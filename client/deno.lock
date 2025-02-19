@@ -1,6 +1,7 @@
 {
   "version": "4",
   "specifiers": {
+    "npm:monaco-editor@~0.52.2": "0.52.2",
     "npm:typescript@~5.7.2": "5.7.3",
     "npm:vite@^6.1.0": "6.1.1"
   },
@@ -173,6 +174,9 @@
     "fsevents@2.3.3": {
       "integrity": "sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw=="
     },
+    "monaco-editor@0.52.2": {
+      "integrity": "sha512-GEQWEZmfkOGLdd3XK8ryrfWz3AIP8YymVXiPHEdewrUq7mh0qrKrfHLNCXcbB6sTnMLnOZ3ztSiKcciFUkIJwQ=="
+    },
     "nanoid@3.3.8": {
       "integrity": "sha512-WNLf5Sd8oZxOm+TzppcYk8gVOgP+l58xNy58D0nbUnOxOWRWvlcCV4kUF7ltmI6PsrLl/BgKEyS4mqsGChFN0w=="
     },
@@ -232,6 +236,7 @@
   "workspace": {
     "packageJson": {
       "dependencies": [
+        "npm:monaco-editor@~0.52.2",
         "npm:typescript@~5.7.2",
         "npm:vite@^6.1.0"
       ]

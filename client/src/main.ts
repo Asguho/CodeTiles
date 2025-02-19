@@ -2,6 +2,7 @@ import "./style.css";
 import typescriptLogo from "./typescript.svg";
 import viteLogo from "/vite.svg";
 import { setupGameCanvas } from "./GameCanvas.ts";
+import { setupEditor } from "./Editor.ts";
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = /*html*/ `
   <div class="container">
