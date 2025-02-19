@@ -1,17 +1,10 @@
 import "./style.css";
-import typescriptLogo from "./typescript.svg";
-import viteLogo from "/vite.svg";
 import { setupGameCanvas } from "./GameCanvas.ts";
 import { setupEditor } from "./Editor.ts";
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = /*html*/ `
   <div class="container">
-    <div class="editor">
-      <pre>
-        <code class="language-js">
-console.log("Hello, Vite!");
-        </code>
-      </pre>
+    <div class="editor" id="editor">
     </div>
     <div class="sidepanel">
       <div class="gamewindow">
@@ -27,8 +20,6 @@ Hello, Vite!
   </div>
 `;
 
-setupGameCanvas(
-  document.querySelector<HTMLCanvasElement>("#gameCanvas"),
-  800,
-  600,
-);
+setupGameCanvas(document.querySelector<HTMLCanvasElement>("#gameCanvas")!, 800, 600);
+
+setupEditor(document.getElementById("editor")!);
