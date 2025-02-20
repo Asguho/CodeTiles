@@ -10,6 +10,7 @@ export async function setupEditor(el: HTMLElement) {
 		theme: "vs",
 		wrappingStrategy: "advanced",
 		wordWrap: "on",
+		value: `// Welcome to the editor!`,
 	});
 	const model = monaco.editor.createModel("", "typescript");
 	/* 	editor.onDidChangeModelContent(() => {
@@ -17,4 +18,5 @@ export async function setupEditor(el: HTMLElement) {
 	}); */
 	//maybe custom theme here maybe ?
 	editor.setModel(model);
+	return editor;
 }
