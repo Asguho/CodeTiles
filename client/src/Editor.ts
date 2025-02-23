@@ -1,4 +1,6 @@
 import type * as Monaco from "monaco-editor/esm/vs/editor/editor.api";
+import { Pathfinding } from "./user_modules/Pathfinding.ts";
+
 
 let editor: Monaco.editor.IStandaloneCodeEditor;
 let monaco: typeof Monaco;
@@ -18,5 +20,8 @@ export async function setupEditor(el: HTMLElement) {
 	}); */
 	//maybe custom theme here maybe ?
 	editor.setModel(model);
+	
+	//expose Pathfinding module to the window object
+	(window as any).Pathfinding = Pathfinding;
 	return editor;
 }
