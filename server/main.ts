@@ -72,6 +72,7 @@ const routes: Route[] = [
   },
   {
     pattern: new URLPattern({ pathname: "/api/auth/signup" }),
+    method: "POST",
     handler: async (req: Request) => {
       const formData = await req.formData();
       const username = formData.get("username") as string;
