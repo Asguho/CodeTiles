@@ -1,43 +1,61 @@
 .container {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
-  height: 100vh;
+	display: grid;
+	grid-template-columns: 50% 5px 50%; // updated for resizer
+	grid-template-rows: 1fr;
+	height: 100vh;
+	overflow: hidden;
+}
+
+body {
+	margin: 0;
+	padding: 0;
+	font-family: Arial, sans-serif;
+	background-color: #f0f0f0;
+	color: #333;
+	overflow: hidden;
 }
 
 .editor {
-  grid-column: 1 / 2;
-  grid-row: 1 / 3;
-  background-color: #f0f0f0;
-  padding: 10px;
-  position: relative;
+	grid-column: 1 / 2;
+	grid-row: 1 / 3;
+	background-color: #f0f0f0;
+	padding: 10px;
+	position: relative;
 }
 
 .sidepanel {
-  grid-column: 2 / 3;
-  display: grid;
-  grid-template-rows: 1fr 1fr;
-  height: 100vh;
+	grid-column: 3 / 4;
+	display: grid;
+	grid-template-rows: 1fr 1fr;
+	height: 100vh;
 }
 
 .gamewindow {
-  grid-row: 1 / 2;
-  background-color: #e0e0e0;
-  padding: 10px;
-  height: 50vh;
+	grid-row: 1 / 2;
+	background-color: #e0e0e0;
+	padding: 10px;
+	width: 100%;
+	aspect-ratio: 1 / 1;
 }
 .gamewindow canvas {
-  width: 100%;
-  height: 100%;
+	width: 100%;
+	height: 100%;
 }
 
 .gameinfo {
-  grid-row: 2 / 3;
-  background-color: #d0d0d0;
-  padding: 10px;
-  height: 50vh;
+	grid-row: 2 / 3;
+	background-color: #d0d0d0;
+	padding: 10px;
+	height: 100%;
 }
 #run_button {
-  position: absolute;
-  right: 10px;
+	position: absolute;
+	right: 10px;
+}
+
+/* New resizer styling */
+#resizer {
+	background: rgb(85, 0, 255);
+	cursor: col-resize;
+	/* full height to span panels */
 }
