@@ -9,8 +9,19 @@ export const user = pgTable("user", {
 
 export const session = pgTable("session", {
   id: text("id").primaryKey().notNull(),
-  userId: text("user_id").notNull().references(() => user.id),
+  userId: text("user_id").notNull().references(() => user.id, {
+    onDelete: "cascade",
+  }),
   expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" })
+    .notNull(),
+});
+
+export const deployment = pgTable("deployment", {
+  id: text("id").primaryKey().notNull(),
+  userId: text("user_id").notNull().references(() => user.id, {
+    onDelete: "cascade",
+  }),
+  createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
     .notNull(),
 });
 

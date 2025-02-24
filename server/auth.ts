@@ -3,8 +3,12 @@ import { sha256 } from "@oslojs/crypto/sha2";
 import { encodeBase64url, encodeHexLowerCase } from "@oslojs/encoding";
 import { db } from "./db/index.ts";
 import * as table from "./db/schema.ts";
-
+import { hash, verify } from "@node-rs/argon2";
 const DAY_IN_MS = 1000 * 60 * 60 * 24;
+
+import DeploymentClient from "./DeploymentClient.ts";
+
+const deploymentClient = new DeploymentClient();
 
 export const sessionCookieName = "auth-session";
 
@@ -72,6 +76,102 @@ export type SessionValidationResult = Awaited<
 export async function invalidateSession(sessionId: string) {
   await db.delete(table.session).where(eq(table.session.id, sessionId));
 }
+export const login = async (req: Request) => {
+  const formData = await req.formData();
+  const username = formData.get("username") as string;
+  const password = formData.get("password") as string;
+
+  const [user] = await db
+    .select()
+    .from(table.user)
+    .where(eq(table.user.username, username));
+
+  if (!user) {
+    return new Response(
+      JSON.stringify({ message: "Invalid username or password" }),
+      { status: 400 },
+    );
+  }
+  const validPassword = await verify(user.passwordHash, password, {
+    memoryCost: 19456,
+    timeCost: 2,
+    outputLen: 32,
+    parallelism: 1,
+  });
+  if (!validPassword) {
+    return new Response(
+      JSON.stringify({ message: "Incorrect username or password" }),
+      { status: 400 },
+    );
+  }
+  const sessionToken = generateRandomId();
+  await createSession(sessionToken, user.id);
+  return new Response(null, {
+    status: 302,
+    headers: {
+      "Set-Cookie": `auth-session=${sessionToken}; Path=/; HttpOnly`,
+    },
+  });
+};
+export const signup = async (req: Request) => {
+  const formData = await req.formData();
+  const username = formData.get("username") as string;
+  const password = formData.get("password") as string;
+
+  if (!validateUsername(username)) {
+    return new Response(JSON.stringify({ message: "Invalid username" }), {
+      status: 400,
+    });
+  }
+  if (!validatePassword(password)) {
+    return new Response(JSON.stringify({ message: "Invalid password" }), {
+      status: 400,
+    });
+  }
+
+  const passwordHash = await hash(password, {
+    // recommended minimum parameters
+    memoryCost: 19456,
+    timeCost: 2,
+    outputLen: 32,
+    parallelism: 1,
+  });
+
+  try {
+    const userId = generateRandomId();
+    const { id: projectId } = await deploymentClient.createProject(
+      username,
+    );
+    if (!projectId) {
+      console.error("Failed to create project");
+      return new Response(
+        JSON.stringify({ message: "Failed to create project" }),
+        { status: 500 },
+      );
+    }
+    await db.insert(table.user).values({
+      id: userId,
+      projectId,
+      username,
+      passwordHash,
+    });
+
+    const sessionToken = generateRandomId();
+    await createSession(sessionToken, userId);
+    return new Response(null, {
+      status: 302,
+      headers: {
+        "Set-Cookie": `auth-session=${sessionToken}; Path=/; HttpOnly`,
+      },
+    });
+  } catch (_e) {
+    console.error(_e);
+    return new Response(
+      JSON.stringify({ message: "An error has occurred" }),
+      { status: 500 },
+    );
+  }
+};
 
 // export function setSessionTokenCookie(
 //   event: RequestEvent,
@@ -89,3 +189,19 @@ export async function invalidateSession(sessionId: string) {
 //     path: "/",
 //   });
 // }
+function validateUsername(username: unknown): username is string {
+  return (
+    typeof username === "string" &&
+    username.length >= 3 &&
+    username.length <= 31 &&
+    /^[a-zA-ZøæåØÆÅ0-9_-]+$/.test(username)
+  );
+}
+
+function validatePassword(password: unknown): password is string {
+  return (
+    typeof password === "string" &&
+    password.length >= 6 &&
+    password.length <= 255
+  );
+}
