@@ -1,6 +1,4 @@
 export function setupGameCanvas(canvas: HTMLCanvasElement, width: number, height: number) {
-	console.log('setupGameCanvas', canvas, width, height);
-
 	canvas.width = width ?? 100;
 	canvas.height = height ?? 100;
 

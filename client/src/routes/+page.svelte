@@ -2,6 +2,7 @@
 	export const prerender = true;
 	import { setupEditor } from '$lib/Editor';
 	import { setupGameCanvas } from '$lib/GameCanvas';
+	import { PaneGroup, Pane, PaneResizer } from 'paneforge';
 
 	let gameCanvas: HTMLCanvasElement;
 
@@ -11,111 +12,87 @@
 		console.log('Hello, Vite!', document);
 		setupGameCanvas(gameCanvas, 800, 600);
 		setupEditor(document.getElementById('editor')!);
-
-		/* document.getElementById('run	_button')!.addEventListener('click', async () => {
-			await fetch('http://localhost:8000/api/upload_code', {
-				method: 'POST',
-				body: editor.getValue()
-			});
-			console.log(editor.getValue());
-		}); */
-
-		// Add resizing logic:
-		const container = document.querySelector('.container') as HTMLElement;
-		const resizer = document.getElementById('resizer')!;
-
-		resizer.addEventListener('mousedown', (e) => {
-			document.addEventListener('mousemove', resizePanels);
-			document.addEventListener('mouseup', stopResize);
-		});
-
-		function resizePanels(e: MouseEvent) {
-			const bounds = container.getBoundingClientRect();
-			const newWidthEditor = e.clientX - bounds.left;
-			const editorPercent = (newWidthEditor / bounds.width) * 100;
-			container.style.gridTemplateColumns = `${editorPercent}% 5px ${100 - editorPercent}%`;
-		}
-
-		function stopResize() {
-			document.removeEventListener('mousemove', resizePanels);
-			document.removeEventListener('mouseup', stopResize);
-		}
 	});
 </script>
 
-<div class="container">
-	<button id="run_button">Run</button>
-	<div class="editor" id="editor">
-		<!-- Editor content -->
+<div
+	class="m-1 flex h-10 flex-row items-center justify-between rounded-lg border border-zinc-300 bg-zinc-100 p-0.5"
+>
+	<div
+		class="flex flex-row gap-2 *:rounded-md *:border *:border-zinc-300 *:bg-zinc-100 *:p-1 *:px-2"
+	>
+		<button
+			class=""
+			onclick={() => {
+				/* Logic */
+			}}>Home</button
+		>
+		<button
+			class=""
+			onclick={() => {
+				/* Logic */
+			}}>File</button
+		>
+		<!-- dropdown -->
+		<button
+			class=""
+			onclick={() => {
+				/* Logic */
+			}}>Save</button
+		>
 	</div>
-	<div id="resizer"></div>
-	<div class="sidepanel">
-		<div class="gamewindow">
-			<canvas id="gameCanvas" bind:this={gameCanvas}></canvas>
-		</div>
-		<div class="gameinfo">
-			<pre>
-Hello, Vite!
-        </pre>
-		</div>
+	<div
+		class="flex flex-row gap-2 *:rounded-md *:border *:border-zinc-300 *:bg-zinc-100 *:p-1 *:px-2"
+	>
+		<button
+			class=""
+			onclick={() => {
+				/* Logic */
+			}}>Test</button
+		>
+		<button
+			class=""
+			onclick={() => {
+				/* Logic */
+			}}>Run</button
+		>
 	</div>
 </div>
 
-<style>
-	.container {
-		display: grid;
-		grid-template-columns: 50% 5px 50%;
-		grid-template-rows: 1fr;
-		height: 100vh;
-		overflow: hidden;
-	}
-
-	body {
-		overflow: hidden;
-	}
-
-	.editor {
-		grid-column: 1 / 2;
-		grid-row: 1 / 3;
-		background-color: #f0f0f0;
-		padding: 10px;
-		position: relative;
-	}
-
-	.sidepanel {
-		grid-column: 3 / 4;
-		display: grid;
-		grid-template-rows: 1fr 1fr;
-		height: 100vh;
-	}
-
-	.gamewindow {
-		grid-row: 1 / 2;
-		background-color: #e0e0e0;
-		padding: 10px;
-		width: 100%;
-		aspect-ratio: 1 / 1;
-	}
-	.gamewindow canvas {
-		width: 100%;
-		height: 100%;
-	}
-
-	.gameinfo {
-		grid-row: 2 / 3;
-		background-color: #d0d0d0;
-		padding: 10px;
-		height: 100%;
-	}
-	#run_button {
-		position: absolute;
-		right: 10px;
-	}
-
-	/* New resizer styling */
-	#resizer {
-		background: rgb(85, 0, 255);
-		cursor: col-resize;
-		/* full height to span panels */
-	}
-</style>
+<div class="h-[calc(100vh-3rem)] w-screen p-1">
+	<PaneGroup direction="horizontal">
+		<Pane defaultSize={50}>
+			<div class="flex h-full w-full rounded-lg border border-zinc-300 p-1">
+				<div id="editor" class="w-full">Loading editor...</div>
+			</div>
+		</Pane>
+		<PaneResizer class="bg-background relative flex w-2 items-center justify-center">
+			<div class="bg-brand z-10 flex h-7 w-5 items-center justify-center rounded-sm">
+				<!-- prettier-ignore -->
+				<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-grip-vertical"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+			</div>
+		</PaneResizer>
+		<Pane defaultSize={50}>
+			<PaneGroup direction="vertical">
+				<Pane defaultSize={50}>
+					<div class="flex h-full rounded-lg border border-zinc-300 p-2">
+						<canvas bind:this={gameCanvas} class="h-full w-full"></canvas>
+					</div>
+				</Pane>
+				<PaneResizer class="bg-background relative flex h-2 items-center justify-center">
+					<div class="bg-brand z-10 flex h-5 w-7 items-center justify-center rounded-sm">
+						<!-- prettier-ignore -->
+						<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-grip-horizontal"><circle cx="12" cy="9" r="1"/><circle cx="19" cy="9" r="1"/><circle cx="5" cy="9" r="1"/><circle cx="12" cy="15" r="1"/><circle cx="19" cy="15" r="1"/><circle cx="5" cy="15" r="1"/></svg>
+					</div>
+				</PaneResizer>
+				<Pane defaultSize={50}>
+					<div class="flex h-full rounded-lg border border-zinc-300 p-2">
+						<pre>
+console&gt; ahh goofy
+						</pre>
+					</div>
+				</Pane>
+			</PaneGroup>
+		</Pane>
+	</PaneGroup>
+</div>
