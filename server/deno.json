@@ -1,8 +1,14 @@
 {
   "tasks": {
-    "dev": "deno run --watch --env-file=.env -A main.ts"
+    "dev": "deno run --watch --env -A main.ts",
+    "db:push": "deno -A --node-modules-dir --env npm:drizzle-kit push",
+    "db:pull": "deno -A --node-modules-dir --env npm:drizzle-kit pull"
   },
   "imports": {
-    "@std/assert": "jsr:@std/assert@1"
+    "@oslojs/crypto": "npm:@oslojs/crypto@^1.0.1",
+    "@oslojs/encoding": "npm:@oslojs/encoding@^1.1.0",
+    "drizzle-kit": "npm:drizzle-kit@^0.30.4",
+    "drizzle-orm": "npm:drizzle-orm@^0.39.3",
+    "postgres": "npm:postgres@^3.4.5"
   }
 }
