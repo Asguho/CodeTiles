@@ -15,7 +15,8 @@
 	},
 	"dependencies": {
 		"@sveltejs/adapter-static": "^3.0.8",
-		"monaco-editor": "^0.52.2"
+		"monaco-editor": "^0.52.2",
+		"paneforge": "^0.0.6"
 	},
 	"devDependencies": {
 		"@sveltejs/kit": "^2.16.0",
