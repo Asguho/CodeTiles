@@ -1,7 +1,7 @@
 {
   "version": "4",
   "specifiers": {
-    "npm:@sveltejs/adapter-auto@4": "4.0.0_@sveltejs+kit@2.17.2__@sveltejs+vite-plugin-svelte@5.0.3___svelte@5.20.2____acorn@8.14.0___vite@6.1.1____lightningcss@1.29.1__svelte@5.20.2___acorn@8.14.0__vite@6.1.1___lightningcss@1.29.1_@sveltejs+vite-plugin-svelte@5.0.3__svelte@5.20.2___acorn@8.14.0__vite@6.1.1___lightningcss@1.29.1_svelte@5.20.2__acorn@8.14.0_vite@6.1.1__lightningcss@1.29.1",
+    "npm:@sveltejs/adapter-static@^3.0.8": "3.0.8_@sveltejs+kit@2.17.2__@sveltejs+vite-plugin-svelte@5.0.3___svelte@5.20.2____acorn@8.14.0___vite@6.1.1____lightningcss@1.29.1__svelte@5.20.2___acorn@8.14.0__vite@6.1.1___lightningcss@1.29.1_@sveltejs+vite-plugin-svelte@5.0.3__svelte@5.20.2___acorn@8.14.0__vite@6.1.1___lightningcss@1.29.1_svelte@5.20.2__acorn@8.14.0_vite@6.1.1__lightningcss@1.29.1",
     "npm:@sveltejs/kit@^2.16.0": "2.17.2_@sveltejs+vite-plugin-svelte@5.0.3__svelte@5.20.2___acorn@8.14.0__vite@6.1.1___lightningcss@1.29.1_svelte@5.20.2__acorn@8.14.0_vite@6.1.1__lightningcss@1.29.1",
     "npm:@sveltejs/vite-plugin-svelte@5": "5.0.3_svelte@5.20.2__acorn@8.14.0_vite@6.1.1__lightningcss@1.29.1",
     "npm:@tailwindcss/vite@4": "4.0.8_vite@6.1.1__lightningcss@1.29.1_lightningcss@1.29.1",
@@ -182,11 +182,10 @@
     "@rollup/rollup-win32-x64-msvc@4.34.8": {
       "integrity": "sha512-U0FaE5O1BCpZSeE6gBl3c5ObhePQSfk9vDRToMmTkbhCOgW4jqvtS5LGyQ76L1fH8sM0keRp4uDTsbjiUyjk0g=="
     },
-    "@sveltejs/adapter-auto@4.0.0_@sveltejs+kit@2.17.2__@sveltejs+vite-plugin-svelte@5.0.3___svelte@5.20.2____acorn@8.14.0___vite@6.1.1____lightningcss@1.29.1__svelte@5.20.2___acorn@8.14.0__vite@6.1.1___lightningcss@1.29.1_@sveltejs+vite-plugin-svelte@5.0.3__svelte@5.20.2___acorn@8.14.0__vite@6.1.1___lightningcss@1.29.1_svelte@5.20.2__acorn@8.14.0_vite@6.1.1__lightningcss@1.29.1": {
-      "integrity": "sha512-kmuYSQdD2AwThymQF0haQhM8rE5rhutQXG4LNbnbShwhMO4qQGnKaaTy+88DuNSuoQDi58+thpq8XpHc1+oEKQ==",
+    "@sveltejs/adapter-static@3.0.8_@sveltejs+kit@2.17.2__@sveltejs+vite-plugin-svelte@5.0.3___svelte@5.20.2____acorn@8.14.0___vite@6.1.1____lightningcss@1.29.1__svelte@5.20.2___acorn@8.14.0__vite@6.1.1___lightningcss@1.29.1_@sveltejs+vite-plugin-svelte@5.0.3__svelte@5.20.2___acorn@8.14.0__vite@6.1.1___lightningcss@1.29.1_svelte@5.20.2__acorn@8.14.0_vite@6.1.1__lightningcss@1.29.1": {
+      "integrity": "sha512-YaDrquRpZwfcXbnlDsSrBQNCChVOT9MGuSg+dMAyfsAa1SmiAhrA5jUYUiIMC59G92kIbY/AaQOWcBdq+lh+zg==",
       "dependencies": [
-        "@sveltejs/kit@2.17.2_@sveltejs+vite-plugin-svelte@5.0.3__svelte@5.20.2___acorn@8.14.0__vite@6.1.1___lightningcss@1.29.1_svelte@5.20.2__acorn@8.14.0_vite@6.1.1__lightningcss@1.29.1_vite@6.1.1",
-        "import-meta-resolve"
+        "@sveltejs/kit"
       ]
     },
     "@sveltejs/kit@2.17.2_@sveltejs+vite-plugin-svelte@5.0.3__svelte@5.20.2___acorn@8.14.0__vite@6.1.1___lightningcss@1.29.1_svelte@5.20.2__acorn@8.14.0_vite@6.1.1__lightningcss@1.29.1": {
@@ -206,25 +205,6 @@
         "sirv",
         "svelte",
         "vite@6.1.1_lightningcss@1.29.1"
-      ]
-    },
-    "@sveltejs/kit@2.17.2_@sveltejs+vite-plugin-svelte@5.0.3__svelte@5.20.2___acorn@8.14.0__vite@6.1.1___lightningcss@1.29.1_svelte@5.20.2__acorn@8.14.0_vite@6.1.1__lightningcss@1.29.1_vite@6.1.1": {
-      "integrity": "sha512-Vypk02baf7qd3SOB1uUwUC/3Oka+srPo2J0a8YN3EfJypRshDkNx9HzNKjSmhOnGWwT+SSO06+N0mAb8iVTmTQ==",
-      "dependencies": [
-        "@sveltejs/vite-plugin-svelte@5.0.3_svelte@5.20.2__acorn@8.14.0_vite@6.1.1__lightningcss@1.29.1_vite@6.1.1",
-        "@types/cookie",
-        "cookie",
-        "devalue",
-        "esm-env",
-        "import-meta-resolve",
-        "kleur",
-        "magic-string",
-        "mrmime",
-        "sade",
-        "set-cookie-parser",
-        "sirv",
-        "svelte",
-        "vite@6.1.1"
       ]
     },
     "@sveltejs/vite-plugin-svelte-inspector@4.0.1_@sveltejs+vite-plugin-svelte@5.0.3__svelte@5.20.2___acorn@8.14.0__vite@6.1.1___lightningcss@1.29.1__vite@6.1.1_svelte@5.20.2__acorn@8.14.0_vite@6.1.1": {
@@ -684,7 +664,7 @@
   "workspace": {
     "packageJson": {
       "dependencies": [
-        "npm:@sveltejs/adapter-auto@4",
+        "npm:@sveltejs/adapter-static@^3.0.8",
         "npm:@sveltejs/kit@^2.16.0",
         "npm:@sveltejs/vite-plugin-svelte@5",
         "npm:@tailwindcss/vite@4",
