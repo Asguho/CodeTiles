@@ -8,13 +8,13 @@ const DAY_IN_MS = 1000 * 60 * 60 * 24;
 
 export const sessionCookieName = "auth-session";
 
-export function generateSessionToken() {
+export function generateRandomId() {
   const bytes = crypto.getRandomValues(new Uint8Array(18));
   const token = encodeBase64url(bytes);
   return token;
 }
 
-export async function createSession(token: string, userId: number) {
+export async function createSession(token: string, userId: string) {
   const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
   const session: table.Session = {
     id: sessionId,

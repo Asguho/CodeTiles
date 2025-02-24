@@ -2,7 +2,7 @@ import { serveDir } from "jsr:@std/http/file-server";
 import { type Route, route } from "jsr:@std/http/unstable-route";
 import {
   createSession,
-  generateSessionToken,
+  generateRandomId,
   validateSessionToken,
 } from "./auth.ts";
 import { hash, verify } from "@node-rs/argon2";
@@ -60,7 +60,7 @@ const routes: Route[] = [
           { status: 400 },
         );
       }
-      const sessionToken = generateSessionToken();
+      const sessionToken = generateRandomId();
       await createSession(sessionToken, user.id);
       return new Response(null, {
         status: 302,
@@ -98,13 +98,15 @@ const routes: Route[] = [
       });
 
       try {
-        const [{ userId }] = await db.insert(table.user).values({
+        console.log(username, passwordHash);
+        const userId = generateRandomId();
+        await db.insert(table.user).values({
+          id: userId,
           username,
           passwordHash,
-        })
-          .returning({ userId: table.user.id });
+        });
 
-        const sessionToken = generateSessionToken();
+        const sessionToken = generateRandomId();
         await createSession(sessionToken, userId);
         return new Response(null, {
           status: 302,
@@ -113,6 +115,7 @@ const routes: Route[] = [
           },
         });
       } catch (_e) {
+        console.error(_e);
         return new Response(
           JSON.stringify({ message: "An error has occurred" }),
           { status: 500 },
