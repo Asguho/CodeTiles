@@ -2,7 +2,8 @@
   "tasks": {
     "dev": "deno run --watch --env -A main.ts",
     "db:push": "deno -A --node-modules-dir --env npm:drizzle-kit push",
-    "db:pull": "deno -A --node-modules-dir --env npm:drizzle-kit pull"
+    "db:pull": "deno -A --node-modules-dir --env npm:drizzle-kit pull",
+    "db:studio": "deno -A --node-modules-dir --env npm:drizzle-kit studio"
   },
   "imports": {
     "@node-rs/argon2": "npm:@node-rs/argon2@^2.0.2",

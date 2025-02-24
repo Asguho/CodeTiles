@@ -9,6 +9,9 @@ import { hash, verify } from "@node-rs/argon2";
 import { eq } from "drizzle-orm";
 import { db } from "./db/index.ts";
 import * as table from "./db/schema.ts";
+import DeploymentClient from "./DeploymentClient.ts";
+
+const deploymentClient = new DeploymentClient();
 
 const routes: Route[] = [
   {
@@ -25,8 +28,22 @@ const routes: Route[] = [
       }
 
       const code = await req.text();
-      console.log(code);
-      return new Response("Code uploaded");
+
+      const deployment = await deploymentClient.createDeployment(
+        user.projectId,
+        {
+          assets: { "main.ts": { kind: "file", content: code } },
+          entryPointUrl: "main.ts",
+        },
+      );
+
+      console.log(
+        `created deployment: https://${user.projectId}-${deployment.id}.deno.dev`,
+      );
+      return Response.json({
+        message: "Deployment successful",
+        url: `https://${user.projectId}-${deployment.id}.deno.dev`,
+      });
     },
   },
   {
@@ -98,10 +115,20 @@ const routes: Route[] = [
       });
 
       try {
-        console.log(username, passwordHash);
         const userId = generateRandomId();
+        const { id: projectId } = await deploymentClient.createProject(
+          username,
+        );
+        if (!projectId) {
+          console.error("Failed to create project");
+          return new Response(
+            JSON.stringify({ message: "Failed to create project" }),
+            { status: 500 },
+          );
+        }
         await db.insert(table.user).values({
           id: userId,
+          projectId,
           username,
           passwordHash,
         });

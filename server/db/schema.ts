@@ -1,8 +1,8 @@
-import { integer, pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey().notNull(),
-  age: integer("age"),
+  projectId: text("project_id").notNull(),
   username: text("username").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
 });
