@@ -38,21 +38,8 @@ Deno.serve(async (req) => {
   }
 
   // if not in dev mode, serve the client build else proxy to vite
-  if (!IS_IN_DEV) {
-    return serveDir(req, {
-      fsRoot: "../client/dist",
-      showIndex: true,
-    });
-  } else {
-    try {
-      return fetch("http://localhost:5173" + url.pathname + url.search, {
-        headers: req.headers,
-        method: req.method,
-        body: req.body,
-      });
-    } catch (error) {
-      console.error(error);
-      return new Response("Vite server is not running", { status: 502 });
-    }
-  }
+  return serveDir(req, {
+    fsRoot: "../client/dist",
+    showIndex: true,
+  });
 });
