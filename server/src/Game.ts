@@ -1,3 +1,5 @@
+import * as uuid from "jsr:@std/uuid";
+
 type Position = {
   x: number;
   y: number;
@@ -313,7 +315,7 @@ class Game {
     );
     for (let i = 0; i < quantity; i++) {
       const newUnit: Unit = {
-        id: `unit-${Date.now()}-${i}`,
+        id: uuid.v4(),
         type: item as "melee" | "ranged" | "miner",
         position: player.basePosition
           ? { ...player.basePosition }
