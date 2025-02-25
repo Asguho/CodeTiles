@@ -6,7 +6,7 @@ import * as table from "./db/schema.ts";
 import { hash, verify } from "@node-rs/argon2";
 const DAY_IN_MS = 1000 * 60 * 60 * 24;
 
-import DeploymentClient from "./DeploymentClient.ts";
+import DeploymentClient from "../src/DeploymentClient.ts";
 
 const deploymentClient = new DeploymentClient();
 
@@ -138,7 +138,7 @@ export const signup = async (req: Request) => {
   });
 
   try {
-    const userId = generateRandomId();
+    const userId = crypto.randomUUID();
     const { id: projectId } = await deploymentClient.createProject(
       username,
     );
