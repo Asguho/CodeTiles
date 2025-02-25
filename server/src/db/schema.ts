@@ -18,6 +18,7 @@ export const session = pgTable("session", {
 
 export const deployment = pgTable("deployment", {
   id: text("id").primaryKey().notNull(),
+  url: text("url").notNull(),
   userId: text("user_id").notNull().references(() => user.id, {
     onDelete: "cascade",
   }),
