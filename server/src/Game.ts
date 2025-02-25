@@ -28,6 +28,8 @@ interface Unit {
   type: "melee" | "ranged" | "miner";
   position: Position;
   health: number;
+  owner: string; // Owner's player id
+  actionTaken?: boolean; // Flag to limit one action per turn
   // ...other unit properties...
 }
 
@@ -63,7 +65,6 @@ class Game {
     for (let y = 0; y < this.mapHeight; y++) {
       const row: Tile[] = [];
       for (let x = 0; x < this.mapWidth; x++) {
-        // Create random walls and ore tiles; others are ground
         let rand = Math.random();
         let type: Tile["type"] = "ground";
         if (rand < 0.1) {
@@ -78,46 +79,52 @@ class Game {
     console.log("Map generated");
   }
 
-  // This method starts the game loop
+  // Resets units' actionTaken flag for each turn
+  resetUnitActions() {
+    this.players.forEach((player) => {
+      player.units.forEach((unit) => {
+        unit.actionTaken = false;
+      });
+    });
+  }
+
+  // Starts the game loop
   async start() {
     // Generate the game map
     this.generateMap();
-    // Optionally initialize each player's base position if not provided (using first unit's position)
+    // Initialize each player's base position if not provided
     this.players.forEach((player) => {
       if (!player.basePosition && player.units.length > 0) {
         player.basePosition = { ...player.units[0].position };
       }
-      // Update player's mapView to be a subset of the full map (implement FOG logic as needed)
+      // Update player's mapView (implement FOG logic as needed)
       player.mapView = this.map;
     });
 
     while (!this.isGameOver()) {
+      // Reset units' actions at beginning of each turn
+      this.resetUnitActions();
       await this.processTurn();
-      // Optionally add a delay between turns if necessary, e.g.,
-      // await new Promise(resolve => setTimeout(resolve, 1000));
+      // Optional delay: await new Promise(resolve => setTimeout(resolve, 1000));
     }
     console.log("Game Over");
   }
 
-  // Checks if the game is over (for example, a base has been captured)
+  // Game over logic can be implemented here
   isGameOver(): boolean {
-    // Game over logic goes here.
-    // For now, we return false to run an infinite loop.
     return false;
   }
 
-  // Processes a single turn by sending requests to each player's server and processing their responses
+  // Process a single turn for all players by sending requests and processing their responses
   async processTurn() {
     this.turn++;
     console.log(`Starting turn ${this.turn}`);
 
-    // Send a request to each player's server concurrently
     const playerRequests = this.players.map((player) =>
       this.sendRequest(player)
     );
     const responses = await Promise.all(playerRequests);
 
-    // Process each player's actions
     responses.forEach((response, index) => {
       this.processActions(this.players[index], response);
     });
@@ -134,40 +141,51 @@ class Game {
     try {
       const response = await fetch(player.serverUrl, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
       return await response.json();
     } catch (error) {
       console.error(`Error sending request to ${player.id}:`, error);
-      // Return empty actions to avoid breaking the game loop
       return { actions: { units: [], shop: [] } };
     }
   }
 
-  // Processes the actions returned from the player's server
+  // Processes player actions ensuring unit protection and one-action-per-turn enforcement
   processActions(player: Player, response: PlayerResponse) {
-    // Process unit actions such as movement and attack
     response.actions.units.forEach((action) => {
       console.log(
         `Player ${player.id} - Processing action for unit ${action.unitId}:`,
         action,
       );
-
+      const unit = player.units.find((u) => u.id === action.unitId);
+      if (!unit) {
+        console.log(`Unit ${action.unitId} not found for player ${player.id}`);
+        return;
+      }
+      if (unit.owner !== player.id) {
+        console.log(
+          `Player ${player.id} is not allowed to control unit ${unit.id}`,
+        );
+        return;
+      }
+      if (unit.actionTaken) {
+        console.log(`Unit ${unit.id} has already taken an action this turn`);
+        return;
+      }
+      // Process action and mark the unit so it cannot act again this turn
       if (action.action === "move" && action.direction) {
-        this.moveUnit(player, action.unitId, action.direction);
+        this.moveUnit(player, unit, action.direction);
       }
       if (action.action === "attack" && action.target) {
-        this.attackWithUnit(player, action.unitId, action.target);
+        this.attackWithUnit(player, unit, action.target);
       }
       if (action.action === "mine") {
-        this.mineResource(player, action.unitId);
+        this.mineResource(player, unit);
       }
+      unit.actionTaken = true;
     });
 
-    // Process shop actions to purchase new units or items
     response.actions.shop.forEach((order) => {
       console.log(`Player ${player.id} - Processing shop order:`, order);
       if (order.type === "buy") {
@@ -176,10 +194,8 @@ class Game {
     });
   }
 
-  // Moves a unit in the specified direction if possible
-  moveUnit(player: Player, unitId: string, direction: string) {
-    const unit = player.units.find((u) => u.id === unitId);
-    if (!unit) return;
+  // Moves a unit in the specified direction
+  moveUnit(player: Player, unit: Unit, direction: string) {
     let newPos = { ...unit.position };
     switch (direction.toLowerCase()) {
       case "north":
@@ -198,7 +214,6 @@ class Game {
         console.log(`Invalid direction ${direction}`);
         return;
     }
-    // Validate boundaries
     if (
       newPos.x < 0 ||
       newPos.x >= this.mapWidth ||
@@ -208,7 +223,6 @@ class Game {
       console.log(`Unit ${unit.id} cannot move out of bounds.`);
       return;
     }
-    // Check if the tile is passable (should not be a wall)
     const tile = this.map[newPos.y][newPos.x];
     if (tile.type === "wall") {
       console.log(
@@ -216,28 +230,29 @@ class Game {
       );
       return;
     }
-    // Move unit
     console.log(
       `Moving unit ${unit.id} from (${unit.position.x},${unit.position.y}) to (${newPos.x},${newPos.y})`,
     );
     unit.position = newPos;
   }
 
-  // Simulates an attack from a unit towards a target position. If an enemy unit is found at the target, apply damage.
-  attackWithUnit(player: Player, unitId: string, target: Position) {
-    const attacker = player.units.find((u) => u.id === unitId);
-    if (!attacker) return;
-
-    // Search through enemy players for a unit at that position
+  // Attacks an enemy unit at the target position
+  attackWithUnit(player: Player, unit: Unit, target: Position) {
+    // Ensure unit ownership
+    if (unit.owner !== player.id) {
+      console.log(
+        `Player ${player.id} is not allowed to attack with unit ${unit.id}`,
+      );
+      return;
+    }
     for (const enemy of this.players.filter((p) => p.id !== player.id)) {
-      const targetUnit = enemy.units.find((u) =>
-        u.position.x === target.x && u.position.y === target.y
+      const targetUnit = enemy.units.find(
+        (u) => u.position.x === target.x && u.position.y === target.y,
       );
       if (targetUnit) {
-        // Apply damage based on unit type
-        let damage = attacker.type === "melee" ? 20 : 15;
+        let damage = unit.type === "melee" ? 20 : 15;
         console.log(
-          `Unit ${attacker.id} (${attacker.type}) attacks enemy unit ${targetUnit.id} for ${damage} damage`,
+          `Unit ${unit.id} (${unit.type}) attacks enemy unit ${targetUnit.id} for ${damage} damage`,
         );
         targetUnit.health -= damage;
         if (targetUnit.health <= 0) {
@@ -248,44 +263,38 @@ class Game {
       }
     }
     console.log(
-      `No enemy unit found at (${target.x}, ${target.y}) for unit ${attacker.id} to attack.`,
+      `No enemy unit found at (${target.x}, ${target.y}) for unit ${unit.id} to attack.`,
     );
   }
 
-  // Simulates mining action for miner units
-  mineResource(player: Player, unitId: string) {
-    const miner = player.units.find((u) =>
-      u.id === unitId && u.type === "miner"
-    );
-    if (!miner) {
-      console.log(`Unit ${unitId} is not a miner or not found.`);
+  // Mines an ore tile to collect resources
+  mineResource(player: Player, unit: Unit) {
+    if (unit.owner !== player.id) {
+      console.log(
+        `Player ${player.id} is not allowed to mine with unit ${unit.id}`,
+      );
       return;
     }
-    // Check if the miner is on an ore tile
-    const pos = miner.position;
+    const pos = unit.position;
     const tile = this.map[pos.y][pos.x];
     if (tile.type === "ore") {
       console.log(
-        `Miner unit ${miner.id} is mining at (${pos.x},${pos.y}). Resources collected!`,
+        `Miner unit ${unit.id} is mining at (${pos.x},${pos.y}). Resources collected!`,
       );
-      // Increase player's coins (or other resource logic)
       player.coins += 20;
-      // Update the tile to ground once mined
       tile.type = "ground";
     } else {
-      console.log(`Miner unit ${miner.id} is not on an ore tile.`);
+      console.log(`Miner unit ${unit.id} is not on an ore tile.`);
     }
   }
 
-  // Purchases a new unit if the player has enough coins.
+  // Purchases new units if the player has enough coins
   buyUnit(player: Player, item: string, quantity: number) {
-    // Define coin cost for each unit type
     const costs: Record<string, number> = {
       melee: 50,
       ranged: 60,
       miner: 40,
     };
-
     const costPerUnit = costs[item];
     if (!costPerUnit) {
       console.log(`Invalid unit type: ${item}`);
@@ -302,8 +311,6 @@ class Game {
     console.log(
       `Player ${player.id} bought ${quantity} ${item} unit(s) for ${totalCost} coins.`,
     );
-
-    // Spawn new units at player's base position
     for (let i = 0; i < quantity; i++) {
       const newUnit: Unit = {
         id: `unit-${Date.now()}-${i}`,
@@ -312,6 +319,8 @@ class Game {
           ? { ...player.basePosition }
           : { x: 0, y: 0 },
         health: item === "ranged" ? 80 : 100,
+        owner: player.id,
+        actionTaken: false,
       };
       player.units.push(newUnit);
     }
@@ -322,17 +331,38 @@ class Game {
 const players: Player[] = [
   {
     id: "player1",
-    serverUrl: "http://localhost:3001", // Player's server endpoint
-    mapView: {}, // This will be set in start()
+    serverUrl: "http://localhost:3001",
+    mapView: {},
     units: [
-      { id: "unit-1", type: "melee", position: { x: 0, y: 0 }, health: 100 },
-      { id: "unit-2", type: "ranged", position: { x: 1, y: 0 }, health: 80 },
-      { id: "unit-3", type: "miner", position: { x: 0, y: 1 }, health: 60 },
+      {
+        id: "unit-1",
+        type: "melee",
+        position: { x: 0, y: 0 },
+        health: 100,
+        owner: "player1",
+        actionTaken: false,
+      },
+      {
+        id: "unit-2",
+        type: "ranged",
+        position: { x: 1, y: 0 },
+        health: 80,
+        owner: "player1",
+        actionTaken: false,
+      },
+      {
+        id: "unit-3",
+        type: "miner",
+        position: { x: 0, y: 1 },
+        health: 60,
+        owner: "player1",
+        actionTaken: false,
+      },
     ],
     coins: 100,
     basePosition: { x: 0, y: 0 },
   },
-  // ...Initialize additional players as needed...
+  // ... Initialize additional players as needed ...
 ];
 
 const game = new Game(players);
