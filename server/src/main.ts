@@ -1,14 +1,6 @@
 import { serveDir } from "jsr:@std/http/file-server";
 import { type Route, route } from "jsr:@std/http/unstable-route";
-import {
-  createSession,
-  generateRandomId,
-  login,
-  signup,
-  validateSessionToken,
-} from "./auth.ts";
-import { hash, verify } from "@node-rs/argon2";
-import { eq } from "drizzle-orm";
+import { login, signup, validateSessionToken } from "./auth.ts";
 import { db } from "./db/index.ts";
 import * as table from "./db/schema.ts";
 import DeploymentClient from "./DeploymentClient.ts";
