@@ -29,11 +29,6 @@ const routes: Route[] = [
         console.log("a client connected!");
         socket.send("hello from server");
       });
-      socket.addEventListener("message", (event) => {
-        if (event.data === "ping") {
-          socket.send("pong");
-        }
-      });
       return response;
     },
   },
@@ -170,3 +165,4 @@ function defaultHandler(req: Request) {
 }
 
 Deno.serve(route(routes, defaultHandler));
+console.log("aske");
