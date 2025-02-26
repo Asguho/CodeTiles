@@ -2,17 +2,25 @@
 	export const prerender = true;
 	import { setupEditor } from '$lib/Editor';
 	import { setupGameCanvas } from '$lib/GameCanvas';
+	import { editor } from 'monaco-editor';
 	import { PaneGroup, Pane, PaneResizer } from 'paneforge';
+	import { onMount } from 'svelte';
 
 	let gameCanvas: HTMLCanvasElement;
 
 	console.log('Hello, Vite!', document);
 
-	$effect(() => {
+	let codeEditor: editor.IStandaloneCodeEditor | null = null;
+
+	onMount(async () => {
 		console.log('Hello, Vite!', document);
 		setupGameCanvas(gameCanvas, 800, 600);
-		setupEditor(document.getElementById('editor')!);
+		codeEditor = await setupEditor(document.getElementById('editor')!);
 	});
+
+	function uploadCode() {
+		console.log('Uploading code...');
+	}
 </script>
 
 <div
@@ -53,7 +61,7 @@
 		<button
 			class=""
 			onclick={() => {
-				/* Logic */
+				uploadCode();
 			}}>Run</button
 		>
 	</div>
