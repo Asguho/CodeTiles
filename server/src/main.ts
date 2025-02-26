@@ -132,7 +132,7 @@ function defaultHandler(req: Request) {
   }
 
   return serveDir(req, {
-    fsRoot: "../client/.sveltekit",
+    fsRoot: "../client/build",
     showIndex: true,
   });
 }
