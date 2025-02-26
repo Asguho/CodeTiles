@@ -68,7 +68,7 @@ interface DeploymentConfig {
   /**
    * A dictionary of environment variables to be set in the runtime environment.
    */
-  envVars?: Record<string, string>;
+  envVars: Record<string, string>;
 
   /**
    * KV database ID mappings to associate with the deployment.

@@ -38,6 +38,7 @@ export async function validateSessionToken(token: string) {
         id: table.user.id,
         username: table.user.username,
         projectId: table.user.projectId,
+        projectName: table.user.projectName,
       },
       session: table.session,
     })
@@ -139,9 +140,10 @@ export const signup = async (req: Request) => {
 
   try {
     const userId = crypto.randomUUID();
-    const { id: projectId } = await deploymentClient.createProject(
-      username,
-    );
+    const { id: projectId, name: projectName } = await deploymentClient
+      .createProject(
+        username,
+      );
     if (!projectId) {
       console.error("Failed to create project");
       return new Response(
@@ -152,6 +154,7 @@ export const signup = async (req: Request) => {
     await db.insert(table.user).values({
       id: userId,
       projectId,
+      projectName,
       username,
       passwordHash,
     });

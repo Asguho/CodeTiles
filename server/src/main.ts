@@ -4,6 +4,7 @@ import { login, signup, validateSessionToken } from "./auth.ts";
 import { db } from "./db/index.ts";
 import * as table from "./db/schema.ts";
 import DeploymentClient from "./DeploymentClient.ts";
+import { getCookies } from "jsr:@std/http/cookie";
 
 const deploymentClient = new DeploymentClient();
 
@@ -30,7 +31,7 @@ const routes: Route[] = [
     method: "POST",
     pattern: new URLPattern({ pathname: "/api/start_game" }),
     handler: async (req: Request) => {
-      const sessionCookie = req.headers.get("auth-session");
+      const sessionCookie = req.headers.get("cookie");
       if (!sessionCookie) {
         return new Response("Unauthorized | no cookie", {
           status: 401,
@@ -55,7 +56,7 @@ const routes: Route[] = [
     pattern: new URLPattern({ pathname: "/api/upload_code" }),
     handler: async (req: Request) => {
       console.log(req.headers);
-      const sessionCookie = req.headers.get("auth-session");
+      const sessionCookie = getCookies(req.headers)["auth-session"];
       console.log(sessionCookie);
       if (!sessionCookie) {
         return new Response("Unauthorized | no cookie", {
@@ -78,8 +79,10 @@ const routes: Route[] = [
         {
           assets: { "main.ts": { kind: "file", content: code } },
           entryPointUrl: "main.ts",
+          envVars: { "DENO_DEPLOYMENT_ID": user.projectId },
         },
       );
+      console.log(deployment);
 
       await db.insert(table.deployment).values({
         id: deployment.id,
@@ -88,11 +91,11 @@ const routes: Route[] = [
       });
 
       console.log(
-        `created deployment: https://${user.projectId}-${deployment.id}.deno.dev`,
+        `created deployment: https://${user.projectName}-${deployment.id}.deno.dev`,
       );
       return Response.json({
         message: "Deployment successful",
-        url: `https://${user.projectId}-${deployment.id}.deno.dev`,
+        url: `https://${user.projectName}-${deployment.id}.deno.dev`,
       }, { headers: corsHeaders });
     },
   },
