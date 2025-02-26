@@ -7,21 +7,46 @@ import DeploymentClient from "./DeploymentClient.ts";
 
 const deploymentClient = new DeploymentClient();
 
+// CORS headers
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, auth-session",
+};
+
 const routes: Route[] = [
+  {
+    method: "OPTIONS",
+    pattern: new URLPattern({ pathname: "/*" }),
+    handler: async () => {
+      return new Response(null, {
+        status: 204,
+        headers: corsHeaders,
+      });
+    },
+  },
   {
     method: "POST",
     pattern: new URLPattern({ pathname: "/api/start_game" }),
     handler: async (req: Request) => {
       const sessionCookie = req.headers.get("auth-session");
       if (!sessionCookie) {
-        return new Response("Unauthorized | no cookie", { status: 401 });
+        return new Response("Unauthorized | no cookie", {
+          status: 401,
+          headers: corsHeaders,
+        });
       }
       const { session, user } = await validateSessionToken(sessionCookie);
       if (!session || !user) {
-        return new Response("Unauthorized | invalid cookie", { status: 401 });
+        return new Response("Unauthorized | invalid cookie", {
+          status: 401,
+          headers: corsHeaders,
+        });
       }
 
-      return Response.json({ message: "Game started" });
+      return Response.json({ message: "Game started" }, {
+        headers: corsHeaders,
+      });
     },
   },
   {
@@ -30,11 +55,17 @@ const routes: Route[] = [
     handler: async (req: Request) => {
       const sessionCookie = req.headers.get("auth-session");
       if (!sessionCookie) {
-        return new Response("Unauthorized | no cookie", { status: 401 });
+        return new Response("Unauthorized | no cookie", {
+          status: 401,
+          headers: corsHeaders,
+        });
       }
       const { session, user } = await validateSessionToken(sessionCookie);
       if (!session || !user) {
-        return new Response("Unauthorized | invalid cookie", { status: 401 });
+        return new Response("Unauthorized | invalid cookie", {
+          status: 401,
+          headers: corsHeaders,
+        });
       }
 
       const code = await req.text();
@@ -59,23 +90,45 @@ const routes: Route[] = [
       return Response.json({
         message: "Deployment successful",
         url: `https://${user.projectId}-${deployment.id}.deno.dev`,
-      });
+      }, { headers: corsHeaders });
     },
   },
   {
     pattern: new URLPattern({ pathname: "/api/auth/login" }),
     method: "POST",
-    handler: login,
+    handler: async (req: Request) => {
+      const response = await login(req);
+      // Add CORS headers to the response
+      for (const [key, value] of Object.entries(corsHeaders)) {
+        response.headers.set(key, value);
+      }
+      return response;
+    },
   },
   {
     pattern: new URLPattern({ pathname: "/api/auth/signup" }),
     method: "POST",
-    handler: signup,
+    handler: async (req: Request) => {
+      const response = await signup(req);
+      // Add CORS headers to the response
+      for (const [key, value] of Object.entries(corsHeaders)) {
+        response.headers.set(key, value);
+      }
+      return response;
+    },
   },
 ];
 
-function defaultHandler(_req: Request) {
-  return serveDir(_req, {
+function defaultHandler(req: Request) {
+  // For non-API routes, we still want to add CORS headers
+  if (req.method === "OPTIONS") {
+    return new Response(null, {
+      status: 204,
+      headers: corsHeaders,
+    });
+  }
+
+  return serveDir(req, {
     fsRoot: "../client/dist",
     showIndex: true,
   });
