@@ -1,5 +1,4 @@
 import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
-import { url } from "node:inspector";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey().notNull(),
