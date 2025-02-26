@@ -54,7 +54,7 @@ interface DeploymentConfig {
    */
   assets: Record<string, {
     kind: "file" | "symlink";
-    content?: string;
+    content: string;
     encoding?: "utf-8" | "base64";
     gitSha1?: string;
     target?: string;

@@ -73,13 +73,21 @@ const routes: Route[] = [
       }
 
       const code = await req.text();
-
+      console.log(code);
       const deployment = await deploymentClient.createDeployment(
         user.projectId,
         {
-          assets: { "main.ts": { kind: "file", content: code } },
           entryPointUrl: "main.ts",
-          envVars: { "DENO_DEPLOYMENT_ID": user.projectId },
+          assets: {
+            "main.ts": {
+              "kind": "file",
+              "content": code,
+              "encoding": "utf-8",
+            },
+          },
+          "envVars": {
+            "MY_ENV": "hey",
+          },
         },
       );
       console.log(deployment);
