@@ -1,5 +1,4 @@
 <script lang="ts">
-	export const prerender = true;
 	import { setupEditor } from '$lib/Editor';
 	import { setupGameCanvas } from '$lib/GameCanvas';
 	import { editor } from 'monaco-editor';
