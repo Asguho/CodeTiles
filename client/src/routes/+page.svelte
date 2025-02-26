@@ -18,8 +18,18 @@
 		codeEditor = await setupEditor(document.getElementById('editor')!);
 	});
 
-	function uploadCode() {
+	async function uploadCode() {
 		console.log('Uploading code...');
+		const code = codeEditor?.getValue();
+		if (!code) return;
+		const response = await fetch('http://localhost:8000/api/upload_code', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ code })
+		});
+		console.log('Response:', response);
 	}
 </script>
 
