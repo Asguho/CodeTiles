@@ -9,9 +9,10 @@ const deploymentClient = new DeploymentClient();
 
 // CORS headers
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": "http://localhost:5173",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, auth-session",
+  "Access-Control-Allow-Credentials": "true",
 };
 
 const routes: Route[] = [
@@ -53,7 +54,9 @@ const routes: Route[] = [
     method: "POST",
     pattern: new URLPattern({ pathname: "/api/upload_code" }),
     handler: async (req: Request) => {
+      console.log(req.headers);
       const sessionCookie = req.headers.get("auth-session");
+      console.log(sessionCookie);
       if (!sessionCookie) {
         return new Response("Unauthorized | no cookie", {
           status: 401,
@@ -129,7 +132,7 @@ function defaultHandler(req: Request) {
   }
 
   return serveDir(req, {
-    fsRoot: "../client/dist",
+    fsRoot: "../client/build",
     showIndex: true,
   });
 }

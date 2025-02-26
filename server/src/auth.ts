@@ -161,7 +161,10 @@ export const signup = async (req: Request) => {
     return new Response(null, {
       status: 302,
       headers: {
-        "Set-Cookie": `auth-session=${sessionToken}; Path=/; HttpOnly`,
+        "Set-Cookie":
+          `auth-session=${sessionToken}; Path=/; HttpOnly; SameSite=None;`,
+        "Access-Control-Allow-Origin": "*", // Or specify your allowed origins
+        "Access-Control-Allow-Credentials": "true",
       },
     });
   } catch (_e) {
