@@ -1,4 +1,5 @@
 import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { url } from "node:inspector";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey().notNull(),
@@ -23,6 +24,7 @@ export const deployment = pgTable("deployment", {
   userId: text("user_id").notNull().references(() => user.id, {
     onDelete: "cascade",
   }),
+  url: text("url").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
     .notNull(),
 });

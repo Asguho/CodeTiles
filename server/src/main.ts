@@ -18,9 +18,29 @@ const corsHeaders = {
 
 const routes: Route[] = [
   {
+    method: "GET",
+    pattern: new URLPattern({ pathname: "/ws" }),
+    handler: (req) => {
+      if (req.headers.get("upgrade") != "websocket") {
+        return new Response(null, { status: 501 });
+      }
+      const { socket, response } = Deno.upgradeWebSocket(req);
+      socket.addEventListener("open", () => {
+        console.log("a client connected!");
+        socket.send("hello from server");
+      });
+      socket.addEventListener("message", (event) => {
+        if (event.data === "ping") {
+          socket.send("pong");
+        }
+      });
+      return response;
+    },
+  },
+  {
     method: "OPTIONS",
     pattern: new URLPattern({ pathname: "/*" }),
-    handler: async () => {
+    handler: () => {
       return new Response(null, {
         status: 204,
         headers: corsHeaders,
@@ -95,6 +115,7 @@ const routes: Route[] = [
       await db.insert(table.deployment).values({
         id: deployment.id,
         userId: user.id,
+        url: `https://${user.projectName}-${deployment.id}.deno.dev`,
         createdAt: new Date(),
       });
 
