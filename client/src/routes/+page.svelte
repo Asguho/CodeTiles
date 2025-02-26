@@ -27,10 +27,25 @@
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({ code })
+			body: code
 		});
 		console.log('Response:', response);
 	}
+
+	const url = new URL(`./ws`, location.href);
+	url.protocol = url.protocol.replace('http', 'ws');
+	let ws = new WebSocket(url.toString());
+	ws.onopen = function () {
+		console.log('WebSocket is open now on ', url.toString());
+	};
+
+	ws.onmessage = function (event) {
+		console.log('WebSocket message received:', event.data);
+	};
+
+	ws.onclose = function () {
+		console.log('WebSocket is closed now.');
+	};
 </script>
 
 <div
