@@ -5,8 +5,11 @@ import { db } from "./db/index.ts";
 import * as table from "./db/schema.ts";
 import DeploymentClient from "./DeploymentClient.ts";
 import { getCookies } from "jsr:@std/http/cookie";
+import { GameHandler } from "./GameHandler.ts";
+import { desc, eq } from "drizzle-orm/expressions";
 
 const deploymentClient = new DeploymentClient();
+const gameHandler = new GameHandler();
 
 // CORS headers
 const corsHeaders = {
@@ -60,6 +63,13 @@ const routes: Route[] = [
           headers: corsHeaders,
         });
       }
+
+      const [latestDeployment] = await db.select().from(table.deployment)
+        .where(eq(table.deployment.userId, user.id))
+        .orderBy(desc(table.deployment.createdAt))
+        .limit(1);
+
+      gameHandler.startGame([{ id: user.id, url: latestDeployment.url }]);
 
       return Response.json({ message: "Game started" }, {
         headers: corsHeaders,

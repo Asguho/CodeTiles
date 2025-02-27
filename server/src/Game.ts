@@ -48,15 +48,21 @@ interface Tile {
   y: number;
 }
 
-class Game {
+export class Game {
   players: Player[];
   turn: number;
   map: Tile[][] = [];
   mapWidth: number = 10;
   mapHeight: number = 10;
 
-  constructor(players: Player[]) {
-    this.players = players;
+  constructor(players: { id: string; url: string }[]) {
+    this.players = players.map(({ id, url }) => ({
+      id,
+      serverUrl: url,
+      mapView: {},
+      units: [],
+      coins: 100,
+    }));
     this.turn = 0;
   }
 
@@ -76,6 +82,12 @@ class Game {
       }
       this.map.push(row);
     }
+    players.forEach((player) => {
+      player.basePosition = {
+        x: Math.random() * this.mapWidth,
+        y: Math.random() * this.mapHeight,
+      };
+    });
     console.log("Map generated");
   }
 
@@ -88,24 +100,12 @@ class Game {
     });
   }
 
-  // Starts the game loop
   async start() {
-    // Generate the game map
     this.generateMap();
-    // Initialize each player's base position if not provided
-    this.players.forEach((player) => {
-      if (!player.basePosition && player.units.length > 0) {
-        player.basePosition = { ...player.units[0].position };
-      }
-      // Update player's mapView (implement FOG logic as needed)
-      player.mapView = this.map;
-    });
 
     while (!this.isGameOver()) {
-      // Reset units' actions at beginning of each turn
       this.resetUnitActions();
       await this.processTurn();
-      // Optional delay: await new Promise(resolve => setTimeout(resolve, 1000));
     }
     console.log("Game Over");
   }
