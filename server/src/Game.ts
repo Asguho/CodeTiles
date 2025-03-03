@@ -82,7 +82,7 @@ export class Game {
       }
       this.map.push(row);
     }
-    players.forEach((player) => {
+    this.players.forEach((player) => {
       player.basePosition = {
         x: Math.random() * this.mapWidth,
         y: Math.random() * this.mapHeight,
@@ -99,9 +99,60 @@ export class Game {
       });
     });
   }
+  // Add this method to the Game class
+  printMap(): void {
+    const symbols = {
+      ground: ".",
+      wall: "#",
+      ore: "O",
+    };
+
+    // Header with column numbers
+    console.log(
+      "   " + [...Array(this.mapWidth)].map((_, i) => i % 10).join(" "),
+    );
+
+    for (let y = 0; y < this.mapHeight; y++) {
+      // Row number prefix
+      let row = `${y.toString().padStart(2, " ")} `;
+
+      for (let x = 0; x < this.mapWidth; x++) {
+        const tile = this.map[y][x];
+
+        // Check if there's a unit at this position
+        let unitAtPosition = false;
+        for (const player of this.players) {
+          const unit = player.units.find((u) =>
+            u.position.x === x && u.position.y === y
+          );
+          if (unit) {
+            // Use first letter of unit type (M)elee, (R)anged, (m)iner
+            const symbol = unit.type[0].toUpperCase();
+            row += symbol + " ";
+            unitAtPosition = true;
+            break;
+          }
+        }
+
+        // If no unit, show terrain
+        if (!unitAtPosition) {
+          row += symbols[tile.type] + " ";
+        }
+      }
+      console.log(row);
+    }
+    console.log("\nLegend:");
+    console.log("# - Wall");
+    console.log("O - Ore");
+    console.log(". - Ground");
+    console.log("M - Melee Unit");
+    console.log("R - Ranged Unit");
+    console.log("m - Miner Unit");
+  }
 
   async start() {
     this.generateMap();
+    this.printMap();
 
     while (!this.isGameOver()) {
       this.resetUnitActions();
@@ -124,10 +175,13 @@ export class Game {
       this.sendRequest(player)
     );
     const responses = await Promise.all(playerRequests);
+    console.log("responses", responses);
 
     responses.forEach((response, index) => {
       this.processActions(this.players[index], response);
     });
+    this.printMap();
+    alert("Turn " + this.turn + " complete. press enter to continue");
   }
 
   // Sends a POST request to the player's server with the current game state data
@@ -153,41 +207,33 @@ export class Game {
 
   // Processes player actions ensuring unit protection and one-action-per-turn enforcement
   processActions(player: Player, response: PlayerResponse) {
-    response.actions.units.forEach((action) => {
-      console.log(
-        `Player ${player.id} - Processing action for unit ${action.unitId}:`,
-        action,
-      );
+    // Process unit actions
+    response?.actions?.units?.forEach((action) => {
       const unit = player.units.find((u) => u.id === action.unitId);
-      if (!unit) {
-        console.log(`Unit ${action.unitId} not found for player ${player.id}`);
-        return;
+
+      // Validation checks
+      if (!unit) return;
+      if (unit.owner !== player.id) return;
+      if (unit.actionTaken) return;
+
+      // Execute the action based on type
+      switch (action.action) {
+        case "move":
+          this.moveUnit(player, unit, action.direction!);
+          break;
+        case "attack":
+          this.attackWithUnit(player, unit, action.target!);
+          break;
+        case "mine":
+          this.mineResource(player, unit);
+          break;
       }
-      if (unit.owner !== player.id) {
-        console.log(
-          `Player ${player.id} is not allowed to control unit ${unit.id}`,
-        );
-        return;
-      }
-      if (unit.actionTaken) {
-        console.log(`Unit ${unit.id} has already taken an action this turn`);
-        return;
-      }
-      // Process action and mark the unit so it cannot act again this turn
-      if (action.action === "move" && action.direction) {
-        this.moveUnit(player, unit, action.direction);
-      }
-      if (action.action === "attack" && action.target) {
-        this.attackWithUnit(player, unit, action.target);
-      }
-      if (action.action === "mine") {
-        this.mineResource(player, unit);
-      }
+
       unit.actionTaken = true;
     });
 
-    response.actions.shop.forEach((order) => {
-      console.log(`Player ${player.id} - Processing shop order:`, order);
+    // Process shop actions
+    response?.actions?.shop?.forEach((order) => {
       if (order.type === "buy") {
         this.buyUnit(player, order.item, order.quantity);
       }
