@@ -82,7 +82,9 @@
 			<button
 				class=""
 				onclick={() => {
-					/* Logic */
+					fetch('/api/start_game', {
+						method: 'POST'
+					});
 				}}>Test</button
 			>
 			<button
