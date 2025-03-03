@@ -4,14 +4,37 @@ import { Pathfinding } from './user_modules/Pathfinding';
 let editor: Monaco.editor.IStandaloneCodeEditor;
 let monaco: typeof Monaco;
 
+const theme: Monaco.editor.IStandaloneThemeData = {
+	base: 'vs-dark' as Monaco.editor.BuiltinTheme,
+	inherit: true,
+	rules: [
+		{ token: 'comment', foreground: '76db6a' },
+		{ token: 'keyword', foreground: '71b8ff' },
+		{ token: 'string', foreground: 'ffc065' },
+		{ token: 'bracket', foreground: '71b8ff' }
+	],
+	colors: {
+		'editor.foreground': '#FFFFFF',
+		'editor.background': '#18181b',
+		'editorCursor.foreground': '#528fff',
+		'editorLineNumber.foreground': '#FFFFFF'
+		/* 'editor.selectionBackground': '#88000030' */
+	}
+};
+
 export async function setupEditor(el: HTMLElement) {
 	console.log('setting up editor');
 
 	monaco = (await import('./monaco')).default;
+
+	monaco.editor.defineTheme('myTheme', theme);
+
 	el.innerHTML = ''; // Clear the container
 	editor = monaco.editor.create(el, {
 		automaticLayout: true,
-		theme: 'vs',
+		theme: 'myTheme',
+		fontFamily: 'JetBrains Mono',
+		fontLigatures: true,
 		wrappingStrategy: 'advanced',
 		wordWrap: 'on',
 		minimap: { enabled: false }, // Disable minimap
