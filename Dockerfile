@@ -22,4 +22,4 @@ RUN deno cache --node-modules-dir main.ts
 # make empty directory called .cache
 RUN mkdir -p .cache
 
-CMD ["run", "-A", "--node-modules-dir", "main.ts"]
+CMD ["run", "-A", "--node-modules-dir", "src/main.ts"]
