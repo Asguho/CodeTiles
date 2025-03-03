@@ -181,4 +181,3 @@ function defaultHandler(req: Request) {
 }
 
 Deno.serve({ port: 3000, hostname: "0.0.0.0" }, route(routes, defaultHandler));
-console.log("aske");

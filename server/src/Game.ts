@@ -119,11 +119,27 @@ export class Game {
       for (let x = 0; x < this.mapWidth; x++) {
         const tile = this.map[y][x];
 
+        // Check if there's a base at this position
+        let baseAtPosition = false;
+        for (const player of this.players) {
+          if (
+            player.basePosition &&
+            Math.floor(player.basePosition.x) === x &&
+            Math.floor(player.basePosition.y) === y
+          ) {
+            row += "B ";
+            baseAtPosition = true;
+            break;
+          }
+        }
+
+        if (baseAtPosition) continue;
+
         // Check if there's a unit at this position
         let unitAtPosition = false;
         for (const player of this.players) {
-          const unit = player.units.find((u) =>
-            u.position.x === x && u.position.y === y
+          const unit = player.units.find(
+            (u) => u.position.x === x && u.position.y === y,
           );
           if (unit) {
             // Use first letter of unit type (M)elee, (R)anged, (m)iner
@@ -134,7 +150,7 @@ export class Game {
           }
         }
 
-        // If no unit, show terrain
+        // If no unit or base, show terrain
         if (!unitAtPosition) {
           row += symbols[tile.type] + " ";
         }
@@ -145,6 +161,7 @@ export class Game {
     console.log("# - Wall");
     console.log("O - Ore");
     console.log(". - Ground");
+    console.log("B - Base");
     console.log("M - Melee Unit");
     console.log("R - Ranged Unit");
     console.log("m - Miner Unit");
