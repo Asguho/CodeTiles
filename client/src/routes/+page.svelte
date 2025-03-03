@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { setupEditor } from '$lib/Editor';
 	import { setupGameCanvas } from '$lib/GameCanvas';
+	import { BASE_URL } from '$lib/utils';
 	import { editor } from 'monaco-editor';
 	import { PaneGroup, Pane, PaneResizer } from 'paneforge';
 	import { onMount } from 'svelte';
@@ -21,7 +22,7 @@
 		console.log('Uploading code...');
 		const code = codeEditor?.getValue();
 		if (!code) return;
-		const response = await fetch('http://localhost:8000/api/upload_code', {
+		const response = await fetch(BASE_URL + '/api/upload_code', {
 			method: 'POST',
 			credentials: 'include',
 			headers: {
