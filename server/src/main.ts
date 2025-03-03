@@ -13,166 +13,169 @@ const gameHandler = new GameHandler();
 
 // CORS headers
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "http://localhost:5173",
-  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, auth-session",
-  "Access-Control-Allow-Credentials": "true",
+	"Access-Control-Allow-Origin": "http://localhost:5173",
+	"Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+	"Access-Control-Allow-Headers": "Content-Type, auth-session",
+	"Access-Control-Allow-Credentials": "true",
 };
 
 const routes: Route[] = [
-  {
-    method: "GET",
-    pattern: new URLPattern({ pathname: "/ws" }),
-    handler: (req) => {
-      if (req.headers.get("upgrade") != "websocket") {
-        return new Response(null, { status: 501 });
-      }
-      const { socket, response } = Deno.upgradeWebSocket(req);
-      socket.addEventListener("open", () => {
-        console.log("a client connected!");
-        socket.send("hello from server");
-      });
-      return response;
-    },
-  },
-  {
-    method: "OPTIONS",
-    pattern: new URLPattern({ pathname: "/*" }),
-    handler: () => {
-      return new Response(null, {
-        status: 204,
-        headers: corsHeaders,
-      });
-    },
-  },
-  {
-    method: "POST",
-    pattern: new URLPattern({ pathname: "/api/start_game" }),
-    handler: async (req: Request) => {
-      const sessionCookie = req.headers.get("cookie");
-      if (!sessionCookie) {
-        return new Response("Unauthorized | no cookie", {
-          status: 401,
-          headers: corsHeaders,
-        });
-      }
-      const { session, user } = await validateSessionToken(sessionCookie);
-      if (!session || !user) {
-        return new Response("Unauthorized | invalid cookie", {
-          status: 401,
-          headers: corsHeaders,
-        });
-      }
+	{
+		method: "GET",
+		pattern: new URLPattern({ pathname: "/ws" }),
+		handler: (req) => {
+			if (req.headers.get("upgrade") != "websocket") {
+				return new Response(null, { status: 501 });
+			}
+			const { socket, response } = Deno.upgradeWebSocket(req);
+			socket.addEventListener("open", () => {
+				console.log("a client connected!");
+				socket.send("hello from server");
+			});
+			return response;
+		},
+	},
+	{
+		method: "OPTIONS",
+		pattern: new URLPattern({ pathname: "/*" }),
+		handler: () => {
+			return new Response(null, {
+				status: 204,
+				headers: corsHeaders,
+			});
+		},
+	},
+	{
+		method: "POST",
+		pattern: new URLPattern({ pathname: "/api/start_game" }),
+		handler: async (req: Request) => {
+			const sessionCookie = req.headers.get("cookie");
+			if (!sessionCookie) {
+				return new Response("Unauthorized | no cookie", {
+					status: 401,
+					headers: corsHeaders,
+				});
+			}
+			const { session, user } = await validateSessionToken(sessionCookie);
+			if (!session || !user) {
+				return new Response("Unauthorized | invalid cookie", {
+					status: 401,
+					headers: corsHeaders,
+				});
+			}
 
-      const [latestDeployment] = await db.select().from(table.deployment)
-        .where(eq(table.deployment.userId, user.id))
-        .orderBy(desc(table.deployment.createdAt))
-        .limit(1);
+			const [latestDeployment] = await db
+				.select()
+				.from(table.deployment)
+				.where(eq(table.deployment.userId, user.id))
+				.orderBy(desc(table.deployment.createdAt))
+				.limit(1);
 
-      gameHandler.startGame([{ id: user.id, url: latestDeployment.url }]);
+			gameHandler.startGame([{ id: user.id, url: latestDeployment.url }]);
 
-      return Response.json({ message: "Game started" }, {
-        headers: corsHeaders,
-      });
-    },
-  },
-  {
-    method: "POST",
-    pattern: new URLPattern({ pathname: "/api/upload_code" }),
-    handler: async (req: Request) => {
-      console.log(req.headers);
-      const sessionCookie = getCookies(req.headers)["auth-session"];
-      console.log(sessionCookie);
-      if (!sessionCookie) {
-        return new Response("Unauthorized | no cookie", {
-          status: 401,
-          headers: corsHeaders,
-        });
-      }
-      const { session, user } = await validateSessionToken(sessionCookie);
-      if (!session || !user) {
-        return new Response("Unauthorized | invalid cookie", {
-          status: 401,
-          headers: corsHeaders,
-        });
-      }
+			return Response.json(
+				{ message: "Game started" },
+				{
+					headers: corsHeaders,
+				}
+			);
+		},
+	},
+	{
+		method: "POST",
+		pattern: new URLPattern({ pathname: "/api/upload_code" }),
+		handler: async (req: Request) => {
+			console.log(req.headers);
+			const sessionCookie = getCookies(req.headers)["auth-session"];
+			console.log(sessionCookie);
+			if (!sessionCookie) {
+				return new Response("Unauthorized | no cookie", {
+					status: 401,
+					headers: corsHeaders,
+				});
+			}
+			const { session, user } = await validateSessionToken(sessionCookie);
+			if (!session || !user) {
+				return new Response("Unauthorized | invalid cookie", {
+					status: 401,
+					headers: corsHeaders,
+				});
+			}
 
-      const code = await req.text();
-      console.log(code);
-      const deployment = await deploymentClient.createDeployment(
-        user.projectId,
-        {
-          entryPointUrl: "main.ts",
-          assets: {
-            "main.ts": {
-              "kind": "file",
-              "content": code,
-              "encoding": "utf-8",
-            },
-          },
-          "envVars": {
-            "MY_ENV": "hey",
-          },
-        },
-      );
-      console.log(deployment);
+			const code = await req.text();
+			console.log(code);
+			const deployment = await deploymentClient.createDeployment(user.projectId, {
+				entryPointUrl: "main.ts",
+				assets: {
+					"main.ts": {
+						kind: "file",
+						content: code,
+						encoding: "utf-8",
+					},
+				},
+				envVars: {
+					MY_ENV: "hey",
+				},
+			});
+			console.log(deployment);
 
-      await db.insert(table.deployment).values({
-        id: deployment.id,
-        userId: user.id,
-        url: `https://${user.projectName}-${deployment.id}.deno.dev`,
-        createdAt: new Date(),
-      });
+			await db.insert(table.deployment).values({
+				id: deployment.id,
+				userId: user.id,
+				url: `https://${user.projectName}-${deployment.id}.deno.dev`,
+				createdAt: new Date(),
+			});
 
-      console.log(
-        `created deployment: https://${user.projectName}-${deployment.id}.deno.dev`,
-      );
-      return Response.json({
-        message: "Deployment successful",
-        url: `https://${user.projectName}-${deployment.id}.deno.dev`,
-      }, { headers: corsHeaders });
-    },
-  },
-  {
-    pattern: new URLPattern({ pathname: "/api/auth/login" }),
-    method: "POST",
-    handler: async (req: Request) => {
-      const response = await login(req);
-      // Add CORS headers to the response
-      for (const [key, value] of Object.entries(corsHeaders)) {
-        response.headers.set(key, value);
-      }
-      return response;
-    },
-  },
-  {
-    pattern: new URLPattern({ pathname: "/api/auth/signup" }),
-    method: "POST",
-    handler: async (req: Request) => {
-      const response = await signup(req);
-      // Add CORS headers to the response
-      for (const [key, value] of Object.entries(corsHeaders)) {
-        response.headers.set(key, value);
-      }
-      return response;
-    },
-  },
+			console.log(`created deployment: https://${user.projectName}-${deployment.id}.deno.dev`);
+			return Response.json(
+				{
+					message: "Deployment successful",
+					url: `https://${user.projectName}-${deployment.id}.deno.dev`,
+				},
+				{ headers: corsHeaders }
+			);
+		},
+	},
+	{
+		pattern: new URLPattern({ pathname: "/api/auth/login" }),
+		method: "POST",
+		handler: async (req: Request) => {
+			const response = await login(req);
+			// Add CORS headers to the response
+			for (const [key, value] of Object.entries(corsHeaders)) {
+				response.headers.set(key, value);
+			}
+			return response;
+		},
+	},
+	{
+		pattern: new URLPattern({ pathname: "/api/auth/signup" }),
+		method: "POST",
+		handler: async (req: Request) => {
+			const response = await signup(req);
+			// Add CORS headers to the response
+			for (const [key, value] of Object.entries(corsHeaders)) {
+				response.headers.set(key, value);
+			}
+			return response;
+		},
+	},
 ];
 
 function defaultHandler(req: Request) {
-  // For non-API routes, we still want to add CORS headers
-  if (req.method === "OPTIONS") {
-    return new Response(null, {
-      status: 204,
-      headers: corsHeaders,
-    });
-  }
+	// For non-API routes, we still want to add CORS headers
+	if (req.method === "OPTIONS") {
+		return new Response(null, {
+			status: 204,
+			headers: corsHeaders,
+		});
+	}
 
-  return serveDir(req, {
-    fsRoot: "../client/build",
-    showIndex: true,
-  });
+	return serveDir(req, {
+		fsRoot: "../client/build",
+		showIndex: true,
+	});
 }
 
-Deno.serve(route(routes, defaultHandler));
+Deno.serve({ port: 3000, hostname: "0.0.0.0" }, route(routes, defaultHandler));
 console.log("aske");
