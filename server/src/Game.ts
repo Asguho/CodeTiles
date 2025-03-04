@@ -188,6 +188,9 @@ export class Game {
     this.turn++;
     console.log(`Starting turn ${this.turn}`);
 
+    // Update what each player can see
+    this.updatePlayerMapView();
+
     const playerRequests = this.players.map((player) =>
       this.sendRequest(player)
     );
@@ -386,6 +389,109 @@ export class Game {
         actionTaken: false,
       };
       player.units.push(newUnit);
+    }
+  }
+
+  // Updates each player's map view with fog of war
+  updatePlayerMapView() {
+    // Reset each player's map view first
+    this.players.forEach((player) => {
+      // Initialize empty map with fog of war (all unknown)
+      player.mapView = Array(this.mapHeight).fill().map(() =>
+        Array(this.mapWidth).fill().map(() => ({
+          type: "unknown",
+          visible: false,
+        }))
+      );
+
+      // Vision radius for different unit types
+      const visionRadius: Record<string, number> = {
+        melee: 3,
+        ranged: 5,
+        miner: 2,
+      };
+
+      // Base vision
+      if (player.basePosition) {
+        const baseX = Math.floor(player.basePosition.x);
+        const baseY = Math.floor(player.basePosition.y);
+        this.revealAreaAroundPosition(player.mapView, baseX, baseY, 4);
+      }
+
+      // Reveal areas around each unit based on its vision radius
+      player.units.forEach((unit) => {
+        const radius = visionRadius[unit.type] || 3;
+        this.revealAreaAroundPosition(
+          player.mapView,
+          Math.floor(unit.position.x),
+          Math.floor(unit.position.y),
+          radius,
+        );
+      });
+    });
+  }
+
+  // Helper method to reveal an area on the map around a position
+  private revealAreaAroundPosition(
+    mapView: any[][],
+    centerX: number,
+    centerY: number,
+    radius: number,
+  ) {
+    for (
+      let y = Math.max(0, centerY - radius);
+      y <= Math.min(this.mapHeight - 1, centerY + radius);
+      y++
+    ) {
+      for (
+        let x = Math.max(0, centerX - radius);
+        x <= Math.min(this.mapWidth - 1, centerX + radius);
+        x++
+      ) {
+        // Calculate distance to check if within radius
+        const distance = Math.sqrt(
+          Math.pow(centerX - x, 2) + Math.pow(centerY - y, 2),
+        );
+        if (distance <= radius) {
+          // Reveal this tile on the map view
+          const tile = this.map[y][x];
+          mapView[y][x] = {
+            type: tile.type,
+            visible: true,
+            x: x,
+            y: y,
+          };
+
+          // Check for units at this position and add them to the map view
+          for (const player of this.players) {
+            const unitsAtPos = player.units.filter((u) =>
+              Math.floor(u.position.x) === x && Math.floor(u.position.y) === y
+            );
+
+            if (unitsAtPos.length > 0) {
+              mapView[y][x].units = unitsAtPos.map((u) => ({
+                id: u.id,
+                type: u.type,
+                owner: u.owner,
+                health: u.health,
+              }));
+            }
+          }
+
+          // Check for bases at this position
+          for (const player of this.players) {
+            if (
+              player.basePosition &&
+              Math.floor(player.basePosition.x) === x &&
+              Math.floor(player.basePosition.y) === y
+            ) {
+              mapView[y][x].base = {
+                owner: player.id,
+              };
+            }
+          }
+        }
+      }
     }
   }
 }

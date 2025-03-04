@@ -53,8 +53,20 @@ export async function setupEditor(el: HTMLElement) {
 }
 
 export const DEFAULT_VAL = /*html*/ `
-Deno.serve((req) => {
-	// This is a dummy implementation of a game API
+Deno.serve(async (req) => {
+	console.stdlog = console.log.bind(console);
+	console.logs = [];
+	console.log = function () {
+		console.logs.push(JSON.stringify(Array.from(arguments)));
+		console.stdlog.apply(console, arguments);
+	}
+	console.log("hej")
+	try {
+		let gameinfo = await req.json()
+		console.log("gameinfo", gameinfo)
+	} catch (e) {
+		console.log("no reqesut data")
+	}
 	return Response.json({
 		actions: {
 			units: [
@@ -63,15 +75,12 @@ Deno.serve((req) => {
 				{ unitId: "unit3", action: "mine" }
 			],
 			shop: [
-				{ type: "buy", item: "soldier", quantity: 2 },
-				{ type: "buy", item: "tank", quantity: 1 }
+				{ type: "buy", item: "melee", quantity: 2 },
+				{ type: "buy", item: "ranged", quantity: 1 }
 			]
 		},
 		logs: [
-			{
-				level: "info",
-				message: "Hello world",
-			}
+			console.logs.map((message) => { return { level: "INFO", message } })
 		]
 	});
 });
