@@ -7,9 +7,11 @@ import DeploymentClient from "./DeploymentClient.ts";
 import { getCookies } from "jsr:@std/http/cookie";
 import { GameHandler } from "./GameHandler.ts";
 import { desc, eq } from "drizzle-orm/expressions";
+import { SocketHandler } from "./SocketHandler.ts";
 
 const deploymentClient = new DeploymentClient();
 const gameHandler = new GameHandler();
+const socketHandler = new SocketHandler();
 
 // CORS headers
 const corsHeaders = {
@@ -24,14 +26,28 @@ const routes: Route[] = [
     method: "GET",
     pattern: new URLPattern({ pathname: "/ws" }),
     handler: (req) => {
+      const sessionCookie = getCookies(req.headers)["auth-session"];
+      if (!sessionCookie) {
+        return new Response("Unauthorized | no cookie", {
+          status: 401,
+          headers: corsHeaders,
+        });
+      }
+      const { session, user } = await validateSessionToken(sessionCookie);
+      if (!session || !user) {
+        return new Response("Unauthorized | invalid cookie", {
+          status: 401,
+          headers: corsHeaders,
+        });
+      }
+
       if (req.headers.get("upgrade") != "websocket") {
         return new Response(null, { status: 501 });
       }
       const { socket, response } = Deno.upgradeWebSocket(req);
-      socket.addEventListener("open", () => {
-        console.log("a client connected!");
-        socket.send("hello from server");
-      });
+      socket.onopen = () => {
+        socketHandler.addSocket(user.id, socket);
+      };
       return response;
     },
   },
