@@ -126,7 +126,7 @@ export const signup = async (req: Request) => {
 
 	try {
 		const userId = crypto.randomUUID();
-		const { id: projectId, name: projectName } = await deploymentClient.createProject(username);
+		const { id: projectId, name: projectName } = await deploymentClient.createProject();
 		if (!projectId) {
 			console.error("Failed to create project");
 			return new Response(JSON.stringify({ message: "Failed to create project" }), { status: 500 });
