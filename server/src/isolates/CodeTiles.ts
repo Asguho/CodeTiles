@@ -104,36 +104,24 @@ class shop {
 }
 
 export class CodeTiles {
-    readonly map: tile[][];
-    readonly units: unit[];
-    readonly bases: base[];
-    readonly coins: number;
-    readonly turn: number;
-    readonly shop: shop;
+    #game: Game;
     #actions: { units: any[], shop: any[] } = { units: [], shop: [] };
     #logs: any[] = [];
+    #playerFunction?: (game: Game) => void;
 
     constructor(gameState: any) {
-        this.map = gameState.map.map((row: any) => row.map((cell: any) => new tile(cell.type, cell.position)));
-        this.units = gameState.units.map((unitData: any) => {
-            switch(unitData.type) {
-                case 'melee':
-                    return new meleeUnit(unitData.id, unitData.health, unitData.type, unitData.position, this);
-                case 'ranged':
-                    return new rangedUnit(unitData.id, unitData.health, unitData.type, unitData.position, this);
-                case 'miner':
-                    return new minerUnit(unitData.id, unitData.health, unitData.type, unitData.position, this);
-                default:
-                    return new unit(unitData.id, unitData.health, unitData.type, unitData.position, this);
-            }
-        });
-        this.bases = gameState.bases.map((base: any) => new base(base.id, base.owner, base.position, base.health));
-        this.coins = gameState.coins;
-        this.turn = gameState.turn;
-        this.shop = new shop(this);
+        this.#game = new Game(gameState, this);
         this.hookConsole();
     }
 
+    onTurn(f: (game: Game) => void) { this.#playerFunction = f; }
+
+    evaluate() {
+        if (this.#playerFunction) {
+            this.#playerFunction(this.#game);
+        }
+    }
+    
     addAction(action: any) {
         if (action.type === 'buy') {
             this.#actions.shop.push(action);
@@ -141,7 +129,13 @@ export class CodeTiles {
             this.#actions.units.push(action);
         }
     }
-
+    
+    toJSON() {
+        return {
+            actions: this.#actions,
+            logs: this.#logs
+        };
+    }
     hookConsole() {
         type LogMethod = keyof Pick<Console, 'log' | 'error' | 'warn' | 'debug'>;
         const hookLogType = (logType: LogMethod) => {
@@ -158,38 +152,33 @@ export class CodeTiles {
             console[logType] = hookLogType(logType);
         });
     } 
-    
-    toJSON() {
-        return {
-            actions: this.#actions,
-            logs: this.#logs
-        };
-    }
 }
 
-let codeTiles = new CodeTiles({
-    map: [
-        [{ type: "grass" }, { type: "grass" }, { type: "grass" }],
-        [{ type: "grass" }, { type: "grass" }, { type: "grass" }],
-        [{ type: "grass" }, { type: "grass" }, { type: "grass" }]
-    ],  
-    units: [
-        { id: "unit1", health: 100, type: "melee", position: { x: 0, y: 0 } },
-        { id: "unit2", health: 100, type: "ranged", position: { x: 1, y: 1 } }
-    ],
-    bases: [
-        { id: "base1", owner: "player1", position: { x: 0, y: 0 }, health: 100 },
-        { id: "base2", owner: "player2", position: { x: 1, y: 1 }, health: 100 }
-    ],
-    coins: 100,
-    turn: 1
-});
+class Game {
+    readonly map: tile[][];
+    readonly units: unit[];
+    readonly bases: base[];
+    readonly coins: number;
+    readonly turn: number;
+    readonly shop: shop;
 
-// Now you can use specific unit methods
-// codeTiles.units.forEach(unit => {
-//     unit.move("north");
-//     if (unit.type === "melee" || unit.type === "ranged") {
-//         (unit as meleeUnit | rangedUnit).attack(codeTiles.units[0]);
-//     }
-// });
-// codeTiles.shop.buy("melee", 2);
+    constructor(gameState: any, codeTiles: CodeTiles) {
+        this.map = gameState.map.map((row: any) => row.map((cell: any) => new tile(cell.type, cell.position)));
+        this.units = gameState.units.map((unitData: any) => {
+            switch(unitData.type) {
+                case 'melee':
+                    return new meleeUnit(unitData.id, unitData.health, unitData.type, unitData.position, codeTiles);
+                case 'ranged':
+                    return new rangedUnit(unitData.id, unitData.health, unitData.type, unitData.position, codeTiles);
+                case 'miner':
+                    return new minerUnit(unitData.id, unitData.health, unitData.type, unitData.position, codeTiles);
+                default:
+                    return new unit(unitData.id, unitData.health, unitData.type, unitData.position, codeTiles);
+            }
+        });
+        this.bases = gameState.bases.map((base: any) => new base(base.id, base.owner, base.position, base.health));
+        this.coins = gameState.coins;
+        this.turn = gameState.turn;
+        this.shop = new shop(codeTiles);
+    }   
+}

@@ -8,6 +8,7 @@ import { getCookies } from "jsr:@std/http/cookie";
 import { GameHandler } from "./GameHandler.ts";
 import { desc, eq } from "drizzle-orm/expressions";
 import { socketHandler } from "./SocketHandler.ts";
+import { getCloudCode } from "./isolates/isolate.ts";
 
 
 const deploymentClient = new DeploymentClient();
@@ -125,10 +126,16 @@ const routes: Route[] = [
           assets: {
             "main.ts": {
               kind: "file",
-              content: code,
+              content: getCloudCode(code),
+              encoding: "utf-8",
+            },
+            "CodeTiles.ts": {
+              kind: "file",
+              content: await Deno.readTextFile("./src/isolates/CodeTiles.ts"),
               encoding: "utf-8",
             },
           },
+
           envVars: {
             MY_ENV: "hey",
           },

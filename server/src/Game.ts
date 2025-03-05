@@ -106,7 +106,7 @@ export class Game {
   async start() {
     this.generateMap();
 
-    while (!this.isGameOver() && this.turn < 3) {
+    while (!this.isGameOver() && this.turn < 1) {
       this.resetUnitActions();
       await this.processTurn();
     }
@@ -160,7 +160,7 @@ export class Game {
       }).then(async (res) => {
         try {
           return await res.json();
-        } catch (e) {
+        } catch (e: any) {
           console.log(`JSON error parsing when parsing:`, res, e);
           return { actions: { units: [], shop: [] }, logs: [`Error parsing response: ${e.message}`] };
         }
