@@ -154,12 +154,12 @@ export class Game {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
-      }).then((res) => {
+      }).then(async (res) => {
         try {
-          return res.json();
+          return await res.json();
         } catch (e) {
-          console.log("error", res, e);
-          throw e;
+          console.log(`JSON error parsing when parsing:`, res, e);
+          return { actions: { units: [], shop: [] }, logs: [`Error parsing response: ${e.message}`] };
         }
       });
 
