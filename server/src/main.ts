@@ -7,11 +7,11 @@ import DeploymentClient from "./DeploymentClient.ts";
 import { getCookies } from "jsr:@std/http/cookie";
 import { GameHandler } from "./GameHandler.ts";
 import { desc, eq } from "drizzle-orm/expressions";
-import { SocketHandler } from "./SocketHandler.ts";
+import { socketHandler } from "./SocketHandler.ts";
+
 
 const deploymentClient = new DeploymentClient();
 const gameHandler = new GameHandler();
-const socketHandler = new SocketHandler();
 
 // CORS headers
 const corsHeaders = {

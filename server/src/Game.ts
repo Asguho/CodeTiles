@@ -1,3 +1,5 @@
+import { socketHandler } from "./SocketHandler.ts";
+
 type Position = {
   x: number;
   y: number;
@@ -200,6 +202,8 @@ export class Game {
     responses.forEach((response, index) => {
       this.processActions(this.players[index], response);
     });
+    
+    
     this.printMap();
     alert("Turn " + this.turn + " complete. press enter to continue");
   }
@@ -211,6 +215,8 @@ export class Game {
       units: player.units,
       coins: player.coins,
     };
+
+    socketHandler.sendMessage(player.id, JSON.stringify(payload));
 
     try {
       const response = await fetch(player.serverUrl, {
@@ -400,7 +406,6 @@ export class Game {
       player.mapView = Array(this.mapHeight).fill().map(() =>
         Array(this.mapWidth).fill().map(() => ({
           type: "unknown",
-          visible: false,
         }))
       );
 
@@ -457,7 +462,6 @@ export class Game {
           const tile = this.map[y][x];
           mapView[y][x] = {
             type: tile.type,
-            visible: true,
             x: x,
             y: y,
           };
