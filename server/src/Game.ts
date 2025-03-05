@@ -134,8 +134,7 @@ export class Game {
     responses.forEach((response, index) => {
       this.processActions(this.players[index], response);
     });
-    
-    
+
     // alert("Turn " + this.turn + " complete. press enter to continue");
   }
 
@@ -150,16 +149,24 @@ export class Game {
       basePosition: player.basePosition,
     };
 
-
-
     try {
       const response = await fetch(player.serverUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
-      }). then((res) => res.json());
+      }).then((res) => {
+        try {
+          return res.json();
+        } catch (e) {
+          console.log("error", res, e);
+          throw e;
+        }
+      });
 
-      socketHandler.sendMessage(player.id, JSON.stringify({...payload, logs: response?.logs || []}));
+      socketHandler.sendMessage(
+        player.id,
+        JSON.stringify({ ...payload, logs: response?.logs || [] }),
+      );
 
       return response;
     } catch (error) {
