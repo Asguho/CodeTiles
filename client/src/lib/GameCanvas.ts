@@ -22,3 +22,12 @@ export function setupGameCanvas(canvas: HTMLCanvasElement, width: number, height
 		ctx.stroke();
 	}
 }
+
+export function drawGame(canvas: HTMLCanvasElement, gameState: any) {
+	console.log('drawing game', gameState);
+	// Clear the canvas
+	const ctx = canvas.getContext('2d')!;
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	ctx.fillStyle = '#FFFFFF';
+	ctx.fillRect(0, 0, canvas.width, canvas.height);
+}

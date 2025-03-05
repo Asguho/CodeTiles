@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { setupEditor } from '$lib/Editor';
-	import { setupGameCanvas } from '$lib/GameCanvas';
+	import { setupGameCanvas, drawGame } from '$lib/GameCanvas';
 	import { BASE_URL } from '$lib/utils';
 	import { editor } from 'monaco-editor';
 	import { PaneGroup, Pane, PaneResizer } from 'paneforge';
@@ -40,8 +40,16 @@
 		console.log('WebSocket is open now on ', url.toString());
 	};
 
-	ws.onmessage = function (event) {
+	ws.onmessage = function (event: MessageEvent) {
 		console.log('WebSocket message received:', event.data);
+		try {
+			const json = JSON.parse(event.data);
+			if (json?.type === 'TURN_DATA') {
+				drawGame(gameCanvas, event.data);
+			}
+		} catch (error) {
+			console.warn('WEBSOKET DATA NOT JSON', event.data);
+		}
 	};
 
 	ws.onclose = function () {
