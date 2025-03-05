@@ -1,5 +1,5 @@
 export function getCloudCode(code: string) {
-	return /*js*/ `
+	return /*js*/`
 		import { CodeTiles as _CodeTiles } from "./CodeTiles.ts";
 		Deno.serve(async (req) => {
 			try {
@@ -7,12 +7,14 @@ export function getCloudCode(code: string) {
 				try {
 					_gameinfo = await req.json();
 				} catch (e) {
-					return Response.json({logs: [{level: "error", values: ["no request data"]}]})
+					return Response.json({logs: [{level: "error", values: ["no request data or wrong format"]}]})
 				}
 				const CodeTiles = new _CodeTiles(_gameinfo);
 
-				{
+				try {
 					${code}
+				} catch (evalError) {
+					return Response.json({logs: [{level: "error", values: [evalError.name, evalError.message]}]})
 				}
 				
 				CodeTiles.evaluate();

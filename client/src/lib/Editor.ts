@@ -51,45 +51,13 @@ export async function setupEditor(el: HTMLElement) {
 	console.log('editor setup complete', editor);
 
 	//load code from server
-	let res = await fetch('/api/get_code', { method: 'GET', credentials: 'include' });
-	if (res.ok) {
-		let { code } = await res.json();
-		editor.setValue(code);
-	}
+
 
 	return editor;
 }
 
 export const DEFAULT_VAL = /*js*/ `
-Deno.serve(async (req) => {
-	console.stdlog = console.log.bind(console);
-	console.logs = [];
-	console.log = function () {
-		console.logs.push(JSON.stringify(Array.from(arguments)));
-		console.stdlog.apply(console, arguments);
-	}
-	console.log("hej")
-	try {
-		let gameinfo = await req.json()
-		console.log("gameinfo", gameinfo)
-	} catch (e) {
-		console.log("no reqesut data")
-	}
-	return Response.json({
-		actions: {
-			units: [
-				{ unitId: "unit1", action: "move", direction: "north" },
-				{ unitId: "unit2", action: "attack", target: "enemy1" },
-				{ unitId: "unit3", action: "mine" }
-			],
-			shop: [
-				{ type: "buy", item: "melee", quantity: 2 },
-				{ type: "buy", item: "ranged", quantity: 1 }
-			]
-		},
-		logs: [
-			console.logs.map((message) => { return { level: "INFO", message } })
-		]
-	});
-});
+CodeTiles.onTurn((game)=>{
+	game.map.forEach((row)=>console.log(row))
+})
 `;

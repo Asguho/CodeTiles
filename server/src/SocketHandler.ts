@@ -14,11 +14,22 @@ class SocketHandler {
   }
 
   addSocket(userId: string, socket: WebSocket) {
+    console.log("Socket opened for user:", userId);
+    
+    const existingSocket = this.sockets.get(userId);
+    if(existingSocket) {
+      existingSocket.onclose = null;
+      existingSocket.close();
+    }
+    
     this.sockets.set(userId, socket);
-    socket.onclose = () => {
-      this.sockets.delete(userId);
+    
+    socket.onclose = (event: CloseEvent) => {
+      console.log("Socket closed for user:", userId);
+      if(this.sockets.get(userId) === socket) {
+        this.sockets.delete(userId);
+      }
     };
-    this.sendMessage(userId, "connected");
   }
 
   getSocket(userId: string) {

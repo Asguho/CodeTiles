@@ -1,4 +1,3 @@
-import test from "node:test";
 import { socketHandler } from "./SocketHandler.ts";
 
 type Position = {
@@ -8,7 +7,7 @@ type Position = {
 
 type UnitAction = {
   unitId: string;
-  action: string;
+  type: string;
   direction?: string;
   target?: Position;
 };
@@ -31,30 +30,34 @@ interface Unit {
   type: "melee" | "ranged" | "miner";
   position: Position;
   health: number;
-  owner: string; // Owner's player id
-  actionTaken?: boolean; // Flag to limit one action per turn
-  // ...other unit properties...
+  owner: string; 
+  actionTaken?: boolean;
 }
 
 interface Player {
   id: string;
   serverUrl: string;
-  mapView: any; // Represents the part of the map visible to the player
   units: Unit[];
   coins: number;
-  basePosition?: Position; // Base for spawning new units
+  basePosition?: Position;
+  mapView?: Tile[][];
 }
 
 interface Tile {
-  type: "ground" | "wall" | "ore";
+  type: "ground" | "wall" | "ore" | "base";
   x: number;
   y: number;
+}
+interface base extends Tile {
+  type: "base";
+  health: number;
+  owner: string;
 }
 
 export class Game {
   players: Player[];
-  turn: number;
   map: Tile[][] = [];
+  turn: number;
   mapWidth: number = 10;
   mapHeight: number = 10;
 
@@ -62,14 +65,12 @@ export class Game {
     this.players = players.map(({ id, url }) => ({
       id,
       serverUrl: url,
-      mapView: {},
       units: [],
       coins: 100,
     }));
     this.turn = 0;
   }
 
-  // Generates a simple tile-based map
   generateMap() {
     for (let y = 0; y < this.mapHeight; y++) {
       const row: Tile[] = [];
@@ -86,12 +87,17 @@ export class Game {
       this.map.push(row);
     }
     this.players.forEach((player) => {
-      player.basePosition = {
-        x: Math.floor(Math.random() * this.mapWidth),
-        y: Math.floor(Math.random() * this.mapHeight),
-      };
+      const baseX = Math.floor(Math.random() * this.mapWidth);
+      const baseY = Math.floor(Math.random() * this.mapHeight);
+      player.basePosition = { x: baseX, y: baseY };
+      this.map[baseY][baseX] = {
+        type: "base",
+        health: 100,
+        owner: player.id,
+        x: baseX,
+        y: baseY,
+      } as base;
     });
-    console.log("Map generated");
   }
 
   // Resets units' actionTaken flag for each turn
@@ -106,7 +112,7 @@ export class Game {
   async start() {
     this.generateMap();
 
-    while (!this.isGameOver() && this.turn < 1) {
+    while (!this.isGameOver() && this.turn < 3) {
       this.resetUnitActions();
       await this.processTurn();
     }
@@ -190,7 +196,7 @@ export class Game {
       if (unit.actionTaken) return;
 
       // Execute the action based on type
-      switch (action.action) {
+      switch (action.type) {
         case "move":
           this.moveUnit(player, unit, action.direction!);
           break;

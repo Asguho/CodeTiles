@@ -12,17 +12,32 @@
 
 	let codeEditor: editor.IStandaloneCodeEditor | null = null;
 	let consoleElement: HTMLPreElement | null = null;
+	let lastSavedcode = $state('');
+
+
+
 
 	onMount(async () => {
 		console.log('Hello, Vite!', document);
 		setupGameCanvas(gameCanvas, 800, 600);
 		codeEditor = await setupEditor(document.getElementById('editor')!);
-	});
 
+		let res = await fetch('/api/get_code', { method: 'GET', credentials: 'include' });
+		if (res.ok) {
+			let { code } = await res.json();
+			codeEditor?.setValue(code); 
+			lastSavedcode = code;
+		}
+	});
+	
+	let canRun = $derived(() => lastSavedcode == codeEditor?.getValue());
+
+	let uploading = $state(false);
 	async function uploadCode() {
-		console.log('Uploading code...');
+		uploading = true;
 		const code = codeEditor?.getValue();
 		if (!code) return;
+		lastSavedcode = code;
 		const response = await fetch(BASE_URL + '/api/upload_code', {
 			method: 'POST',
 			credentials: 'include',
@@ -32,6 +47,7 @@
 			body: code
 		});
 		console.log('Response:', response);
+		uploading = false;
 	}
 
 	const url = new URL(`./ws`, location.href);
@@ -100,8 +116,9 @@
 		<div
 			class="flex flex-row gap-2 *:rounded-md *:border *:border-zinc-700 *:bg-zinc-800 *:p-1 *:px-2 *:text-zinc-200"
 		>
-			<button
+			<!-- <button
 				class=""
+				disabled={uploading}
 				onclick={() => {
 					/* Logic */
 				}}>Home</button
@@ -112,13 +129,13 @@
 					/* Logic */
 				}}>File</button
 			>
-			<!-- dropdown -->
-			<button
+			dropdown -->
+			<!-- <button
 				class=""
 				onclick={() => {
 					/* Logic */
 				}}>Save</button
-			>
+			> -->
 		</div>
 		<div
 			class="flex flex-row gap-2 *:rounded-md *:border *:border-zinc-700 *:bg-zinc-800 *:p-1 *:px-2 *:text-zinc-200"
@@ -126,15 +143,15 @@
 			<button
 				class=""
 				onclick={() => {
-					fetch('/api/start_game', {
-						method: 'POST'
-					});
-				}}>Test</button
+					uploadCode();
+				}}>Save</button
 			>
 			<button
 				class=""
 				onclick={() => {
-					uploadCode();
+					fetch('/api/start_game', {
+						method: 'POST'
+					});
 				}}>Run</button
 			>
 		</div>
