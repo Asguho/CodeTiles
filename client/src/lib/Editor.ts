@@ -52,7 +52,7 @@ export async function setupEditor(el: HTMLElement) {
 	return editor;
 }
 
-export const DEFAULT_VAL = /*html*/ `
+export const DEFAULT_VAL = /*js*/ `
 Deno.serve(async (req) => {
 	console.stdlog = console.log.bind(console);
 	console.logs = [];
