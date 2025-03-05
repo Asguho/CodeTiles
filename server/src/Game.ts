@@ -86,8 +86,8 @@ export class Game {
     }
     this.players.forEach((player) => {
       player.basePosition = {
-        x: Math.random() * this.mapWidth,
-        y: Math.random() * this.mapHeight,
+        x: Math.floor(Math.random() * this.mapWidth),
+        y: Math.floor(Math.random() * this.mapHeight),
       };
     });
     console.log("Map generated");
@@ -101,77 +101,9 @@ export class Game {
       });
     });
   }
-  // Add this method to the Game class
-  printMap(): void {
-    const symbols = {
-      ground: ".",
-      wall: "#",
-      ore: "O",
-    };
-
-    // Header with column numbers
-    console.log(
-      "   " + [...Array(this.mapWidth)].map((_, i) => i % 10).join(" "),
-    );
-
-    for (let y = 0; y < this.mapHeight; y++) {
-      // Row number prefix
-      let row = `${y.toString().padStart(2, " ")} `;
-
-      for (let x = 0; x < this.mapWidth; x++) {
-        const tile = this.map[y][x];
-
-        // Check if there's a base at this position
-        let baseAtPosition = false;
-        for (const player of this.players) {
-          if (
-            player.basePosition &&
-            Math.floor(player.basePosition.x) === x &&
-            Math.floor(player.basePosition.y) === y
-          ) {
-            row += "B ";
-            baseAtPosition = true;
-            break;
-          }
-        }
-
-        if (baseAtPosition) continue;
-
-        // Check if there's a unit at this position
-        let unitAtPosition = false;
-        for (const player of this.players) {
-          const unit = player.units.find(
-            (u) => u.position.x === x && u.position.y === y,
-          );
-          if (unit) {
-            // Use first letter of unit type (M)elee, (R)anged, (m)iner
-            const symbol = unit.type[0].toUpperCase();
-            row += symbol + " ";
-            unitAtPosition = true;
-            break;
-          }
-        }
-
-        // If no unit or base, show terrain
-        if (!unitAtPosition) {
-          row += symbols[tile.type] + " ";
-        }
-      }
-      console.log(row);
-    }
-    console.log("\nLegend:");
-    console.log("# - Wall");
-    console.log("O - Ore");
-    console.log(". - Ground");
-    console.log("B - Base");
-    console.log("M - Melee Unit");
-    console.log("R - Ranged Unit");
-    console.log("m - Miner Unit");
-  }
 
   async start() {
     this.generateMap();
-    this.printMap();
 
     while (!this.isGameOver()) {
       this.resetUnitActions();
@@ -403,8 +335,8 @@ export class Game {
     // Reset each player's map view first
     this.players.forEach((player) => {
       // Initialize empty map with fog of war (all unknown)
-      player.mapView = Array(this.mapHeight).fill().map(() =>
-        Array(this.mapWidth).fill().map(() => ({
+      player.mapView = Array(this.mapHeight).fill(null).map(() =>
+        Array(this.mapWidth).fill(null).map(() => ({
           type: "unknown",
         }))
       );
