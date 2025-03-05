@@ -47,6 +47,17 @@
 	ws.onclose = function () {
 		console.log('WebSocket is closed now.');
 	};
+
+	$effect(() => {
+		fetch('/api/auth/validate', {
+			method: 'POST',
+			credentials: 'include'
+		}).then((res) => {
+			if (res.status === 401) {
+				window.location.href = '/login.html';
+			}
+		});
+	});
 </script>
 
 <div class="bg-zinc-900 px-1 pt-1">
