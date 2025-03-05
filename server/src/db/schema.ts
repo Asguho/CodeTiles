@@ -22,6 +22,7 @@ export const deployment = pgTable("deployment", {
   userId: text("user_id").notNull().references(() => user.id, {
     onDelete: "cascade",
   }),
+  code: text("code").notNull(),
   url: text("url").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
     .notNull(),
