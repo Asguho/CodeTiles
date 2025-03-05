@@ -103,41 +103,79 @@ class shop {
     }
 }
 
-class CodeTiles {
+export class CodeTiles {
     readonly map: tile[][];
     readonly units: unit[];
     readonly bases: base[];
     readonly coins: number;
     readonly turn: number;
     readonly shop: shop;
-    #actions: any[] = [];
+    #actions: { units: any[], shop: any[] } = { units: [], shop: [] };
+    #logs: any[] = [];
 
     constructor(gameState: any) {
         this.map = gameState.map.map((row: any) => row.map((cell: any) => new tile(cell.type, cell.position)));
-        this.units = gameState.units.map((unit: any) => new unit(unit.id, unit.health, unit.type, unit.position, this));
+        this.units = gameState.units.map((unitData: any) => {
+            switch(unitData.type) {
+                case 'melee':
+                    return new meleeUnit(unitData.id, unitData.health, unitData.type, unitData.position, this);
+                case 'ranged':
+                    return new rangedUnit(unitData.id, unitData.health, unitData.type, unitData.position, this);
+                case 'miner':
+                    return new minerUnit(unitData.id, unitData.health, unitData.type, unitData.position, this);
+                default:
+                    return new unit(unitData.id, unitData.health, unitData.type, unitData.position, this);
+            }
+        });
         this.bases = gameState.bases.map((base: any) => new base(base.id, base.owner, base.position, base.health));
         this.coins = gameState.coins;
         this.turn = gameState.turn;
         this.shop = new shop(this);
+        this.hookConsole();
     }
 
     addAction(action: any) {
-        this.#actions.push(action);
+        if (action.type === 'buy') {
+            this.#actions.shop.push(action);
+        } else {
+            this.#actions.units.push(action);
+        }
+    }
+
+    hookConsole() {
+        type LogMethod = keyof Pick<Console, 'log' | 'error' | 'warn' | 'debug'>;
+        const hookLogType = (logType: LogMethod) => {
+            const original = console[logType].bind(console);
+            return (...args: any[]) => {
+                this.#logs.push({ 
+                    type: logType, 
+                    values: Array.from(args)
+                });
+                original(...args);
+            };
+        };
+        (['log', 'error', 'warn', 'debug'] as LogMethod[]).forEach(logType => {
+            console[logType] = hookLogType(logType);
+        });
+    } 
+    
+    toJSON() {
+        return {
+            actions: this.#actions,
+            logs: this.#logs
+        };
     }
 }
 
 let codeTiles = new CodeTiles({
     map: [
-        [{ type: "grass" }, { type:
-"grass" }, { type: "grass" }],
-        [{ type: "grass" }, { type:
-"grass" }, { type: "grass" }],
-        [{ type: "grass" }, { type:
-"grass" }, { type: "grass" }]
+        [{ type: "grass" }, { type: "grass" }, { type: "grass" }],
+        [{ type: "grass" }, { type: "grass" }, { type: "grass" }],
+        [{ type: "grass" }, { type: "grass" }, { type: "grass" }]
     ],  
     units: [
-        { id: "unit1", health: 100, position: { x: 0, y: 0 } },
-        { id: "unit2", health: 100, position: { x: 1, y: 1 } }
+        { id: "unit1", health: 100, type: "melee", position: { x: 0, y: 0 } },
+        { id: "unit2", health: 100, type: "ranged", position: { x: 1, y: 1 } }
     ],
     bases: [
         { id: "base1", owner: "player1", position: { x: 0, y: 0 }, health: 100 },
@@ -147,7 +185,11 @@ let codeTiles = new CodeTiles({
     turn: 1
 });
 
+// Now you can use specific unit methods
 // codeTiles.units.forEach(unit => {
 //     unit.move("north");
+//     if (unit.type === "melee" || unit.type === "ranged") {
+//         (unit as meleeUnit | rangedUnit).attack(codeTiles.units[0]);
+//     }
 // });
 // codeTiles.shop.buy("melee", 2);
