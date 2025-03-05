@@ -136,7 +136,6 @@ export class Game {
     });
     
     
-    this.printMap();
     alert("Turn " + this.turn + " complete. press enter to continue");
   }
 
