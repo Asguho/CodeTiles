@@ -11,6 +11,7 @@
 	console.log('Hello, Vite!', document);
 
 	let codeEditor: editor.IStandaloneCodeEditor | null = null;
+	let consoleElement: HTMLPreElement | null = null;
 
 	onMount(async () => {
 		console.log('Hello, Vite!', document);
@@ -45,7 +46,8 @@
 		try {
 			const json = JSON.parse(event.data);
 			if (json?.type === 'TURN_DATA') {
-				drawGame(gameCanvas, event.data);
+				drawGame(gameCanvas, json); 
+				updateConsole(json?.logs);
 			}
 		} catch (error) {
 			console.warn('WEBSOKET DATA NOT JSON', event.data);
@@ -66,6 +68,29 @@
 			}
 		});
 	});
+
+
+	function updateConsole(logs: {level: string, values: string[]}[]) {
+		if (!consoleElement) return;
+		consoleElement.innerHTML = logs.map(log => {
+			let style = '';
+			switch (log.level) {
+				case 'error':
+					style = 'color: #ff5555; font-weight: bold;';
+					break;
+				case 'warn':
+					style = 'color: #ffb86c;';
+					break;
+				case 'info':
+					style = 'color: #8be9fd;';
+					break;
+				default: // 'log' and others
+					style = 'color: #f8f8f2;';
+			}
+			return `<span class="console-${log.level}" style="${style}">${log.values.map((val) => typeof val === 'string' ? val : JSON.stringify(val)).join(' ')}</span>`;
+		}).join('\n');
+		consoleElement.scrollTop = consoleElement.scrollHeight;		
+	}
 </script>
 
 <div class="bg-zinc-900 px-1 pt-1">
@@ -144,9 +169,7 @@
 				</PaneResizer>
 				<Pane defaultSize={50}>
 					<div class="flex h-full rounded-lg border border-zinc-700 bg-zinc-800 p-2 text-zinc-200">
-						<pre>
-console&gt; ahh goofy
-						</pre>
+						<pre bind:this={consoleElement} class="h-full w-full overflow-auto"></pre>
 					</div>
 				</Pane>
 			</PaneGroup>
