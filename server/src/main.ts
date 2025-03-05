@@ -205,6 +205,7 @@ const routes: Route[] = [
         .where(eq(table.deployment.userId, user.id))
         .orderBy(desc(table.deployment.createdAt))
         .limit(1);
+        
 
       return Response.json(
         { code: latestDeployment.code || null },
