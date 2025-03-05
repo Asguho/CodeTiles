@@ -105,7 +105,7 @@ export class Game {
   async start() {
     this.generateMap();
 
-    while (!this.isGameOver()) {
+    while (!this.isGameOver() && this.turn < 3) {
       this.resetUnitActions();
       await this.processTurn();
     }
@@ -145,6 +145,8 @@ export class Game {
       map: player.mapView,
       units: player.units,
       coins: player.coins,
+      turn: this.turn,
+      basePosition: player.basePosition,
     };
 
     socketHandler.sendMessage(player.id, JSON.stringify(payload));
