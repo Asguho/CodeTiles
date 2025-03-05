@@ -142,6 +142,7 @@ export class Game {
   // Sends a POST request to the player's server with the current game state data
   async sendRequest(player: Player): Promise<PlayerResponse> {
     const payload = {
+      type: "TURN_DATA",
       map: player.mapView,
       units: player.units,
       coins: player.coins,
@@ -149,15 +150,18 @@ export class Game {
       basePosition: player.basePosition,
     };
 
-    socketHandler.sendMessage(player.id, JSON.stringify(payload));
+
 
     try {
       const response = await fetch(player.serverUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
-      });
-      return await response.json();
+      }). then((res) => res.json());
+
+      socketHandler.sendMessage(player.id, JSON.stringify({...payload, logs: response?.logs || []}));
+
+      return response;
     } catch (error) {
       console.error(`Error sending request to ${player.id}:`, error);
       return { actions: { units: [], shop: [] } };
