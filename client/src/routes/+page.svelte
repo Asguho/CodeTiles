@@ -42,7 +42,8 @@
 
 	ws.onmessage = function (event: MessageEvent) {
 		console.log('WebSocket message received:', event.data);
-		if (event.data?.type === 'TURN_DATA') {
+		const json = JSON.parse(event.data);
+		if (json?.type === 'TURN_DATA') {
 			drawGame(gameCanvas, event.data);
 		}
 	};
