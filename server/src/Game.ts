@@ -136,7 +136,7 @@ export class Game {
     });
     
     
-    alert("Turn " + this.turn + " complete. press enter to continue");
+    // alert("Turn " + this.turn + " complete. press enter to continue");
   }
 
   // Sends a POST request to the player's server with the current game state data

@@ -207,7 +207,7 @@ const routes: Route[] = [
         .limit(1);
 
       return Response.json(
-        { code: latestDeployment.code },
+        { code: latestDeployment.code || null },
         { headers: corsHeaders },
       );
     }
