@@ -25,7 +25,7 @@ const routes: Route[] = [
   {
     method: "GET",
     pattern: new URLPattern({ pathname: "/ws" }),
-    handler: (req) => {
+    handler: async (req) => {
       const sessionCookie = getCookies(req.headers)["auth-session"];
       if (!sessionCookie) {
         return new Response("Unauthorized | no cookie", {
