@@ -139,6 +139,7 @@ const routes: Route[] = [
       await db.insert(table.deployment).values({
         id: deployment.id,
         userId: user.id,
+        code,
         url: `https://${user.projectName}-${deployment.id}.deno.dev`,
         createdAt: new Date(),
       });
@@ -154,6 +155,62 @@ const routes: Route[] = [
         { headers: corsHeaders },
       );
     },
+  },
+  {
+    pattern: new URLPattern({ pathname: "/api/auth/validate" }),
+    method: "POST",
+    handler: async (req: Request) => {
+      const sessionCookie = getCookies(req.headers)["auth-session"];
+      if (!sessionCookie) {
+        return new Response("Unauthorized | no cookie", {
+          status: 401,
+          headers: corsHeaders,
+        });
+      }
+      const { session, user } = await validateSessionToken(sessionCookie);
+      if (!session || !user) {
+        return new Response("Unauthorized | invalid cookie", {
+          status: 401,
+          headers: corsHeaders,
+        });
+      }
+      return Response.json(
+        { message: "Valid session" },
+        { headers: corsHeaders },
+      );
+    }
+  },
+  {
+    pattern: new URLPattern({ pathname: "/api/get_code" }),
+    method: "GET",
+    handler: async (req: Request) => {
+      const sessionCookie = getCookies(req.headers)["auth-session"];
+      if (!sessionCookie) {
+        return new Response("Unauthorized | no cookie", {
+          status: 401,
+          headers: corsHeaders,
+        });
+      }
+      const { session, user } = await validateSessionToken(sessionCookie);
+      if (!session || !user) {
+        return new Response("Unauthorized | invalid cookie", {
+          status: 401,
+          headers: corsHeaders,
+        });
+      }
+
+      const [latestDeployment] = await db
+        .select()
+        .from(table.deployment)
+        .where(eq(table.deployment.userId, user.id))
+        .orderBy(desc(table.deployment.createdAt))
+        .limit(1);
+
+      return Response.json(
+        { code: latestDeployment.code },
+        { headers: corsHeaders },
+      );
+    }
   },
   {
     pattern: new URLPattern({ pathname: "/api/auth/login" }),
