@@ -49,14 +49,23 @@ export async function setupEditor(el: HTMLElement) {
 
 	console.log('types', types);
 
+	// validation settings
+	monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
+		noSemanticValidation: true,
+		noSyntaxValidation: false
+	});
+
+	// compiler options
+	monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+		target: monaco.languages.typescript.ScriptTarget.ES2015,
+		allowNonTsExtensions: true
+	});
+
 	// Register the custom types for the game api
 	monaco.languages.typescript.javascriptDefaults.addExtraLib(types, libUri);
 	monaco.languages.typescript.typescriptDefaults.addExtraLib(types, libUri);
 
 	const model = monaco.editor.createModel(DEFAULT_VAL, 'typescript', monaco.Uri.parse(libUri));
-	/* 	editor.onDidChangeModelContent(() => {
-		body = editor.getValue();
-	}); */
 
 	editor.setModel(model);
 
