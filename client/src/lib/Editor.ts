@@ -41,17 +41,28 @@ export async function setupEditor(el: HTMLElement) {
 		stickyScroll: { enabled: false }, // Disable sticky scroll
 		lineNumbers: 'off' // Show line numbers
 	});
-	const model = monaco.editor.createModel(DEFAULT_VAL, 'typescript');
+
+	//fetch the CodeTiles.d.ts file from the server
+	const response = await fetch('/api/types');
+	const types = await response.text();
+	var libUri = 'ts:filename/codetiles.d.ts';
+
+	console.log('types', types);
+
+	// Register the custom types for the game api
+	monaco.languages.typescript.javascriptDefaults.addExtraLib(types, libUri);
+	monaco.languages.typescript.typescriptDefaults.addExtraLib(types, libUri);
+
+	const model = monaco.editor.createModel(DEFAULT_VAL, 'typescript', monaco.Uri.parse(libUri));
 	/* 	editor.onDidChangeModelContent(() => {
 		body = editor.getValue();
 	}); */
-	//maybe custom theme here maybe ?
+
 	editor.setModel(model);
 
 	console.log('editor setup complete', editor);
 
 	//load code from server
-
 
 	return editor;
 }
