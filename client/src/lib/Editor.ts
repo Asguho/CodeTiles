@@ -29,25 +29,10 @@ export async function setupEditor(el: HTMLElement) {
 
 	monaco.editor.defineTheme('myTheme', theme);
 
-	el.innerHTML = ''; // Clear the container
-	editor = monaco.editor.create(el, {
-		automaticLayout: true,
-		theme: 'myTheme',
-		fontFamily: 'JetBrains Mono',
-		fontLigatures: true,
-		wrappingStrategy: 'advanced',
-		wordWrap: 'on',
-		minimap: { enabled: false }, // Disable minimap
-		stickyScroll: { enabled: false }, // Disable sticky scroll
-		lineNumbers: 'off' // Show line numbers
-	});
-
 	//fetch the CodeTiles.d.ts file from the server
 	const response = await fetch('/api/types');
 	const types = await response.text();
-	var libUri = 'ts:filename/codetiles.d.ts';
-
-	console.log('types', types);
+	const libUri = 'ts:filename/codetiles.d.ts';
 
 	// validation settings
 	monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
@@ -61,17 +46,25 @@ export async function setupEditor(el: HTMLElement) {
 		allowNonTsExtensions: true
 	});
 
-	// Register the custom types for the game api
 	monaco.languages.typescript.javascriptDefaults.addExtraLib(types, libUri);
-	monaco.languages.typescript.typescriptDefaults.addExtraLib(types, libUri);
+	monaco.editor.createModel(types, 'typescript', monaco.Uri.parse(libUri));
 
-	const model = monaco.editor.createModel(DEFAULT_VAL, 'typescript', monaco.Uri.parse(libUri));
-
-	editor.setModel(model);
+	el.innerHTML = '';
+	const editor = monaco.editor.create(el, {
+		automaticLayout: true,
+		theme: 'myTheme',
+		fontFamily: 'JetBrains Mono',
+		fontLigatures: true,
+		language: 'javascript',
+		wrappingStrategy: 'advanced',
+		value: DEFAULT_VAL,
+		wordWrap: 'on',
+		minimap: { enabled: false }, // Disable minimap
+		stickyScroll: { enabled: false }, // Disable sticky scroll
+		lineNumbers: 'off' // Show line numbers
+	});
 
 	console.log('editor setup complete', editor);
-
-	//load code from server
 
 	return editor;
 }
