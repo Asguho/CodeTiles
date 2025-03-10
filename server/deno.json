@@ -4,7 +4,7 @@
     "db:push": "deno -A --node-modules-dir --env npm:drizzle-kit push",
     "db:pull": "deno -A --node-modules-dir --env npm:drizzle-kit pull",
     "db:studio": "deno -A --node-modules-dir --env npm:drizzle-kit studio",
-    "gen:types": "deno run -A npm:typescript/bin/tsc ./src/isolates/CodeTiles.ts --declaration --emitDeclarationOnly --target ES2015 --moduleResolution node --skipLibCheck --outFile ./src/CodeTiles.d.ts"
+    "gen:types": "deno run -A npm:typescript/bin/tsc ./src/isolates/CodeTiles.ts --declaration --emitDeclarationOnly --target ES2015 --moduleResolution node --skipLibCheck --module none --declarationDir ./src"
   },
   "imports": {
     "@node-rs/argon2": "npm:@node-rs/argon2@^2.0.2",
