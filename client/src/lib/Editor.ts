@@ -36,7 +36,7 @@ export async function setupEditor(el: HTMLElement) {
 
 	// validation settings
 	monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
-		noSemanticValidation: true,
+		noSemanticValidation: false,
 		noSyntaxValidation: false
 	});
 
@@ -61,7 +61,13 @@ export async function setupEditor(el: HTMLElement) {
 		wordWrap: 'on',
 		minimap: { enabled: false }, // Disable minimap
 		stickyScroll: { enabled: false }, // Disable sticky scroll
-		lineNumbers: 'off' // Show line numbers
+		lineNumbers: 'off', // Show line numbers
+		//allow suggestions in strings
+		quickSuggestions: {
+			strings: true,
+			other: true,
+			comments: true
+		}
 	});
 
 	console.log('editor setup complete', editor);
