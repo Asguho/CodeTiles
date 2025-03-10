@@ -8,9 +8,9 @@ class unit {
     owner: string;
     type: unitType;
     position: { x: number; y: number };
-    protected game?: CodeTiles;
+    protected game: CodeTiles;
 
-    constructor(id: string, health: number, owner: string, type: unitType, position: { x: number; y: number }, game?: CodeTiles) {
+    constructor(id: string, health: number, owner: string, type: unitType, position: { x: number; y: number }, game: CodeTiles) {
         this.id = id;
         this.health = health;
         this.owner = owner;
@@ -20,47 +20,39 @@ class unit {
     }
 
     move(direction: direction) {
-        if (this.game) {
             this.game.addAction({
                 type: 'move',
                 unitId: this.id,
                 direction
             });
-        }
     }
 }
 class meleeUnit extends unit {
     attack(target: unit) {
-        if (this.game) {
             this.game.addAction({
                 type: 'attack',
                 unitId: this.id,
                 target: target.id
             });
         }
-    }
 }
 
 class rangedUnit extends unit {
     attack(target: unit) {
-        if (this.game) {
             this.game.addAction({
                 type: 'attack',
                 unitId: this.id,
                 target: target.id
             });
-        }
     }
 }
 class minerUnit extends unit {
     mine(target: tile) {
-        if (this.game) {
             this.game.addAction({
                 type: 'mine',
                 unitId: this.id,
                 target: target.position
             });
-        }
     }
 }
 
@@ -86,20 +78,18 @@ class base extends tile {
 }
 
 class shop {
-    game?: CodeTiles;
+    #game: CodeTiles;
 
-    constructor(game?: CodeTiles) {
-        this.game = game;
+    constructor(game: CodeTiles) {
+        this.#game = game;
     }
 
     buy(item: unitType, quantity: number) {
-        if (this.game) {
-            this.game.addAction({
-                type: 'buy',
-                item,
-                quantity
-            });
-        }
+        this.#game.addAction({
+            type: 'buy',
+            item,
+            quantity
+        });
     }
 }
 
@@ -141,7 +131,7 @@ class Game {
 }
 
 
-export class CodeTiles {
+class CodeTiles {
     #game: Game;
     #actions: { units: any[], shop: any[] } = { units: [], shop: [] };
     #logs: any[] = [];
@@ -190,4 +180,8 @@ export class CodeTiles {
             console[logType] = hookLogType(logType);
         });
     } 
+}
+
+namespace CodeTiles {
+    export function onTurn(f: (game: Game) => void): void {}
 }
