@@ -31,6 +31,7 @@
     "npm:node-fetch@2.7.0": "2.7.0",
     "npm:postgres@^3.4.5": "3.4.5",
     "npm:qs@6.11.2": "6.11.2",
+    "npm:typescript@*": "5.7.3",
     "npm:url-join@4.0.1": "4.0.1"
   },
   "jsr": {
@@ -585,6 +586,9 @@
     },
     "tslib@2.8.1": {
       "integrity": "sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w=="
+    },
+    "typescript@5.7.3": {
+      "integrity": "sha512-84MVSjMEHP+FQRPy3pX9sTVV/INIex71s9TL2Gm5FG/WG1SqXeKyZ0k7/blY/4FdOzI12CBy1vGc4og/eus0fw=="
     },
     "undici-types@6.20.0": {
       "integrity": "sha512-Ny6QZ2Nju20vw1SRHe3d9jVu6gJ+4e3+MMpqu7pqE5HT6WsTSlce++GQmK5UXS8mzV8DSYHrQH+Xrf2jVcuKNg=="
