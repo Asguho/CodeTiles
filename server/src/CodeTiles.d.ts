@@ -2,7 +2,6 @@ declare type tileType = "unknown" | "ground" | "wall" | "ore" | "base";
 declare type unitType = "melee" | "ranged" | "miner";
 declare type direction = "north" | "south" | "east" | "west";
 
-/** @internal */
 declare class unit {
 	id: string;
 	health: number;
@@ -27,7 +26,6 @@ declare class unit {
 	move(direction: direction): void;
 }
 
-/** @internal */
 declare class tile {
 	type: tileType;
 	position: {
@@ -43,7 +41,6 @@ declare class tile {
 	);
 }
 
-/** @internal */
 declare class base extends tile {
 	owner: string;
 	health: number;
@@ -57,14 +54,12 @@ declare class base extends tile {
 	);
 }
 
-/** @internal */
 declare class shop {
 	game?: CodeTiles;
 	constructor(game?: CodeTiles);
 	buy(item: unitType, quantity: number): void;
 }
 
-/** @internal */
 declare class Game {
 	readonly playerId: string;
 	readonly map: tile[][];
@@ -76,7 +71,6 @@ declare class Game {
 	constructor(gameState: any, codeTiles: CodeTiles);
 }
 
-/** @internal */
 declare class CodeTiles {
 	#private: any;
 	constructor(gameState: any);
