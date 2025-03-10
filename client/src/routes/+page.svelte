@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ingestLogs, setupConsole } from '$lib/Console';
+	import { clearConsole, ingestLogs, setupConsole } from '$lib/Console';
 	import { setupEditor } from '$lib/Editor';
 	import { setupGameCanvas, drawGame } from '$lib/GameCanvas';
 	import { BASE_URL } from '$lib/utils';
@@ -89,6 +89,7 @@
 		if (!codeEditor) return;
 		const code = codeEditor.getValue();
 		if (!code) return;
+		clearConsole(consoleElement!);
 		if (code !== lastSavedcode) {
 			await uploadCode();
 			lastSavedcode = code;
