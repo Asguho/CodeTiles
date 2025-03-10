@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { ingestLogs, setupConsole } from '$lib/Console';
 	import { setupEditor } from '$lib/Editor';
 	import { setupGameCanvas, drawGame } from '$lib/GameCanvas';
 	import { BASE_URL } from '$lib/utils';
@@ -11,12 +12,13 @@
 	console.log('Hello, Vite!', document);
 
 	let codeEditor: editor.IStandaloneCodeEditor | null = null;
-	let consoleElement: HTMLPreElement | null = null;
+	let consoleElement: HTMLDivElement | null = null;
 	let lastSavedcode = $state('');
 
 	onMount(async () => {
 		console.log('Hello, Vite!', document);
 		setupGameCanvas(gameCanvas, 800, 600);
+		setupConsole(consoleElement!);
 		codeEditor = await setupEditor(document.getElementById('editor')!);
 
 		let res = await fetch('/api/get_code', { method: 'GET', credentials: 'include' });
@@ -55,13 +57,14 @@
 	ws.onmessage = function (event: MessageEvent) {
 		console.log('WebSocket message received:', event.data);
 		try {
-			const json = JSON.parse(event.data);
+			const json = JSON.parse(event.data.toString());
 			if (json?.type === 'TURN_DATA') {
 				drawGame(gameCanvas, json);
-				updateConsole(json?.logs);
+				console.log('Game data received:', json.logs);
+				ingestLogs(consoleElement!, json.logs);
 			}
 		} catch (error) {
-			console.warn('WEBSOKET DATA NOT JSON', event.data);
+			console.warn('WEBSOKET DATA NOT JSON', event.data, error);
 		}
 	};
 
@@ -79,30 +82,6 @@
 			}
 		});
 	});
-
-	function updateConsole(logs: { level: string; values: string[] }[]) {
-		if (!consoleElement) return;
-		consoleElement.innerHTML = logs
-			.map((log) => {
-				let style = '';
-				switch (log.level) {
-					case 'error':
-						style = 'color: #ff5555; font-weight: bold;';
-						break;
-					case 'warn':
-						style = 'color: #ffb86c;';
-						break;
-					case 'info':
-						style = 'color: #8be9fd;';
-						break;
-					default: // 'log' and others
-						style = 'color: #f8f8f2;';
-				}
-				return `<span class="console-${log.level}" style="${style}">${log.values.map((val) => (typeof val === 'string' ? val : JSON.stringify(val))).join(' ')}</span>`;
-			})
-			.join('\n');
-		consoleElement.scrollTop = consoleElement.scrollHeight;
-	}
 
 	async function handleRun() {
 		if (!codeEditor) return;
@@ -201,9 +180,10 @@
 					</div>
 				</PaneResizer>
 				<Pane defaultSize={50}>
-					<div class="flex h-full rounded-lg border border-zinc-700 bg-zinc-800 p-2 text-zinc-200">
-						<pre bind:this={consoleElement} class="h-full w-full overflow-auto"></pre>
-					</div>
+					<div
+						class="flex h-full rounded-lg border border-zinc-700 bg-zinc-800 p-2 text-zinc-200"
+						bind:this={consoleElement}
+					></div>
 				</Pane>
 			</PaneGroup>
 		</Pane>
