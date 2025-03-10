@@ -43,7 +43,11 @@ export async function setupEditor(el: HTMLElement) {
 	// compiler options
 	monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
 		target: monaco.languages.typescript.ScriptTarget.Latest,
-		allowNonTsExtensions: true
+		allowUmdGlobalAccess: true,
+		allowSyntheticDefaultImports: true,
+		allowNonTsExtensions: true,
+		moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
+		module: monaco.languages.typescript.ModuleKind.CommonJS
 	});
 
 	monaco.languages.typescript.javascriptDefaults.addExtraLib(types, libUri);
