@@ -77,6 +77,15 @@ declare class CodeTiles {
 	onTurn(f: (game: Game) => void): void;
 }
 
-declare interface global {
-	CodeTiles: typeof CodeTiles;
+declare global {
+	interface Window {
+		CodeTiles: typeof CodeTiles;
+	}
+	interface CodeTiles {
+		Game: typeof Game;
+		unit: typeof unit;
+		tile: typeof tile;
+		base: typeof base;
+		shop: typeof shop;
+	}
 }
