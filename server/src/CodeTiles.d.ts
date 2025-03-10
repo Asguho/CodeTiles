@@ -52,7 +52,7 @@ declare module "CodeTiles" {
         readonly shop: shop;
         constructor(gameState: any, codeTiles: CodeTiles);
     }
-    export class CodeTiles {
+    class CodeTiles {
         #private;
         constructor(gameState: any);
         onTurn(f: (game: Game) => void): void;
