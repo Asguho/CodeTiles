@@ -16,18 +16,26 @@ function setupConsole(el: HTMLDivElement) {
 	el.style.fontSize = '14px';
 	el.style.whiteSpace = 'pre-wrap';
 	el.style.textWrapMode = 'break-word';
+	//flex flex-col items-start justify-start
+	el.style.display = 'flex';
+	el.style.flexDirection = 'column';
+	el.style.alignItems = 'flex-start';
+	el.style.justifyContent = 'flex-start';
 }
 
-function addConsoleLine(el: HTMLDivElement, log: { level: string; values: string[] }) {
+function addConsoleLine(el: HTMLDivElement, log: { type: string; values: string[] }) {
+	console.log('adding console line', log);
 	const pre = document.createElement('pre');
 	pre.innerText = log.values
 		.map((val) => (typeof val === 'string' ? val : JSON.stringify(val)))
 		.join(' ');
+	pre.style.width = '100%';
 	pre.style.maxWidth = '100%';
+	pre.style.display = 'block';
 	pre.style.overflowWrap = 'break-word';
 
 	let style = '';
-	switch (log.level) {
+	switch (log.type) {
 		case 'error':
 			style = 'color: #ff5555; font-weight: bold;';
 			break;
@@ -41,8 +49,8 @@ function addConsoleLine(el: HTMLDivElement, log: { level: string; values: string
 			style = 'color: #f8f8f2;';
 	}
 
-	pre.className = `console-${log.level}`;
-	pre.style.cssText = `max-width: 100%; overflow-wrap: break-word; ${style}`;
+	pre.className = `console-${log.type}`;
+	pre.style.cssText += style;
 
 	el.appendChild(pre);
 	consoleLines.push(pre);
@@ -58,7 +66,7 @@ function addConsoleLine(el: HTMLDivElement, log: { level: string; values: string
 	}
 }
 
-function ingestLogs(el: HTMLDivElement, logs: { level: string; values: string[] }[] | undefined) {
+function ingestLogs(el: HTMLDivElement, logs: { type: string; values: string[] }[] | undefined) {
 	if (!el || !logs || !Array.isArray(logs)) return;
 
 	logs.forEach((log) => {

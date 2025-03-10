@@ -62,6 +62,8 @@
 				drawGame(gameCanvas, json);
 				console.log('Game data received:', json.logs);
 				ingestLogs(consoleElement!, json.logs);
+			} else if (json?.type === 'LOG') {
+				ingestLogs(consoleElement!, json.logs);
 			}
 		} catch (error) {
 			console.warn('WEBSOKET DATA NOT JSON', event.data, error);
