@@ -23,7 +23,7 @@ type PlayerResponse = {
     units: UnitAction[];
     shop: ShopAction[];
   };
-  logs?: { level: string; values: string[] }[];
+  logs?: { type: string; values: string[] }[];
 };
 
 interface Unit {
@@ -42,7 +42,7 @@ interface Player {
   coins: number;
   basePosition?: Position;
   mapView?: Tile[][];
-  logs: { level: string; values: string[] }[];
+  logs: { type: string; values: string[] }[];
 }
 
 interface Tile {
@@ -176,13 +176,13 @@ export class Game {
       }).then(async (res) => {
         if(!res.ok) {
           console.error(`Error response from ${player.id}:`, res.statusText);
-          return { actions: { units: [], shop: [] }, logs: [{level:"error", values: [`Backend Error: ${res.statusText}`]}] };
+          return { actions: { units: [], shop: [] }, logs: [{type:"error", values: [`Backend Error: ${res.statusText}`]}] };
         }
         try {
           return await res.json();
         } catch (e: any) {
           console.log(`JSON error parsing when parsing:`, res, e);
-          return { actions: { units: [], shop: [] }, logs: [{level:"error", values: [`Backend Error parsing response: ${e.message}`]}] };
+          return { actions: { units: [], shop: [] }, logs: [{type:"error", values: [`Backend Error parsing response: ${e.message}`]}] };
         }
       });
 
@@ -248,7 +248,7 @@ export class Game {
         newPos.x -= 1;
         break;
       default:
-        player.logs.push({ level: "error", values: [`SERVER: Invalid move direction: ${direction}`] });
+        player.logs.push({ type: "error", values: [`SERVER: Invalid move direction: ${direction}`] });
         return;
     }
     if (
@@ -257,12 +257,12 @@ export class Game {
       newPos.y < 0 ||
       newPos.y >= this.mapHeight
     ) {
-      player.logs.push({ level: "error", values: [`SERVER: Unit ${unit.id} cannot move out of bounds.`] });
+      player.logs.push({ type: "error", values: [`SERVER: Unit ${unit.id} cannot move out of bounds.`] });
       return;
     }
     const tile = this.map[newPos.x][newPos.y];
     if (tile.type === "wall") {
-      player.logs.push({ level: "error", values: [`SERVER: Unit ${unit.id} cannot move into a wall at (${newPos.x},${newPos.y}).`] });
+      player.logs.push({ type: "error", values: [`SERVER: Unit ${unit.id} cannot move into a wall at (${newPos.x},${newPos.y}).`] });
       return;
     }
     // console.log(
@@ -276,7 +276,7 @@ export class Game {
   attackWithUnit(player: Player, unit: Unit, target: Position) {
     // Ensure unit ownership
     if (unit.owner !== player.id) {
-      player.logs.push({ level: "error", values: [`SERVER: Player ${player.id} is not allowed to attack with unit ${unit.id}`] });
+      player.logs.push({ type: "error", values: [`SERVER: Player ${player.id} is not allowed to attack with unit ${unit.id}`] });
       return;
     }
     for (const enemy of this.players.filter((p) => p.id !== player.id)) {
@@ -296,13 +296,13 @@ export class Game {
         return;
       }
     }
-    player.logs.push({ level: "error", values: [`SERVER: No enemy unit found at (${target.x},${target.y})`] });
+    player.logs.push({ type: "error", values: [`SERVER: No enemy unit found at (${target.x},${target.y})`] });
   }
 
   // Mines an ore tile to collect resources
   mineResource(player: Player, unit: Unit) {
     if (unit.owner !== player.id) {
-      player.logs.push({ level: "error", values: [`SERVER: Player ${player.id} is not allowed to mine with unit ${unit.id}`] });
+      player.logs.push({ type: "error", values: [`SERVER: Player ${player.id} is not allowed to mine with unit ${unit.id}`] });
       return;
     }
     const pos = unit.position;
@@ -314,7 +314,7 @@ export class Game {
       player.coins += 20;
       tile.type = "ground";
     } else {
-      player.logs.push({ level: "error", values: [`SERVER: Unit ${unit.id} is not on an ore tile at (${pos.x},${pos.y}).`] });
+      player.logs.push({ type: "error", values: [`SERVER: Unit ${unit.id} is not on an ore tile at (${pos.x},${pos.y}).`] });
     }
   }
 
@@ -327,12 +327,12 @@ export class Game {
     };
     const costPerUnit = costs[item];
     if (!costPerUnit) {
-      player.logs.push({ level: "error", values: [`SERVER: Invalid unit type: ${item}`] });
+      player.logs.push({ type: "error", values: [`SERVER: Invalid unit type: ${item}`] });
       return;
     }
     const totalCost = costPerUnit * quantity;
     if (player.coins < totalCost) {
-      player.logs.push({ level: "error", values: [`SERVER: Not enough coins to buy ${quantity} ${item} unit(s).`]});
+      player.logs.push({ type: "error", values: [`SERVER: Not enough coins to buy ${quantity} ${item} unit(s).`]});
       return;
     }
     player.coins -= totalCost;

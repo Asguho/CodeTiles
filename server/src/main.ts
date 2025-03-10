@@ -1,5 +1,7 @@
 import { serveDir } from "jsr:@std/http/file-server";
 import { type Route, route } from "jsr:@std/http/unstable-route";
+import { retry } from "jsr:@std/async";
+
 import { login, signup, validateSessionToken } from "./auth.ts";
 import { db } from "./db/index.ts";
 import * as table from "./db/schema.ts";
@@ -86,6 +88,35 @@ const routes: Route[] = [
 				.where(eq(table.deployment.userId, user.id))
 				.orderBy(desc(table.deployment.createdAt))
 				.limit(1);
+
+			try {
+				const startTime = Date.now(); 
+				await retry(async () => {
+					console.log("Fetching deployment:", latestDeployment.url, Date.now() - startTime);
+					const response = await fetch(latestDeployment.url);
+					const text = await response.text();
+					const isNotFound = text === "404: Not Found (DEPLOYMENT_NOT_FOUND)\n\nThe requested deployment does not exist.";
+
+					if (isNotFound) {
+						throw new Error("Deployment not ready yet");
+					}
+					
+					return true;
+				}, {
+					multiplier: 2,
+					maxAttempts: 5,
+					minTimeout: 1000,
+				});
+			} catch (error) {
+				console.log("Error fetching deployment:", error);
+				return Response.json(
+					{ message: "Deployment not ready yet" },
+					{
+						headers: corsHeaders,
+						status: 503,
+					}
+				);
+			}
 
 			gameHandler.startGame([{ id: user.id, url: latestDeployment.url }]);
 
