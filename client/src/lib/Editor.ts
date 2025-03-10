@@ -36,7 +36,7 @@ export async function setupEditor(el: HTMLElement) {
 
 	// validation settings
 	monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
-		noSemanticValidation: true,
+		noSemanticValidation: false,
 		noSyntaxValidation: false
 	});
 
