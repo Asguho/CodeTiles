@@ -137,8 +137,17 @@ export class Game {
     // Update what each player can see
     this.updatePlayerMapView();
 
-    const playerRequests = this.players.map((player) =>
-      this.sendRequest(player)
+    let payloads = this.players.map((player) => ({
+      type: "TURN_DATA",
+      map: player.mapView,
+      units: player.units,
+      coins: player.coins,
+      turn: this.turn,
+      basePosition: player.basePosition,
+    }));
+
+    const playerRequests = this.players.map((player, index) =>
+      this.sendRequest(player, payloads[index])
     );
     const responses = await Promise.all(playerRequests);
     console.log("responses", responses);
@@ -147,25 +156,17 @@ export class Game {
       this.processActions(this.players[index], response);
     });
 
-    this.players.forEach((player) => {
+    this.players.forEach((player, index) => {
       socketHandler.sendMessage(
         player.id,
-        JSON.stringify(player.logs || []),
+        JSON.stringify({...payloads[index], logs: player.logs}),
       );
       player.logs = []; // Clear logs after sending
     });
   }
 
   // Sends a POST request to the player's server with the current game state data
-  async sendRequest(player: Player): Promise<PlayerResponse> {
-    const payload = {
-      type: "TURN_DATA",
-      map: player.mapView,
-      units: player.units,
-      coins: player.coins,
-      turn: this.turn,
-      basePosition: player.basePosition,
-    };
+  async sendRequest(player: Player, payload: any): Promise<PlayerResponse> {
 
     try {
       const response = await fetch(player.serverUrl, {
