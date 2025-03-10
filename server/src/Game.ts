@@ -23,6 +23,7 @@ type PlayerResponse = {
     units: UnitAction[];
     shop: ShopAction[];
   };
+  logs?: { level: string; values: string[] }[];
 };
 
 interface Unit {
@@ -41,10 +42,11 @@ interface Player {
   coins: number;
   basePosition?: Position;
   mapView?: Tile[][];
+  logs: { level: string; values: string[] }[];
 }
 
 interface Tile {
-  type: "ground" | "wall" | "ore" | "base";
+  type: "ground" | "wall" | "ore" | "base" | "unknown";
   x: number;
   y: number;
 }
@@ -67,6 +69,7 @@ export class Game {
       serverUrl: url,
       units: [],
       coins: 100,
+      logs: [],
     }));
     this.turn = 0;
   }
@@ -144,7 +147,13 @@ export class Game {
       this.processActions(this.players[index], response);
     });
 
-    // alert("Turn " + this.turn + " complete. press enter to continue");
+    this.players.forEach((player) => {
+      socketHandler.sendMessage(
+        player.id,
+        JSON.stringify(player.logs || []),
+      );
+      player.logs = []; // Clear logs after sending
+    });
   }
 
   // Sends a POST request to the player's server with the current game state data
@@ -164,19 +173,21 @@ export class Game {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       }).then(async (res) => {
+        if(!res.ok) {
+          console.error(`Error response from ${player.id}:`, res.statusText);
+          return { actions: { units: [], shop: [] }, logs: [{level:"error", values: [`Backend Error: ${res.statusText}`]}] };
+        }
         try {
           return await res.json();
         } catch (e: any) {
           console.log(`JSON error parsing when parsing:`, res, e);
-          return { actions: { units: [], shop: [] }, logs: [`Error parsing response: ${e.message}`] };
+          return { actions: { units: [], shop: [] }, logs: [{level:"error", values: [`Backend Error parsing response: ${e.message}`]}] };
         }
       });
 
-      socketHandler.sendMessage(
-        player.id,
-        JSON.stringify({ ...payload, logs: response?.logs || [] }),
-      );
-
+      console.log(response.logs);
+      
+      player.logs = response.logs || [];
       return response;
     } catch (error) {
       console.error(`Error sending request to ${player.id}:`, error);
@@ -186,7 +197,7 @@ export class Game {
 
   // Processes player actions ensuring unit protection and one-action-per-turn enforcement
   processActions(player: Player, response: PlayerResponse) {
-    // Process unit actions
+
     response?.actions?.units?.forEach((action) => {
       const unit = player.units.find((u) => u.id === action.unitId);
 
@@ -236,7 +247,7 @@ export class Game {
         newPos.x -= 1;
         break;
       default:
-        console.log(`Invalid direction ${direction}`);
+        player.logs.push({ level: "error", values: [`SERVER: Invalid move direction: ${direction}`] });
         return;
     }
     if (
@@ -245,19 +256,18 @@ export class Game {
       newPos.y < 0 ||
       newPos.y >= this.mapHeight
     ) {
-      console.log(`Unit ${unit.id} cannot move out of bounds.`);
+      player.logs.push({ level: "error", values: [`SERVER: Unit ${unit.id} cannot move out of bounds.`] });
       return;
     }
-    const tile = this.map[newPos.y][newPos.x];
+    const tile = this.map[newPos.x][newPos.y];
     if (tile.type === "wall") {
-      console.log(
-        `Unit ${unit.id} cannot move into a wall at (${newPos.x},${newPos.y}).`,
-      );
+      player.logs.push({ level: "error", values: [`SERVER: Unit ${unit.id} cannot move into a wall at (${newPos.x},${newPos.y}).`] });
       return;
     }
-    console.log(
-      `Moving unit ${unit.id} from (${unit.position.x},${unit.position.y}) to (${newPos.x},${newPos.y})`,
-    );
+    // console.log(
+    //   `Moving unit ${unit.id} from (${unit.position.x},${unit.position.y}) to (${newPos.x},${newPos.y})`,
+    // );
+
     unit.position = newPos;
   }
 
@@ -265,9 +275,7 @@ export class Game {
   attackWithUnit(player: Player, unit: Unit, target: Position) {
     // Ensure unit ownership
     if (unit.owner !== player.id) {
-      console.log(
-        `Player ${player.id} is not allowed to attack with unit ${unit.id}`,
-      );
+      player.logs.push({ level: "error", values: [`SERVER: Player ${player.id} is not allowed to attack with unit ${unit.id}`] });
       return;
     }
     for (const enemy of this.players.filter((p) => p.id !== player.id)) {
@@ -287,17 +295,13 @@ export class Game {
         return;
       }
     }
-    console.log(
-      `No enemy unit found at (${target.x}, ${target.y}) for unit ${unit.id} to attack.`,
-    );
+    player.logs.push({ level: "error", values: [`SERVER: No enemy unit found at (${target.x},${target.y})`] });
   }
 
   // Mines an ore tile to collect resources
   mineResource(player: Player, unit: Unit) {
     if (unit.owner !== player.id) {
-      console.log(
-        `Player ${player.id} is not allowed to mine with unit ${unit.id}`,
-      );
+      player.logs.push({ level: "error", values: [`SERVER: Player ${player.id} is not allowed to mine with unit ${unit.id}`] });
       return;
     }
     const pos = unit.position;
@@ -309,7 +313,7 @@ export class Game {
       player.coins += 20;
       tile.type = "ground";
     } else {
-      console.log(`Miner unit ${unit.id} is not on an ore tile.`);
+      player.logs.push({ level: "error", values: [`SERVER: Unit ${unit.id} is not on an ore tile at (${pos.x},${pos.y}).`] });
     }
   }
 
@@ -322,14 +326,12 @@ export class Game {
     };
     const costPerUnit = costs[item];
     if (!costPerUnit) {
-      console.log(`Invalid unit type: ${item}`);
+      player.logs.push({ level: "error", values: [`SERVER: Invalid unit type: ${item}`] });
       return;
     }
     const totalCost = costPerUnit * quantity;
     if (player.coins < totalCost) {
-      console.log(
-        `Player ${player.id} does not have enough coins to buy ${quantity} ${item} units.`,
-      );
+      player.logs.push({ level: "error", values: [`SERVER: Not enough coins to buy ${quantity} ${item} unit(s).`]});
       return;
     }
     player.coins -= totalCost;
@@ -356,9 +358,11 @@ export class Game {
     // Reset each player's map view first
     this.players.forEach((player) => {
       // Initialize empty map with fog of war (all unknown)
-      player.mapView = Array(this.mapHeight).fill(null).map(() =>
-        Array(this.mapWidth).fill(null).map(() => ({
+      player.mapView = Array(this.mapHeight).fill(null).map((_, y) =>
+        Array(this.mapWidth).fill(null).map((_, x) => ({
           type: "unknown",
+          x,
+          y
         }))
       );
 
@@ -370,7 +374,7 @@ export class Game {
       };
 
       // Base vision
-      if (player.basePosition) {
+      if (player.basePosition && player.mapView) {
         const baseX = Math.floor(player.basePosition.x);
         const baseY = Math.floor(player.basePosition.y);
         this.revealAreaAroundPosition(player.mapView, baseX, baseY, 4);
@@ -379,12 +383,14 @@ export class Game {
       // Reveal areas around each unit based on its vision radius
       player.units.forEach((unit) => {
         const radius = visionRadius[unit.type] || 3;
-        this.revealAreaAroundPosition(
-          player.mapView,
-          Math.floor(unit.position.x),
-          Math.floor(unit.position.y),
-          radius,
-        );
+        if (player.mapView) {
+          this.revealAreaAroundPosition(
+            player.mapView,
+            Math.floor(unit.position.x),
+            Math.floor(unit.position.y),
+            radius,
+          );
+        }
       });
     });
   }
