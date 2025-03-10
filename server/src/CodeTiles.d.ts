@@ -77,15 +77,7 @@ declare class CodeTiles {
 	onTurn(f: (game: Game) => void): void;
 }
 
-declare global {
-	interface Window {
-		CodeTiles: typeof CodeTiles;
-	}
-	interface CodeTiles {
-		Game: typeof Game;
-		unit: typeof unit;
-		tile: typeof tile;
-		base: typeof base;
-		shop: typeof shop;
-	}
+declare namespace CodeTiles {
+	function onTurn(f: (game: Game) => void): void;
+	// Add other global methods as needed
 }
