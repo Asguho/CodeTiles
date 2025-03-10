@@ -14,9 +14,6 @@
 	let consoleElement: HTMLPreElement | null = null;
 	let lastSavedcode = $state('');
 
-
-
-
 	onMount(async () => {
 		console.log('Hello, Vite!', document);
 		setupGameCanvas(gameCanvas, 800, 600);
@@ -25,12 +22,10 @@
 		let res = await fetch('/api/get_code', { method: 'GET', credentials: 'include' });
 		if (res.ok) {
 			let { code } = await res.json();
-			codeEditor?.setValue(code); 
+			codeEditor?.setValue(code);
 			lastSavedcode = code;
 		}
 	});
-	
-	let canRun = $derived(() => lastSavedcode == codeEditor?.getValue());
 
 	let uploading = $state(false);
 	async function uploadCode() {
@@ -62,7 +57,7 @@
 		try {
 			const json = JSON.parse(event.data);
 			if (json?.type === 'TURN_DATA') {
-				drawGame(gameCanvas, json); 
+				drawGame(gameCanvas, json);
 				updateConsole(json?.logs);
 			}
 		} catch (error) {
@@ -85,27 +80,41 @@
 		});
 	});
 
-
-	function updateConsole(logs: {level: string, values: string[]}[]) {
+	function updateConsole(logs: { level: string; values: string[] }[]) {
 		if (!consoleElement) return;
-		consoleElement.innerHTML = logs.map(log => {
-			let style = '';
-			switch (log.level) {
-				case 'error':
-					style = 'color: #ff5555; font-weight: bold;';
-					break;
-				case 'warn':
-					style = 'color: #ffb86c;';
-					break;
-				case 'info':
-					style = 'color: #8be9fd;';
-					break;
-				default: // 'log' and others
-					style = 'color: #f8f8f2;';
-			}
-			return `<span class="console-${log.level}" style="${style}">${log.values.map((val) => typeof val === 'string' ? val : JSON.stringify(val)).join(' ')}</span>`;
-		}).join('\n');
-		consoleElement.scrollTop = consoleElement.scrollHeight;		
+		consoleElement.innerHTML = logs
+			.map((log) => {
+				let style = '';
+				switch (log.level) {
+					case 'error':
+						style = 'color: #ff5555; font-weight: bold;';
+						break;
+					case 'warn':
+						style = 'color: #ffb86c;';
+						break;
+					case 'info':
+						style = 'color: #8be9fd;';
+						break;
+					default: // 'log' and others
+						style = 'color: #f8f8f2;';
+				}
+				return `<span class="console-${log.level}" style="${style}">${log.values.map((val) => (typeof val === 'string' ? val : JSON.stringify(val))).join(' ')}</span>`;
+			})
+			.join('\n');
+		consoleElement.scrollTop = consoleElement.scrollHeight;
+	}
+
+	async function handleRun() {
+		if (!codeEditor) return;
+		const code = codeEditor.getValue();
+		if (!code) return;
+		if (code !== lastSavedcode) {
+			await uploadCode();
+			lastSavedcode = code;
+		}
+		await fetch('/api/start_game', {
+			method: 'POST'
+		});
 	}
 </script>
 
@@ -140,20 +149,27 @@
 		<div
 			class="flex flex-row gap-2 *:rounded-md *:border *:border-zinc-700 *:bg-zinc-800 *:p-1 *:px-2 *:text-zinc-200"
 		>
-			<button
+			<!-- <button
 				class=""
 				onclick={() => {
 					uploadCode();
 				}}>Save</button
-			>
+			> -->
 			<button
-				class=""
+				class="flex h-8 w-20 items-center justify-center gap-3 rounded-md border border-zinc-700 bg-zinc-800 p-1 text-zinc-200 hover:bg-zinc-700 disabled:cursor-not-allowed disabled:bg-zinc-700"
+				disabled={uploading}
 				onclick={() => {
-					fetch('/api/start_game', {
-						method: 'POST'
-					});
-				}}>Run</button
+					handleRun();
+				}}
 			>
+				{#if uploading}
+					<!-- loading spinner -->
+					<div
+						class="h-4 w-4 animate-spin rounded-full border-2 border-t-2 border-zinc-700 border-t-zinc-200"
+					></div>
+				{/if}
+				RUN
+			</button>
 		</div>
 	</div>
 </div>
