@@ -185,3 +185,5 @@ class CodeTiles {
 namespace CodeTiles {
     export function onTurn(f: (game: Game) => void): void {}
 }
+
+export { CodeTiles }
