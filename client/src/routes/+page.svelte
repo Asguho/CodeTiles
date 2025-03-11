@@ -17,7 +17,7 @@
 
 	onMount(async () => {
 		console.log('Hello, Vite!', document);
-		setupGameCanvas(gameCanvas, 800, 600);
+		setupGameCanvas(gameCanvas);
 		setupConsole(consoleElement!);
 		codeEditor = await setupEditor(document.getElementById('editor')!);
 
