@@ -67,7 +67,7 @@ export function drawGame(canvas: HTMLCanvasElement, gameState: any) {
     // Draw the cells based on the game state // map[x][y].type = 'unknown' | 'ground' | 'wall' | 'ore'
     for (let x = 0; x < width; x++) {
         for (let y = 0; y < height; y++) {
-            const cell = gameState.map[x][y];
+            const cell = gameState.map[y][x];
             if (!cell) continue;
             
             const cellType = cell.type;

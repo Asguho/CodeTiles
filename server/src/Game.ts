@@ -60,8 +60,8 @@ export class Game {
   players: Player[];
   map: Tile[][] = [];
   turn: number;
-  mapWidth: number = 10;
-  mapHeight: number = 10;
+  mapWidth: number = 25;
+  mapHeight: number = 15;
 
   constructor(players: { id: string; url: string }[]) {
     this.players = players.map(({ id, url }) => ({
@@ -93,7 +93,7 @@ export class Game {
       const baseX = Math.floor(Math.random() * this.mapWidth);
       const baseY = Math.floor(Math.random() * this.mapHeight);
       player.basePosition = { x: baseX, y: baseY };
-      this.map[baseY][baseX] = {
+      this.map[baseX][baseY] = {
         type: "base",
         health: 100,
         owner: player.id,
