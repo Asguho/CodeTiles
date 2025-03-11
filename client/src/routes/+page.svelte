@@ -17,7 +17,7 @@
 
 	onMount(async () => {
 		console.log('Hello, Vite!', document);
-		setupGameCanvas(gameCanvas, 800, 600);
+		setupGameCanvas(gameCanvas);
 		setupConsole(consoleElement!);
 		codeEditor = await setupEditor(document.getElementById('editor')!);
 
@@ -94,9 +94,16 @@
 			await uploadCode();
 			lastSavedcode = code;
 		}
-		await fetch('/api/start_game', {
-			method: 'POST'
-		});
+		try {
+			uploading = true;
+			await fetch('/api/start_game', {
+				method: 'POST'
+			});
+			uploading = false;
+		} catch (error) {
+			console.error('Error starting game:', error);
+			uploading = false;
+		}
 	}
 </script>
 
