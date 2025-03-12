@@ -45,6 +45,7 @@ interface Player {
   logs: { type: string; values: string[] }[];
 }
 
+
 interface Tile {
   type: "ground" | "wall" | "ore" | "base" | "unknown";
   x: number;
@@ -60,8 +61,8 @@ export class Game {
   players: Player[];
   map: Tile[][] = [];
   turn: number;
-  mapWidth: number = 10;
-  mapHeight: number = 10;
+  mapWidth: number = 25;
+  mapHeight: number = 15;
 
   constructor(players: { id: string; url: string }[]) {
     this.players = players.map(({ id, url }) => ({

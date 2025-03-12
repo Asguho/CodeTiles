@@ -43,8 +43,8 @@ export function setupGameCanvas(canvas: HTMLCanvasElement) {
 }
 
 export function drawGame(canvas: HTMLCanvasElement, gameState: any) {
-	const width = gameState.map.length;
-    const height = gameState.map[0].length;
+	const height = gameState.map.length;
+	const width = gameState.map[0].length;
     
     // Clear the canvas
     const ctx = canvas.getContext('2d')!;
