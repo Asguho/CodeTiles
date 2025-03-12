@@ -1,5 +1,6 @@
 import type * as Monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import { Pathfinding } from './user_modules/Pathfinding';
+import { BASE_URL } from './utils';
 
 let editor: Monaco.editor.IStandaloneCodeEditor;
 let monaco: typeof Monaco;
@@ -30,7 +31,7 @@ export async function setupEditor(el: HTMLElement) {
 	monaco.editor.defineTheme('myTheme', theme);
 
 	//fetch the CodeTiles.d.ts file from the server
-	const response = await fetch('/api/types');
+	const response = await fetch(BASE_URL+'/api/types', {credentials: 'include'});
 	const types = await response.text();
 	const libUri = 'ts:filename/codetiles.d.ts';
 

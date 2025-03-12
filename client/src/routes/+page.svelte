@@ -21,7 +21,7 @@
 		setupConsole(consoleElement!);
 		codeEditor = await setupEditor(document.getElementById('editor')!);
 
-		let res = await fetch('/api/get_code', { method: 'GET', credentials: 'include' });
+		let res = await fetch(BASE_URL + '/api/get_code', { method: 'GET', credentials: 'include' });
 		if (res.ok) {
 			let { code } = await res.json();
 			codeEditor?.setValue(code);
@@ -47,7 +47,7 @@
 		uploading = false;
 	}
 
-	const url = new URL(`./ws`, location.href);
+	const url = new URL(`/ws`, BASE_URL || location.href);
 	url.protocol = url.protocol.replace('http', 'ws');
 	let ws = new WebSocket(url.toString());
 	ws.onopen = function () {
@@ -66,7 +66,7 @@
 				ingestLogs(consoleElement!, json.logs);
 			}
 		} catch (error) {
-			console.warn('WEBSOKET DATA NOT JSON', event.data, error);
+			console.error('WEBSOKET DATA NOT JSON', event.data, error);
 		}
 	};
 
@@ -75,12 +75,12 @@
 	};
 
 	$effect(() => {
-		fetch('/api/auth/validate', {
+		fetch(BASE_URL + '/api/auth/validate', {
 			method: 'POST',
 			credentials: 'include'
 		}).then((res) => {
 			if (res.status === 401) {
-				window.location.href = '/login.html';
+				window.location.href = BASE_URL + '/login.html';
 			}
 		});
 	});
@@ -96,8 +96,9 @@
 		}
 		try {
 			uploading = true;
-			await fetch('/api/start_game', {
-				method: 'POST'
+			await fetch(BASE_URL + '/api/start_game', {
+				method: 'POST',
+				credentials: 'include',
 			});
 			uploading = false;
 		} catch (error) {
