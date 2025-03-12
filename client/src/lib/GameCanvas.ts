@@ -36,6 +36,8 @@ export function setupGameCanvas(canvas: HTMLCanvasElement) {
 		}
 	};
 
+	//farmor
+
 	// Initial setup
 	updateCanvasDimensions();
 
