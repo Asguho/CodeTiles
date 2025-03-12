@@ -111,11 +111,19 @@
 </script>
 
 {#if websocketHasClosed}
-	<dialog open>
-		<p>WebSocket Has been closed :(</p>
-		<p>Reload the window to proceed</p>
-		<button onclick={() => window.location.reload}>OK</button>
-	</dialog>
+	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+		<div class="rounded-lg border border-zinc-700 bg-zinc-800 p-6 shadow-xl">
+			<h2 class="mb-3 text-xl font-semibold text-zinc-100">Connection Lost</h2>
+			<p class="mb-2 text-zinc-300">WebSocket connection has been closed.</p>
+			<p class="mb-4 text-zinc-300">Reload the page to reconnect.</p>
+			<button
+				class="w-full rounded-md bg-indigo-600 py-2 font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+				onclick={() => window.location.reload()}
+			>
+				Reload Page
+			</button>
+		</div>
+	</div>
 {/if}
 
 <div class="bg-zinc-900 px-1 pt-1">
@@ -210,10 +218,3 @@
 		</Pane>
 	</PaneGroup>
 </div>
-
-<style>
-	::backdrop {
-		background-image: linear-gradient(45deg, lightgray, darkgray, black, black);
-		opacity: 0.75;
-	}
-</style>
