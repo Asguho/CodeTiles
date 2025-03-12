@@ -104,7 +104,7 @@ const routes: Route[] = [
 					return true;
 				}, {
 					multiplier: 2,
-					maxAttempts: 5,
+					maxAttempts: 10,
 					minTimeout: 1000,
 				});
 			} catch (error) {

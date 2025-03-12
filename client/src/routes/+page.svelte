@@ -83,7 +83,7 @@
 			credentials: 'include'
 		}).then((res) => {
 			if (res.status === 401) {
-				window.location.href = BASE_URL + '/login.html';
+				window.location.href = '/login.html';
 			}
 		});
 	});
