@@ -7,6 +7,8 @@
 	import { PaneGroup, Pane, PaneResizer } from 'paneforge';
 	import { onMount } from 'svelte';
 
+	let websocketHasClosed = $state(false);
+
 	let gameCanvas: HTMLCanvasElement;
 
 	console.log('Hello, Vite!', document);
@@ -72,6 +74,7 @@
 
 	ws.onclose = function () {
 		console.log('WebSocket is closed now.');
+		websocketHasClosed = true;
 	};
 
 	$effect(() => {
@@ -106,6 +109,16 @@
 		}
 	}
 </script>
+
+{#if websocketHasClosed}
+	<dialog open>
+		<p>WebSocket Has been closed :(</p>
+		<p>Reload the window to proceed</p>
+		<form method="dialog">
+			<button onclick={() => window.location.reload}>OK</button>
+		</form>
+	</dialog>
+{/if}
 
 <div class="bg-zinc-900 px-1 pt-1">
 	<div
