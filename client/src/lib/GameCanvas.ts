@@ -2,11 +2,61 @@ import oneGif from './1.gif';
 import twoGif from './2.gif';
 import threeGif from './3.gif';
 
+import ground1 from './tiles/tile016.png';
+import ground2 from './tiles/tile017.png';
+import ground3 from './tiles/tile018.png';
+import ground4 from './tiles/tile019.png';
+import ground5 from './tiles/tile027.png';
+import ground6 from './tiles/tile028.png';
+import ground7 from './tiles/tile029.png';
+
+import wall1 from './tiles/tile001.png';
+import wall2 from './tiles/tile002.png';
+import wall3 from './tiles/tile003.png';
+import wall4 from './tiles/tile004.png';
+
+import ore1 from './tiles/oretile000.png';
+import ore2 from './tiles/oretile001.png';
+
+import unknown1 from './tiles/cloudtile000.png';
+import unknown2 from './tiles/cloudtile001.png';
+import unknown3 from './tiles/cloudtile002.png';
+
 // Preload images
 const unitImages = {
 	melee: new Image(),
 	ranged: new Image(),
 	miner: new Image()
+};
+
+const TileImagesImports = {
+	grounds: [ground1, ground2, ground3, ground4, ground5, ground6, ground7],
+	walls: [wall1, wall2, wall3, wall4],
+	ores: [ore1, ore2],
+	unknowns: [unknown1, unknown2, unknown3]
+};
+
+const TileImages = {
+	grounds: TileImagesImports.grounds.map((src) => {
+		const img = new Image();
+		img.src = src;
+		return img;
+	}),
+	walls: TileImagesImports.walls.map((src) => {
+		const img = new Image();
+		img.src = src;
+		return img;
+	}),
+	ores: TileImagesImports.ores.map((src) => {
+		const img = new Image();
+		img.src = src;
+		return img;
+	}),
+	unknowns: TileImagesImports.unknowns.map((src) => {
+		const img = new Image();
+		img.src = src;
+		return img;
+	})
 };
 
 unitImages.melee.src = oneGif;
@@ -87,28 +137,67 @@ export function drawGame(canvas: HTMLCanvasElement, gameState: any) {
 			const cell = gameState.map[y][x];
 			if (!cell) continue;
 
+			// Get image based on cell type
+			let img = null;
 			const cellType = cell.type;
 
-			// Set fill color based on cell type
-			switch (cellType) {
-				case 'ground':
-					ctx.fillStyle = '#CCFFCC'; // Light green
-					break;
-				case 'wall':
-					ctx.fillStyle = '#6666FF'; // Blue
-					break;
-				case 'ore':
-					ctx.fillStyle = '#FFD700'; // Gold
-					break;
-				case 'unknown':
-				default:
-					ctx.fillStyle = '#EEEEEE'; // Light gray
-					break;
+			// First draw ground tile as the base layer
+			const groundIndex = Math.floor(Math.random() * TileImages.grounds.length);
+			img = TileImages.grounds[groundIndex];
+
+			// Draw the ground tile
+			if (img && img.complete) {
+				ctx.drawImage(img, offsetX + x * gridSize, offsetY + y * gridSize, gridSize, gridSize);
 			}
 
-			// Draw the cell
-			ctx.fillRect(offsetX + x * gridSize, offsetY + y * gridSize, gridSize, gridSize);
-			ctx.strokeRect(offsetX + x * gridSize, offsetY + y * gridSize, gridSize, gridSize);
+			// Then overdraw with the specific cell type if it's not ground
+			switch (cellType) {
+				case 'wall': {
+					// Use x,y coordinates to create a deterministic index
+					const index = (x * 31 + y * 17) % TileImages.walls.length; //NOT RANDOM
+					img = TileImages.walls[index];
+					break;
+				}
+				case 'ore': {
+					const index = (x * 23 + y * 29) % TileImages.ores.length; //NOT RANDOM
+					img = TileImages.ores[index];
+					break;
+				}
+				case 'unknown': {
+					const index = (x * 13 + y * 19) % TileImages.unknowns.length; //NOT RANDOM
+					img = TileImages.unknowns[index];
+					break;
+				}
+				case 'ground': {
+					const index = (x * 13 + y * 14) % TileImages.grounds.length; //NOT RANDOM
+					img = TileImages.grounds[index];
+					break;
+				}
+			}
+
+			// Draw the cell (image or fallback)
+			if (img) {
+				// Wait for the image to load before drawing
+				img.onload = () => {
+					ctx.drawImage(img, offsetX + x * gridSize, offsetY + y * gridSize, gridSize, gridSize);
+				};
+
+				// If the image is already cached and loaded
+				if (img.complete) {
+					ctx.drawImage(img, offsetX + x * gridSize, offsetY + y * gridSize, gridSize, gridSize);
+				} else {
+					// Fallback to rectangle while loading
+					ctx.fillStyle = '#EEEEEE';
+					ctx.fillRect(offsetX + x * gridSize, offsetY + y * gridSize, gridSize, gridSize);
+				}
+			} else {
+				// Fallback to rectangle if image is null
+				ctx.fillStyle = '#EEEEEE';
+				ctx.fillRect(offsetX + x * gridSize, offsetY + y * gridSize, gridSize, gridSize);
+			}
+
+			// Draw cell border
+			//ctx.strokeRect(offsetX + x * gridSize, offsetY + y * gridSize, gridSize, gridSize);
 
 			// Draw base if present
 			if (cell.base) {
@@ -155,7 +244,7 @@ export function drawGame(canvas: HTMLCanvasElement, gameState: any) {
 				let unitImage = null;
 
 				// Calculate unit position and size
-				const unitSize = gridSize * 0.6;
+				const unitSize = gridSize * 0.9;
 				const xPos = offsetX + x * gridSize + (gridSize - unitSize) / 2;
 				const yPos = offsetY + y * gridSize + (gridSize - unitSize) / 2;
 
