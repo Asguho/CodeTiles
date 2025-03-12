@@ -26,8 +26,6 @@ export function setupGameCanvas(canvas: HTMLCanvasElement) {
 			// Update the canvas dimensions and scale
 			canvas.width = displayWidth * dpr;
 			canvas.height = displayHeight * dpr;
-			// Ensure pixelated rendering for better quality
-			canvas.style.imageRendering = 'pixelated';
 
 			const ctx = canvas.getContext('2d');
 			if (ctx) {
@@ -67,7 +65,7 @@ export function drawGame(canvas: HTMLCanvasElement, gameState: any) {
 	const ctx = canvas.getContext('2d')!;
 	ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
 	ctx.fillStyle = '#FFFFFF';
-
+	ctx.imageSmoothingEnabled = false; // Disable image smoothing for pixelated rendering
 	// Calculate grid size to ensure square cells
 	// Use the CSS dimensions (clientWidth/clientHeight) instead of canvas.width/height
 	const cellSizeX = canvas.clientWidth / width;
