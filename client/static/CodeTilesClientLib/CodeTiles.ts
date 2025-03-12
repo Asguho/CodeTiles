@@ -1,5 +1,5 @@
 import { type direction } from './utils.ts';
-import { Pathfinding,  type Cords } from './pathfinding';
+import { Pathfinding,  type Cords } from './pathfinding.ts';
 
 type tileType = 'unknown' | 'ground' | 'wall' | 'ore' | 'base';
 type unitType = 'melee' | 'ranged' | 'miner';
