@@ -114,9 +114,7 @@
 	<dialog open>
 		<p>WebSocket Has been closed :(</p>
 		<p>Reload the window to proceed</p>
-		<form method="dialog">
-			<button onclick={() => window.location.reload}>OK</button>
-		</form>
+		<button onclick={() => window.location.reload}>OK</button>
 	</dialog>
 {/if}
 
@@ -212,3 +210,10 @@
 		</Pane>
 	</PaneGroup>
 </div>
+
+<style>
+	::backdrop {
+		background-image: linear-gradient(45deg, lightgray, darkgray, black, black);
+		opacity: 0.75;
+	}
+</style>
