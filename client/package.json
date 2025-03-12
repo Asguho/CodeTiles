@@ -10,6 +10,7 @@
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"gen:types": "deno run -A npm:typescript/bin/tsc ./src/isolates/CodeTiles.ts --declaration --emitDeclarationOnly --target ES2015 --moduleResolution node --skipLibCheck --module none --declarationDir ../server/src/",
 		"format": "prettier --write .",
 		"lint": "prettier --check ."
 	},

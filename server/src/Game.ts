@@ -61,8 +61,8 @@ export class Game {
   players: Player[];
   map: Tile[][] = [];
   turn: number;
-  mapWidth: number = 25;
-  mapHeight: number = 15;
+  mapWidth: number = 10;
+  mapHeight: number = 10;
 
   constructor(players: { id: string; url: string }[]) {
     this.players = players.map(({ id, url }) => ({
@@ -281,6 +281,22 @@ export class Game {
         type: "error",
         values: [
           `SERVER: Unit ${unit.id} cannot move into a ${tile.type} at (${newPos.x},${newPos.y}).`,
+        ],
+      });
+      return;
+    }
+
+    // Check if the new position is already occupied by another unit
+    const unitAtNewPos = this.players.some((p) =>
+      p.units.some(
+        (u) => (u.position.x) === newPos.x && (u.position.y) === newPos.y,
+      ),
+    );
+    if (unitAtNewPos) {
+      player.logs.push({
+        type: "error",
+        values: [
+          `SERVER: Unit ${unit.id} cannot move to an occupied position (${newPos.x},${newPos.y}).`,
         ],
       });
       return;

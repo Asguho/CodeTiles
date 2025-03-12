@@ -1,6 +1,6 @@
 export function getCloudCode(code: string) {
 	return /*js*/`
-		import { CodeTiles as _CodeTiles } from "./CodeTiles.ts";
+		import { CodeTiles as _CodeTiles } from "http://codetiles.voe.dk/CodeTilesClientLib/CodeTiles.ts";
 		Deno.serve(async (req) => {
 			try {
 				let _gameinfo: any;
