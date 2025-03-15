@@ -31,9 +31,44 @@ export async function setupEditor(el: HTMLElement) {
 	monaco.editor.defineTheme('myTheme', theme);
 
 	//fetch the CodeTiles.d.ts file from the server
-	const response = await fetch(BASE_URL+'/api/types', {credentials: 'include'});
-	const types = await response.text();
-	const libUri = 'ts:filename/codetiles.d.ts';
+	const response1 = await fetch(BASE_URL + '/api/types/1', { credentials: 'include' });
+	const response2 = await fetch(BASE_URL + '/api/types/2', { credentials: 'include' });
+	const response3 = await fetch(BASE_URL + '/api/types/3', { credentials: 'include' });
+	const types1 = await response1.text();
+	const types2 = await response2.text();
+	const types3 = await response3.text();
+	const libUri1 = 'ts:filename/codetiles.d.ts';
+
+	//combine the files into one and properly format as a valid TS declaration file
+	let combinedTypes = types1 + '\n\n' + types2 + '\n\n' + types3;
+	// Remove imports
+	combinedTypes = combinedTypes.replace(/import.*\n/g, '');
+	// Remove export statements
+	combinedTypes = combinedTypes.replace(/export\s*{[^}]*}\s*;?/g, '');
+	// Convert remaining export keywords to declare
+	combinedTypes = combinedTypes.replace(
+		/export\s+(?=(type|interface|class|enum|const|function|namespace))/g,
+		'declare '
+	);
+	// Remove duplicate declarations by keeping only the first occurrence
+	const typeDeclarations = new Map();
+	const processedLines = combinedTypes
+		.split('\n')
+		.filter((line) => {
+			const typeMatch = line.match(/^(declare\s+)?(type|interface|class)\s+([a-zA-Z0-9_]+)/);
+			if (typeMatch) {
+				const typeName = typeMatch[3];
+				if (typeDeclarations.has(typeName)) {
+					return false;
+				}
+				typeDeclarations.set(typeName, true);
+			}
+			return true;
+		})
+		.join('\n');
+
+	combinedTypes = processedLines;
+	console.log('combined types', combinedTypes);
 
 	// validation settings
 	monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
@@ -47,8 +82,8 @@ export async function setupEditor(el: HTMLElement) {
 		allowNonTsExtensions: true
 	});
 
-	monaco.languages.typescript.javascriptDefaults.addExtraLib(types, libUri);
-	monaco.editor.createModel(types, 'typescript', monaco.Uri.parse(libUri));
+	monaco.languages.typescript.javascriptDefaults.addExtraLib(combinedTypes, libUri1);
+	monaco.editor.createModel(combinedTypes, 'typescript', monaco.Uri.parse(libUri1));
 
 	el.innerHTML = '';
 	const editor = monaco.editor.create(el, {

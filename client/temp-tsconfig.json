@@ -1,0 +1,21 @@
+{
+	"compilerOptions": {
+		"target": "ES2015",
+		"module": "none",
+		"declaration": true,
+		"emitDeclarationOnly": true,
+		"outDir": "../server/src/",
+		"skipLibCheck": true,
+		"allowImportingTsExtensions": true,
+		"moduleResolution": "node",
+		"esModuleInterop": true,
+		"lib": ["es2015", "dom"],
+		"noEmitOnError": false,
+		"isolatedModules": true,
+		"preserveConstEnums": true,
+		"composite": false,
+		"noResolve": true,
+		"moduleDetection": "force"
+	},
+	"include": ["./static/CodeTilesClientLib/*.ts"]
+}

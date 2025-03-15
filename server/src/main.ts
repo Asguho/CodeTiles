@@ -90,23 +90,27 @@ const routes: Route[] = [
 				.limit(1);
 
 			try {
-				const startTime = Date.now(); 
-				await retry(async () => {
-					console.log("Fetching deployment:", latestDeployment.url, Date.now() - startTime);
-					const response = await fetch(latestDeployment.url);
-					const text = await response.text();
-					const isNotFound = text === "404: Not Found (DEPLOYMENT_NOT_FOUND)\n\nThe requested deployment does not exist.";
+				const startTime = Date.now();
+				await retry(
+					async () => {
+						console.log("Fetching deployment:", latestDeployment.url, Date.now() - startTime);
+						const response = await fetch(latestDeployment.url);
+						const text = await response.text();
+						const isNotFound =
+							text === "404: Not Found (DEPLOYMENT_NOT_FOUND)\n\nThe requested deployment does not exist.";
 
-					if (isNotFound) {
-						throw new Error("Deployment not ready yet");
+						if (isNotFound) {
+							throw new Error("Deployment not ready yet");
+						}
+
+						return true;
+					},
+					{
+						multiplier: 2,
+						maxAttempts: 10,
+						minTimeout: 1000,
 					}
-					
-					return true;
-				}, {
-					multiplier: 2,
-					maxAttempts: 10,
-					minTimeout: 1000,
-				});
+				);
 			} catch (error) {
 				console.log("Error fetching deployment:", error);
 				return Response.json(
@@ -258,11 +262,47 @@ const routes: Route[] = [
 		},
 	},
 	{
-		pattern: new URLPattern({ pathname: "/api/types" }),
+		pattern: new URLPattern({ pathname: "/api/types/1" }),
 		method: "GET",
 		handler: async () => {
 			//serve the types from ./CodeTiles.d.ts
 			const file = await Deno.open("./src/CodeTiles.d.ts");
+			const response = new Response(file.readable, {
+				headers: {
+					"Content-Type": "text/plain",
+					"Access-Control-Allow-Origin": "*",
+				},
+			});
+			for (const [key, value] of Object.entries(corsHeaders)) {
+				response.headers.set(key, value);
+			}
+			return response;
+		},
+	},
+	{
+		pattern: new URLPattern({ pathname: "/api/types/2" }),
+		method: "GET",
+		handler: async () => {
+			//serve the types from ./pathfinding.d.ts
+			const file = await Deno.open("./src/pathfinding.d.ts");
+			const response = new Response(file.readable, {
+				headers: {
+					"Content-Type": "text/plain",
+					"Access-Control-Allow-Origin": "*",
+				},
+			});
+			for (const [key, value] of Object.entries(corsHeaders)) {
+				response.headers.set(key, value);
+			}
+			return response;
+		},
+	},
+	{
+		pattern: new URLPattern({ pathname: "/api/types/3" }),
+		method: "GET",
+		handler: async () => {
+			//serve the types from ./pathfinding.d.ts
+			const file = await Deno.open("./src/utils.d.ts");
 			const response = new Response(file.readable, {
 				headers: {
 					"Content-Type": "text/plain",
