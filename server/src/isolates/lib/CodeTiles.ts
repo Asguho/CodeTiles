@@ -1,9 +1,6 @@
-import { TurnData } from "../../types.ts";
+import type { Direction, LogEntry, ShopAction, TileType, TurnData, UnitAction, UnitType } from "../../types.ts";
 import { type Cords, Pathfinding } from "./pathfinding.ts";
 
-type TileType = "unknown" | "ground" | "wall" | "ore" | "base";
-type UnitType = "melee" | "ranged" | "miner";
-type Direction = "north" | "south" | "east" | "west";
 
 class Unit {
   id: string;
@@ -61,7 +58,7 @@ class MeleeUnit extends Unit {
     this.codeTiles.addAction({
       type: "attack",
       unitId: this.id,
-      target: target.id,
+      target: target.position,
     });
   }
 }
@@ -71,7 +68,7 @@ class RangedUnit extends Unit {
     this.codeTiles.addAction({
       type: "attack",
       unitId: this.id,
-      target: target.id,
+      target: target.position,
     });
   }
 }
@@ -180,8 +177,8 @@ class Game {
       gameState.map.map((row) =>
         row.map((cell) =>
           cell.type === "base"
-            ? new Base(cell.owner, { x: cell.x, y: cell.y }, cell.health)
-            : new Tile(cell.type, { x: cell.x, y: cell.y })
+            ? new Base(cell.owner,  cell.position, cell.health)
+            : new Tile(cell.type, cell.position)
         )
       ),
     );
@@ -226,12 +223,8 @@ class Game {
           );
       }
     });
-    this.base = gameState.map.find((row: any) =>
-      row.find((cell: any) =>
-        cell.type === "base" && cell.owner === this.playerId
-      )
-    );
-
+    this.base = gameState.map[gameState.basePosition.y][
+      gameState.basePosition.x] as Base;
     this.coins = gameState.coins;
     this.turn = gameState.turn;
     this.shop = new Shop(codeTiles);
@@ -240,11 +233,11 @@ class Game {
 
 class CodeTiles {
   #game: Game;
-  #actions: { units: any[]; shop: any[] } = { units: [], shop: [] };
-  #logs: any[] = [];
+  #actions: { units: UnitAction[]; shop: ShopAction[] } = { units: [], shop: [] };
+  #logs: LogEntry[] = [];
   #playerFunction?: (game: Game) => void;
 
-  constructor(gameState: any) {
+  constructor(gameState: TurnData) {
     this.#game = new Game(gameState, this);
     this.hookConsole();
   }
@@ -259,11 +252,11 @@ class CodeTiles {
     }
   }
 
-  addAction(action: any) {
+  addAction(action: UnitAction | ShopAction) {
     if (action.type === "buy") {
-      this.#actions.shop.push(action);
+      this.#actions.shop.push(action as ShopAction);
     } else {
-      this.#actions.units.push(action);
+      this.#actions.units.push(action as UnitAction);
     }
   }
 
@@ -280,10 +273,10 @@ class CodeTiles {
     >;
     const hookLogType = (logType: LogMethod) => {
       const original = console[logType].bind(console);
-      return (...args: any[]) => {
+      return (...args: unknown[]) => {
         this.#logs.push({
           type: logType,
-          values: Array.from(args),
+          values: args.map(arg => String(arg)),
         });
         original(...args);
       };
@@ -296,8 +289,11 @@ class CodeTiles {
   }
 }
 
+// deno-lint-ignore no-namespace
 namespace CodeTiles {
-  export function onTurn(f: (game: Game) => void): void {}
+    // deno-lint-ignore no-unused-vars
+    export function onTurn(f: (game: Game) => void): void {}
 }
 
 export { CodeTiles };
+

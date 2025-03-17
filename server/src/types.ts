@@ -1,8 +1,6 @@
-// Tile types
-type TileType = "unknown" | "ground" | "base" | "ore" | "wall";
-
-// Unit types
-type UnitType = "melee" | "ranged" | "miner";
+export type TileType = "unknown" | "ground" | "base" | "ore" | "wall";
+export type Direction = "north" | "south" | "east" | "west";
+export type UnitType = "melee" | "ranged" | "miner";
 
 // Position interface
 export interface Position {
@@ -41,7 +39,7 @@ interface WallTile extends standardTile {
   type: "wall";
 }
 
-interface BaseTile extends standardTile {
+export interface BaseTile extends standardTile {
   type: "base";
   owner: string;
   health: number;
@@ -64,14 +62,14 @@ export interface TurnData {
 
 
 /// client to server message types
-type UnitAction = {
+export type UnitAction = {
   unitId: string;
   type: string;
   direction?: string;
   target?: Position;
 };
 
-type ShopAction = {
+export type ShopAction = {
   type: string;
   item: string;
   quantity: number;
@@ -82,5 +80,7 @@ export type PlayerResponse = {
     units: UnitAction[];
     shop: ShopAction[];
   };
-  logs?: { type: string; values: string[] }[];
+  logs?: LogEntry[];
 };
+
+export type LogEntry = { type: string; values: string[] }

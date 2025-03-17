@@ -33,7 +33,7 @@ export class Game {
     for (let y = 0; y < this.mapHeight; y++) {
       const row: Tile[] = [];
       for (let x = 0; x < this.mapWidth; x++) {
-        let rand = Math.random();
+        const rand = Math.random();
         let type: Tile["type"] = "ground";
         if (rand < 0.1) {
           type = "wall";
@@ -136,7 +136,7 @@ export class Game {
   }
 
   // Sends a POST request to the player's server with the current game state data
-  async sendRequest(player: Player, payload: any): Promise<PlayerResponse> {
+  async sendRequest(player: Player, payload: TurnData): Promise<PlayerResponse> {
     try {
       const response = await fetch(player.serverUrl, {
         method: "POST",
@@ -155,6 +155,7 @@ export class Game {
         }
         try {
           return await res.json();
+        // deno-lint-ignore no-explicit-any
         } catch (e: any) {
           console.log(`JSON error parsing when parsing:`, res, e);
           return {
@@ -213,7 +214,7 @@ export class Game {
 
   // Moves a unit in the specified direction
   moveUnit(player: Player, unit: Unit, direction: string) {
-    let newPos = { ...unit.position };
+    const newPos = { ...unit.position };
     switch (direction.toLowerCase()) {
       case "north":
         newPos.y -= 1;
@@ -296,7 +297,7 @@ export class Game {
         (u) => u.position.x === target.x && u.position.y === target.y,
       );
       if (targetUnit) {
-        let damage = unit.type === "melee" ? 20 : 15;
+        const damage = unit.type === "melee" ? 20 : 15;
         console.log(
           `Unit ${unit.id} (${unit.type}) attacks enemy unit ${targetUnit.id} for ${damage} damage`,
         );

@@ -6,6 +6,7 @@
 	import { editor } from 'monaco-editor';
 	import { PaneGroup, Pane, PaneResizer } from 'paneforge';
 	import { onMount } from 'svelte';
+	import type { TurnData, TurnDataWithLogs } from '../../../server/src/types.js';
 
 	let websocketHasClosed = $state(false);
 
@@ -60,7 +61,7 @@
 	ws.onmessage = function (event: MessageEvent) {
 		console.log('WebSocket message received:', event.data);
 		try {
-			const json = JSON.parse(event.data.toString());
+			const json = JSON.parse(event.data.toString()) as TurnDataWithLogs;
 			if (json?.type === 'TURN_DATA') {
 				drawGame(gameCanvas, json);
 				latestGameData = json;
