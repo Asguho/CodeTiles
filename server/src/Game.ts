@@ -45,7 +45,6 @@ interface Player {
   logs: { type: string; values: string[] }[];
 }
 
-
 interface Tile {
   type: "ground" | "wall" | "ore" | "base" | "unknown";
   x: number;
@@ -116,10 +115,28 @@ export class Game {
   async start() {
     this.generateMap();
 
-    while (!this.isGameOver() && this.turn < 2) {
+    while (!this.isGameOver() && this.turn < 20) {
       this.resetUnitActions();
       await this.processTurn();
     }
+
+    this.updatePlayerMapView();
+    this.players.forEach((player) => {
+      socketHandler.sendMessage(
+        player.id,
+        JSON.stringify({
+          type: "TURN_DATA",
+          map: player.mapView,
+          units: player.units,
+          coins: player.coins,
+          turn: this.turn,
+          basePosition: player.basePosition,
+          logs: player.logs,
+        }),
+      );
+      player.logs = []; // Clear logs after sending
+    });
+
     console.log("Game Over");
   }
 
@@ -145,6 +162,14 @@ export class Game {
       basePosition: player.basePosition,
     }));
 
+    this.players.forEach((player, index) => {
+      socketHandler.sendMessage(
+        player.id,
+        JSON.stringify({ ...payloads[index], logs: player.logs }),
+      );
+      player.logs = []; // Clear logs after sending
+    });
+
     const playerRequests = this.players.map((player, index) =>
       this.sendRequest(player, payloads[index])
     );
@@ -153,14 +178,6 @@ export class Game {
 
     responses.forEach((response, index) => {
       this.processActions(this.players[index], response);
-    });
-
-    this.players.forEach((player, index) => {
-      socketHandler.sendMessage(
-        player.id,
-        JSON.stringify({ ...payloads[index], logs: player.logs }),
-      );
-      player.logs = []; // Clear logs after sending
     });
   }
 
@@ -290,7 +307,7 @@ export class Game {
     const unitAtNewPos = this.players.some((p) =>
       p.units.some(
         (u) => (u.position.x) === newPos.x && (u.position.y) === newPos.y,
-      ),
+      )
     );
     if (unitAtNewPos) {
       player.logs.push({
