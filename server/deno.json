@@ -7,6 +7,9 @@
 		"gen:types": "deno run -A npm:typescript/bin/tsc ./src/isolates/lib/CodeTiles.ts --declaration --allowImportingTsExtensions --emitDeclarationOnly --target ES2015 --moduleResolution node --skipLibCheck --module none --declarationDir ./src/"
 
   },
+    "fmt": {
+      "lineWidth": 140
+    },
   "imports": {
     "@node-rs/argon2": "npm:@node-rs/argon2@^2.0.2",
     "@oslojs/crypto": "npm:@oslojs/crypto@^1.0.1",

@@ -1,3 +1,4 @@
+import { TurnData } from "../../types.ts";
 import { type Cords, Pathfinding } from "./pathfinding.ts";
 
 type TileType = "unknown" | "ground" | "wall" | "ore" | "base";
@@ -124,7 +125,7 @@ class Shop {
     });
   }
 }
-class Map {
+class GameMap {
   tiles: Tile[][];
 
   constructor(tiles: Tile[][]) {
@@ -166,26 +167,26 @@ class Map {
 
 class Game {
   readonly playerId: string;
-  readonly map: Map;
+  readonly map: GameMap;
   readonly units: Unit[];
   readonly base: Base;
   readonly coins: number;
   readonly turn: number;
   readonly shop: Shop;
 
-  constructor(gameState: any, codeTiles: CodeTiles) {
+  constructor(gameState: TurnData, codeTiles: CodeTiles) {
     this.playerId = gameState.playerId;
-    this.map = new Map(
-      gameState.map.map((row: any) =>
-        row.map((cell: any) =>
+    this.map = new GameMap(
+      gameState.map.map((row) =>
+        row.map((cell) =>
           cell.type === "base"
-            ? new Base(cell.owner, cell.position, cell.health)
-            : new Tile(cell.type, cell.position)
+            ? new Base(cell.owner, { x: cell.x, y: cell.y }, cell.health)
+            : new Tile(cell.type, { x: cell.x, y: cell.y })
         )
       ),
     );
 
-    this.units = gameState.units.map((unitData: any) => {
+    this.units = gameState.units.map((unitData) => {
       switch (unitData.type) {
         case "melee":
           return new MeleeUnit(

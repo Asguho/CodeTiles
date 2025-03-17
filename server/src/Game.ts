@@ -1,39 +1,5 @@
 import { socketHandler } from "./SocketHandler.ts";
-
-type Position = {
-  x: number;
-  y: number;
-};
-
-type UnitAction = {
-  unitId: string;
-  type: string;
-  direction?: string;
-  target?: Position;
-};
-
-type ShopAction = {
-  type: string;
-  item: string;
-  quantity: number;
-};
-
-type PlayerResponse = {
-  actions: {
-    units: UnitAction[];
-    shop: ShopAction[];
-  };
-  logs?: { type: string; values: string[] }[];
-};
-
-interface Unit {
-  id: string;
-  type: "melee" | "ranged" | "miner";
-  position: Position;
-  health: number;
-  owner: string;
-  actionTaken?: boolean;
-}
+import type { PlayerResponse, Position, Tile, TurnData, Unit } from "./types.ts";
 
 interface Player {
   id: string;
@@ -43,17 +9,6 @@ interface Player {
   basePosition?: Position;
   mapView?: Tile[][];
   logs: { type: string; values: string[] }[];
-}
-
-interface Tile {
-  type: "ground" | "wall" | "ore" | "base" | "unknown";
-  x: number;
-  y: number;
-}
-interface base extends Tile {
-  type: "base";
-  health: number;
-  owner: string;
 }
 
 export class Game {
@@ -85,7 +40,7 @@ export class Game {
         } else if (rand < 0.2) {
           type = "ore";
         }
-        row.push({ x, y, type });
+        row.push({ position: { x, y }, type });
       }
       this.map.push(row);
     }
@@ -97,9 +52,8 @@ export class Game {
         type: "base",
         health: 100,
         owner: player.id,
-        x: baseX,
-        y: baseY,
-      } as base;
+        position: { x: baseX, y: baseY },
+      };
     });
   }
 
@@ -126,6 +80,7 @@ export class Game {
         player.id,
         JSON.stringify({
           type: "TURN_DATA",
+          playerId: player.id,
           map: player.mapView,
           units: player.units,
           coins: player.coins,
@@ -153,13 +108,14 @@ export class Game {
     // Update what each player can see
     this.updatePlayerMapView();
 
-    let payloads = this.players.map((player) => ({
+    const payloads: TurnData[] = this.players.map((player) => ({
       type: "TURN_DATA",
-      map: player.mapView,
+      playerId: player.id,
+      map: player.mapView || [],
       units: player.units,
       coins: player.coins,
       turn: this.turn,
-      basePosition: player.basePosition,
+      basePosition: player.basePosition!,
     }));
 
     this.players.forEach((player, index) => {
@@ -170,9 +126,7 @@ export class Game {
       player.logs = []; // Clear logs after sending
     });
 
-    const playerRequests = this.players.map((player, index) =>
-      this.sendRequest(player, payloads[index])
-    );
+    const playerRequests = this.players.map((player, index) => this.sendRequest(player, payloads[index]));
     const responses = await Promise.all(playerRequests);
     console.log("responses", responses);
 
@@ -378,7 +332,7 @@ export class Game {
         `Miner unit ${unit.id} is mining at (${pos.x},${pos.y}). Resources collected!`,
       );
       player.coins += 20;
-      tile.type = "ground";
+      this.map[pos.y][pos.x] = { ...tile, type: "ground" };
     } else {
       player.logs.push({
         type: "error",
@@ -422,9 +376,7 @@ export class Game {
       const newUnit: Unit = {
         id: crypto.randomUUID(),
         type: item as "melee" | "ranged" | "miner",
-        position: player.basePosition
-          ? { ...player.basePosition }
-          : { x: 0, y: 0 },
+        position: player.basePosition ? { ...player.basePosition } : { x: 0, y: 0 },
         health: item === "ranged" ? 80 : 100,
         owner: player.id,
         actionTaken: false,
@@ -441,8 +393,7 @@ export class Game {
       player.mapView = Array(this.mapHeight).fill(null).map((_, y) =>
         Array(this.mapWidth).fill(null).map((_, x) => ({
           type: "unknown",
-          x,
-          y,
+          position: { x, y },
         }))
       );
 
@@ -477,7 +428,7 @@ export class Game {
 
   // Helper method to reveal an area on the map around a position
   private revealAreaAroundPosition(
-    mapView: any[][],
+    mapView: Tile[][],
     centerX: number,
     centerY: number,
     radius: number,
@@ -492,47 +443,12 @@ export class Game {
         x <= Math.min(this.mapWidth - 1, centerX + radius);
         x++
       ) {
-        // Calculate distance to check if within radius
         const distance = Math.sqrt(
           Math.pow(centerX - x, 2) + Math.pow(centerY - y, 2),
         );
         if (distance <= radius) {
-          // Reveal this tile on the map view
           const tile = this.map[y][x];
-          mapView[y][x] = {
-            type: tile.type,
-            x: x,
-            y: y,
-          };
-
-          // Check for units at this position and add them to the map view
-          for (const player of this.players) {
-            const unitsAtPos = player.units.filter((u) =>
-              Math.floor(u.position.x) === x && Math.floor(u.position.y) === y
-            );
-
-            if (unitsAtPos.length > 0) {
-              mapView[y][x].units = unitsAtPos.map((u) => ({
-                id: u.id,
-                type: u.type,
-                owner: u.owner,
-                health: u.health,
-              }));
-            }
-          }
-
-          // Check for bases at this position
-          for (const player of this.players) {
-            if (
-              player.basePosition &&
-              Math.floor(player.basePosition.x) === x &&
-              Math.floor(player.basePosition.y) === y
-            ) {
-              mapView[y][x].base = {
-                owner: player.id,
-              };
-            }
-          }
+          mapView[y][x] = tile;
         }
       }
     }
