@@ -5,11 +5,11 @@
 <div class="flex min-h-screen items-center justify-center bg-zinc-900">
 	<div class="flex w-full max-w-xl overflow-hidden rounded-lg bg-zinc-950 shadow-lg">
 		<div class="w-3/5 p-8">
-			<h1 class="mb-6 text-2xl font-bold text-white">Welcome back</h1>
-			<p class="mb-6 text-zinc-400">Login to your CodeTiles account</p>
-			<form action={BASE_URL + '/api/auth/login'} method="post" class="space-y-4">
+			<h1 class="mb-6 text-2xl font-bold text-white">Create an account</h1>
+			<p class="mb-6 text-zinc-400">Sign up for your CodeTiles account</p>
+			<form action={BASE_URL + '/api/auth/signup'} method="post" class="space-y-4">
 				<div>
-					<label for="username" class="block text-sm font-medium text-zinc-300">Email</label>
+					<label for="username" class="block text-sm font-medium text-zinc-300">Username</label>
 					<input
 						type="text"
 						name="username"
@@ -33,7 +33,7 @@
 				<button
 					type="submit"
 					class="flex w-full justify-center rounded-md border border-transparent bg-white px-4 py-2 text-sm font-medium text-black shadow-sm hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-200 focus:ring-offset-2"
-					>Login</button
+					>Sign Up</button
 				>
 			</form>
 			<div class="mt-6 flex items-center justify-between">
@@ -54,8 +54,7 @@
 				Continue with GitHub
 			</button>
 			<p class="mt-6 text-center text-zinc-400">
-				Don't have an account? <a href="/signup" class="text-zinc-500 hover:text-zinc-200"
-					>Sign up</a
+				Already have an account? <a href="/login" class="text-zinc-500 hover:text-zinc-200">Login</a
 				>
 			</p>
 		</div>
