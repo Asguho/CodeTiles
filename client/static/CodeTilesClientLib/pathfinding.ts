@@ -102,17 +102,21 @@ export class Pathfinding {
     const heuristic = (a: Cords, b: Cords): number => 
       Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
     
-    const openSet = new Set<string>([this.posKey(start)]);
+    const startKey = this.posKey(start);
+    const openSet = new Set<string>([startKey]);
     const closedSet = new Set<string>();
     
     // Maps for tracking scores and path reconstruction
     const gScore = new Map<string, number>();
     const fScore = new Map<string, number>();
     const cameFrom = new Map<string, Cords>();
+    // Map from keys to actual coordinates to avoid parsing strings
+    const coordsMap = new Map<string, Cords>();
     
-    // Initialize scores for start node
-    gScore.set(this.posKey(start), 0);
-    fScore.set(this.posKey(start), heuristic(start, end));
+    // Initialize maps with start position
+    coordsMap.set(startKey, start);
+    gScore.set(startKey, 0);
+    fScore.set(startKey, heuristic(start, end));
     
     while (openSet.size > 0) {
       // Find node with lowest fScore in openSet
@@ -127,9 +131,8 @@ export class Pathfinding {
         }
       }
       
-      // Convert key back to coordinates
-      const [x, y] = currentKey.split(',').map(Number);
-      const current: Cords = { x, y };
+      // Get coordinates from map instead of parsing
+      const current = coordsMap.get(currentKey)!;
       
       // If we've reached the target, reconstruct and return the path
       if (current.x === end.x && current.y === end.y) {
@@ -159,6 +162,8 @@ export class Pathfinding {
         // If neighbor is not in openSet, add it
         if (!openSet.has(neighborKey)) {
           openSet.add(neighborKey);
+          // Store actual coordinate object in the map
+          coordsMap.set(neighborKey, neighbor);
         } 
         // If this path to neighbor is not better than previous, skip
         else if (tentativeGScore >= (gScore.get(neighborKey) || Infinity)) {

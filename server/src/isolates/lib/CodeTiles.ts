@@ -1,3 +1,5 @@
+import {Pathfinding, type Cords} from "http://codetiles.voe.dk/CodeTilesClientLib/pathfinding.ts";
+
 type TileType = "unknown" | "ground" | "wall" | "ore" | "base";
 type UnitType = "melee" | "ranged" | "miner";
 type Direction = "north" | "south" | "east" | "west";
@@ -33,6 +35,32 @@ class Unit {
             direction,
         });
     }
+
+    moveTowards(target: { x: number; y: number}, map: Tile[][]) {
+        console.log("Moving towards target:", target);
+        console.log("Current position:", this.position);
+        console.log("Map:", map);
+        const isWalkable = (pos: Cords): boolean => {
+            const x = pos.x;
+            const y = pos.y;
+
+            if (x < 0 || y < 0 || y >= map.length || x >= map[0].length) {
+                return false;
+            }
+            console.log(`x: ${x}, y: ${y}, type: ${map?.[y]?.[x]?.type}`);
+            console.log("hej")
+            return map[y][x].type !== 'wall';
+        };
+
+
+        const path = Pathfinding.findPath(this.position, target, isWalkable)
+        if (path && path.length > 0) {
+            this.move(path[0]);
+        } else {
+            console.log('No valid path found to target position.');
+        }
+    }
+
 }
 class MeleeUnit extends Unit {
     attack(target: Unit) {

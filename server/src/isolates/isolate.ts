@@ -7,20 +7,21 @@ export function getCloudCode(code: string) {
 				try {
 					_gameinfo = await req.json();
 				} catch (e) {
-					return Response.json({logs: [{level: "error", values: ["no request data or wrong format"]}]})
+					return Response.json({logs: [{level: "error", values: ["No GameData JSON", "Please open the app through https://codetiles.voe.dk/"]}]})
 				}
 				const CodeTiles = new _CodeTiles(_gameinfo);
 
 				try {
 					${code}
+					CodeTiles.evaluate();
 				} catch (evalError) {
-					return Response.json({logs: [{level: "error", values: [evalError.name, evalError.message]}]})
+					const { actions, logs } = CodeTiles.toJSON();
+					return Response.json({actions, logs: [...logs, {level: "error", values: [evalError.name, evalError.message, evalError.stack]}]})
 				}
 				
-				CodeTiles.evaluate();
 				return Response.json(CodeTiles)
 			} catch (e: any) {
-				return Response.json({logs: [{level: "error", values: [e.name, e.message, e.stack]}]})
+				return Response.json({logs: [{level: "error", values: ["Backend code error", e.name, e.message, e.stack]}]})
 			}
 		});
 	`
