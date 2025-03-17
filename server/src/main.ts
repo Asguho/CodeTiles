@@ -157,6 +157,11 @@ const routes: Route[] = [
 						content: getCloudCode(code),
 						encoding: "utf-8",
 					},
+					"CodeTiles.ts": {
+						kind: "file",
+						content: await Deno.readTextFile("./src/isolates/lib/CodeTiles.ts"),
+						encoding: "utf-8",	
+					},
 				},
 
 				envVars: {
