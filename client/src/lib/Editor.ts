@@ -76,8 +76,7 @@ export async function setupEditor(el: HTMLElement) {
 	return editor;
 }
 
-export const DEFAULT_VAL = /*js*/ `
-CodeTiles.onTurn((game)=>{
-	game.map.forEach((row)=>console.log(row))
-})
-`;
+export const DEFAULT_VAL = 
+/*js*/ `CodeTiles.onTurn((game)=>{
+	game.map.forEach((row)=>console.log(row));
+});`;
