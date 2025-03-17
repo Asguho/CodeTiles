@@ -149,6 +149,7 @@ export class Pathfinding {
           y: current.y + dir.y
         };
         const neighborKey = this.posKey(neighbor);
+        coordsMap.set(neighborKey, neighbor);
         
         // Skip if neighbor is in closed set or not walkable
         if (closedSet.has(neighborKey) || !isWalkable(neighbor)) {
@@ -156,13 +157,11 @@ export class Pathfinding {
         }
         
         // Calculate tentative gScore
-        const tentativeGScore = (gScore.get(currentKey) || Infinity) + 1;
-        
+        const tentativeGScore = (gScore.get(currentKey)!) + 1;
+    
         // If neighbor is not in openSet, add it
         if (!openSet.has(neighborKey)) {
           openSet.add(neighborKey);
-          // Store actual coordinate object in the map
-          coordsMap.set(neighborKey, neighbor);
         } 
         // If this path to neighbor is not better than previous, skip
         else if (tentativeGScore >= (gScore.get(neighborKey) || Infinity)) {

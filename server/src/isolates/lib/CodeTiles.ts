@@ -49,11 +49,12 @@ class Unit {
                 return false;
             }
             console.log(`x: ${x}, y: ${y}, type: ${map?.[y]?.[x]?.type}`);
-            return map[y][x].type !== 'wall';
+            return map[y][x].type !== 'wall' && map[y][x].type !== 'ore';
         };
-
+        
 
         const path = Pathfinding.findPath(this.position, target, isWalkable)
+        console.log("Path found:", path);
         if (path && path.length > 0) {
             this.move(path[0]);
         } else {
