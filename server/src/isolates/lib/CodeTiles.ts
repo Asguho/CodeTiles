@@ -1,4 +1,4 @@
-import {Pathfinding, type Cords} from "http://codetiles.voe.dk/CodeTilesClientLib/pathfinding.ts";
+import {Pathfinding, type Cords} from "./pathfinding.ts";
 
 type TileType = "unknown" | "ground" | "wall" | "ore" | "base";
 type UnitType = "melee" | "ranged" | "miner";
@@ -40,6 +40,7 @@ class Unit {
         console.log("Moving towards target:", target);
         console.log("Current position:", this.position);
         console.log("Map:", map);
+
         const isWalkable = (pos: Cords): boolean => {
             const x = pos.x;
             const y = pos.y;
@@ -48,7 +49,6 @@ class Unit {
                 return false;
             }
             console.log(`x: ${x}, y: ${y}, type: ${map?.[y]?.[x]?.type}`);
-            console.log("hej")
             return map[y][x].type !== 'wall';
         };
 

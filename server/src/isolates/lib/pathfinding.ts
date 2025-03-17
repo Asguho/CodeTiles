@@ -1,10 +1,9 @@
-import { type direction } from './utils.ts';
-// Cords interface used throughout the game
 export interface Cords {
   x: number;
   y: number;
 }
 
+type direction = 'north' | 'south' | 'east' | 'west';
 // Node used in the pathfinding algorithm
 interface PathNode {
   position: Cords;
@@ -216,4 +215,3 @@ export class Pathfinding {
     return directions;
   }
 }
-

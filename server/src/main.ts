@@ -162,6 +162,11 @@ const routes: Route[] = [
 						content: await Deno.readTextFile("./src/isolates/lib/CodeTiles.ts"),
 						encoding: "utf-8",	
 					},
+					"pathfinding.ts": {
+						kind: "file",
+						content: await Deno.readTextFile("./src/isolates/lib/pathfinding.ts"),
+						encoding: "utf-8",
+					},
 				},
 
 				envVars: {
