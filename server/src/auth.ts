@@ -95,7 +95,7 @@ export const login = async (req: Request) => {
 	return new Response(null, {
 		status: 302,
 		headers: {
-			"Set-Cookie": `auth-session=${sessionToken}; Path=/; HttpOnly`,
+			"Set-Cookie": `auth-session=${sessionToken}; Path=/; HttpOnly; Max-Age=${DAY_IN_MS * 30};`,
 			Location: req.headers.get("origin") || "/",
 		},
 	});
@@ -144,7 +144,7 @@ export const signup = async (req: Request) => {
 		return new Response(null, {
 			status: 302,
 			headers: {
-				"Set-Cookie": `auth-session=${sessionToken}; Path=/; HttpOnly`,
+				"Set-Cookie": `auth-session=${sessionToken}; Path=/; HttpOnly; Max-Age=${DAY_IN_MS * 30};`,
 				Location: req.headers.get("origin") || "/",
 			},
 		});

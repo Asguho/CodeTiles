@@ -7,19 +7,23 @@ export function getCloudCode(code: string) {
 				try {
 					_gameinfo = await req.json();
 				} catch (e) {
+					console.error(e);
 					return Response.json({logs: [{type: "error", values: ["no request data or wrong format"]}]})
 				}
 				const CodeTiles = new _CodeTiles(_gameinfo);
 
 				try {
 					${code}
+					CodeTiles.evaluate();
 				} catch (evalError) {
-					return Response.json({logs: [{type: "error", values: [evalError.name, evalError.message]}]})
+					const data = CodeTiles.toJSON();
+					console.error(evalError);
+					return Response.json({actions: data.actions, logs: [...data.logs, {type: "error", values: [evalError.name, evalError.message]}]})
 				}
-				
-				CodeTiles.evaluate();
-				return Response.json(CodeTiles)
+				console.log(CodeTiles.toJSON());
+				return Response.json(CodeTiles.toJSON())
 			} catch (e: any) {
+				console.error(e);
 				return Response.json({logs: [{type: "error", values: [e.name, e.message, e.stack]}]})
 			}
 		});
