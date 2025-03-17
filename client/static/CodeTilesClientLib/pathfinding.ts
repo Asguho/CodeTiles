@@ -183,7 +183,6 @@ export class Pathfinding {
   private static reconstructPath(end: Cords, cameFrom: Map<string, Cords>): direction[] {
     const directions: direction[] = [];
     let current = end;
-    let previous: Cords;
     
     // First build the path of coordinates from end to start
     const coordPath: Cords[] = [end];

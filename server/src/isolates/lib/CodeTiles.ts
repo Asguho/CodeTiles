@@ -1,42 +1,42 @@
-type tileType = "unknown" | "ground" | "wall" | "ore" | "base";
-type unitType = "melee" | "ranged" | "miner";
-type direction = "north" | "south" | "east" | "west";
+type TileType = "unknown" | "ground" | "wall" | "ore" | "base";
+type UnitType = "melee" | "ranged" | "miner";
+type Direction = "north" | "south" | "east" | "west";
 
-class unit {
+class Unit {
     id: string;
     health: number;
     owner: string;
-    type: unitType;
+    type: UnitType;
     position: { x: number; y: number };
-    protected game: CodeTiles;
+    protected codeTiles: CodeTiles;
 
     constructor(
         id: string,
         health: number,
         owner: string,
-        type: unitType,
+        type: UnitType,
         position: { x: number; y: number },
-        game: CodeTiles,
+        codeTiles: CodeTiles,
     ) {
         this.id = id;
         this.health = health;
         this.owner = owner;
         this.type = type;
         this.position = position;
-        this.game = game;
+        this.codeTiles = codeTiles;
     }
 
-    move(direction: direction) {
-        this.game.addAction({
+    move(direction: Direction) {
+        this.codeTiles.addAction({
             type: "move",
             unitId: this.id,
             direction,
         });
     }
 }
-class meleeUnit extends unit {
-    attack(target: unit) {
-        this.game.addAction({
+class MeleeUnit extends Unit {
+    attack(target: Unit) {
+        this.codeTiles.addAction({ 
             type: "attack",
             unitId: this.id,
             target: target.id,
@@ -44,18 +44,18 @@ class meleeUnit extends unit {
     }
 }
 
-class rangedUnit extends unit {
-    attack(target: unit) {
-        this.game.addAction({
+class RangedUnit extends Unit {
+    attack(target: Unit) {
+        this.codeTiles.addAction({  
             type: "attack",
             unitId: this.id,
             target: target.id,
         });
     }
 }
-class minerUnit extends unit {
-    mine(target: tile) {
-        this.game.addAction({
+class MinerUnit extends Unit {
+    mine(target: Tile) {
+        this.codeTiles.addAction({
             type: "mine",
             unitId: this.id,
             target: target.position,
@@ -63,17 +63,17 @@ class minerUnit extends unit {
     }
 }
 
-class tile {
-    type: tileType;
+class Tile {
+    type: TileType;
     position: { x: number; y: number };
 
-    constructor(type: tileType, position: { x: number; y: number }) {
+    constructor(type: TileType, position: { x: number; y: number }) {
         this.type = type;
         this.position = position;
     }
 }
 
-class base extends tile {
+class Base extends Tile {
     owner: string;
     health: number;
 
@@ -88,15 +88,15 @@ class base extends tile {
     }
 }
 
-class shop {
-    #game: CodeTiles;
+class Shop {
+    #codeTiles: CodeTiles;
 
-    constructor(game: CodeTiles) {
-        this.#game = game;
+    constructor(codeTiles: CodeTiles) {
+        this.#codeTiles = codeTiles;
     }
 
-    buy(item: unitType, quantity: number) {
-        this.#game.addAction({
+    buy(item: UnitType, quantity: number) {
+        this.#codeTiles.addAction({
             type: "buy",
             item,
             quantity,
@@ -106,27 +106,27 @@ class shop {
 
 class Game {
     readonly playerId: string;
-    readonly map: tile[][];
-    readonly units: unit[];
-    readonly base: base;
+    readonly map: Tile[][];
+    readonly units: Unit[];
+    readonly base: Base;
     readonly coins: number;
     readonly turn: number;
-    readonly shop: shop;
+    readonly shop: Shop;
 
     constructor(gameState: any, codeTiles: CodeTiles) {
         this.playerId = gameState.playerId;
         this.map = gameState.map.map((row: any) =>
             row.map((cell: any) =>
                 cell.type === "base"
-                    ? new base(cell.owner, cell.position, cell.health)
-                    : new tile(cell.type, cell.position)
+                    ? new Base(cell.owner, cell.position, cell.health)
+                    : new Tile(cell.type, cell.position)
             )
         );
 
         this.units = gameState.units.map((unitData: any) => {
             switch (unitData.type) {
                 case "melee":
-                    return new meleeUnit(
+                    return new MeleeUnit(
                         unitData.id,
                         unitData.health,
                         unitData.owner,
@@ -135,7 +135,7 @@ class Game {
                         codeTiles,
                     );
                 case "ranged":
-                    return new rangedUnit(
+                    return new RangedUnit(
                         unitData.id,
                         unitData.health,
                         unitData.owner,
@@ -144,7 +144,7 @@ class Game {
                         codeTiles,
                     );
                 case "miner":
-                    return new minerUnit(
+                    return new MinerUnit(
                         unitData.id,
                         unitData.health,
                         unitData.owner,
@@ -153,7 +153,7 @@ class Game {
                         codeTiles,
                     );
                 default:
-                    return new unit(
+                    return new Unit(
                         unitData.id,
                         unitData.health,
                         unitData.owner,
@@ -171,7 +171,7 @@ class Game {
 
         this.coins = gameState.coins;
         this.turn = gameState.turn;
-        this.shop = new shop(codeTiles);
+        this.shop = new Shop(codeTiles);
     }
 }
 
