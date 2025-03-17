@@ -18,10 +18,9 @@ export interface Unit {
   actionTaken?: boolean;
 }
 
-
 interface standardTile {
   type: TileType;
-  position: Position; 
+  position: Position;
 }
 
 interface UnknownTile extends standardTile {
@@ -59,7 +58,9 @@ export interface TurnData {
   playerId: string;
 }
 
-
+export interface TurnDataWithLogs extends TurnData {
+  logs: LogEntry[];
+}
 
 /// client to server message types
 export type UnitAction = {
@@ -83,4 +84,4 @@ export type PlayerResponse = {
   logs?: LogEntry[];
 };
 
-export type LogEntry = { type: string; values: string[] }
+export type LogEntry = { type: string; values: string[] };

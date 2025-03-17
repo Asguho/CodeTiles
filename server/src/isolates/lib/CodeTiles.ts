@@ -1,7 +1,6 @@
 import type { Direction, LogEntry, ShopAction, TileType, TurnData, UnitAction, UnitType } from "../../types.ts";
 import { type Cords, Pathfinding } from "./pathfinding.ts";
 
-
 class Unit {
   id: string;
   health: number;
@@ -175,11 +174,7 @@ class Game {
     this.playerId = gameState.playerId;
     this.map = new GameMap(
       gameState.map.map((row) =>
-        row.map((cell) =>
-          cell.type === "base"
-            ? new Base(cell.owner,  cell.position, cell.health)
-            : new Tile(cell.type, cell.position)
-        )
+        row.map((cell) => cell.type === "base" ? new Base(cell.owner, cell.position, cell.health) : new Tile(cell.type, cell.position))
       ),
     );
 
@@ -224,7 +219,8 @@ class Game {
       }
     });
     this.base = gameState.map[gameState.basePosition.y][
-      gameState.basePosition.x] as Base;
+      gameState.basePosition.x
+    ] as Base;
     this.coins = gameState.coins;
     this.turn = gameState.turn;
     this.shop = new Shop(codeTiles);
@@ -273,10 +269,11 @@ class CodeTiles {
     >;
     const hookLogType = (logType: LogMethod) => {
       const original = console[logType].bind(console);
-      return (...args: unknown[]) => {
+      // deno-lint-ignore no-explicit-any
+      return (...args: any) => {
         this.#logs.push({
           type: logType,
-          values: args.map(arg => String(arg)),
+          values: Array.from(args),
         });
         original(...args);
       };
@@ -291,9 +288,8 @@ class CodeTiles {
 
 // deno-lint-ignore no-namespace
 namespace CodeTiles {
-    // deno-lint-ignore no-unused-vars
-    export function onTurn(f: (game: Game) => void): void {}
+  // deno-lint-ignore no-unused-vars
+  export function onTurn(f: (game: Game) => void): void {}
 }
 
 export { CodeTiles };
-

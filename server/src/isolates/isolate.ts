@@ -10,7 +10,6 @@ export function getCloudCode(code: string) {
 					return Response.json({logs: [{level: "error", values: ["No GameData JSON", "Please open the app through https://codetiles.voe.dk/"]}]})
 				}
 				const CodeTiles = new _CodeTiles(_gameinfo);
-				console.log("GameData", _gameinfo);
 
 				try {
 					${code}

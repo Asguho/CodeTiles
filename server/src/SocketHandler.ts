@@ -15,18 +15,18 @@ class SocketHandler {
 
   addSocket(userId: string, socket: WebSocket) {
     console.log("Socket opened for user:", userId);
-    
+
     const existingSocket = this.sockets.get(userId);
-    if(existingSocket) {
+    if (existingSocket) {
       existingSocket.onclose = null;
       existingSocket.close();
     }
-    
+
     this.sockets.set(userId, socket);
-    
-    socket.onclose = (event: CloseEvent) => {
+
+    socket.onclose = () => {
       console.log("Socket closed for user:", userId);
-      if(this.sockets.get(userId) === socket) {
+      if (this.sockets.get(userId) === socket) {
         this.sockets.delete(userId);
       }
     };
@@ -46,4 +46,3 @@ class SocketHandler {
 
 // Export the singleton getInstance method
 export const socketHandler = SocketHandler.getInstance();
-
