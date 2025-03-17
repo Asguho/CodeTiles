@@ -115,7 +115,7 @@ export class Game {
   async start() {
     this.generateMap();
 
-    while (!this.isGameOver() && this.turn < 20) {
+    while (!this.isGameOver() && this.turn < 3) {
       this.resetUnitActions();
       await this.processTurn();
     }
