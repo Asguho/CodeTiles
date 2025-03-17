@@ -10,6 +10,7 @@
 	let websocketHasClosed = $state(false);
 
 	let gameCanvas: HTMLCanvasElement;
+	let latestGameData: any = null;
 
 	console.log('Hello, Vite!', document);
 
@@ -62,6 +63,7 @@
 			const json = JSON.parse(event.data.toString());
 			if (json?.type === 'TURN_DATA') {
 				drawGame(gameCanvas, json);
+				latestGameData = json;
 				console.log('Game data received:', json.logs);
 				ingestLogs(consoleElement!, json.logs);
 			} else if (json?.type === 'LOG') {
@@ -101,7 +103,7 @@
 			uploading = true;
 			await fetch(BASE_URL + '/api/start_game', {
 				method: 'POST',
-				credentials: 'include',
+				credentials: 'include'
 			});
 			uploading = false;
 		} catch (error) {
@@ -190,7 +192,14 @@
 				<div id="editor" class="w-full">Loading editor...</div>
 			</div>
 		</Pane>
-		<PaneResizer class="relative flex w-2 items-center justify-center bg-zinc-900">
+		<PaneResizer
+			class="relative flex w-2 items-center justify-center bg-zinc-900"
+			onDraggingChange={() => {
+				console.log('dragging');
+				if (!latestGameData) return;
+				drawGame(gameCanvas, latestGameData);
+			}}
+		>
 			<div class="z-10 flex h-7 w-5 items-center justify-center rounded-sm text-zinc-300">
 				<!-- prettier-ignore -->
 				<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-grip-vertical"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg>
@@ -203,7 +212,14 @@
 						<canvas bind:this={gameCanvas} class="h-full w-full"></canvas>
 					</div>
 				</Pane>
-				<PaneResizer class="relative flex h-2 items-center justify-center bg-zinc-900">
+				<PaneResizer
+					class="relative flex h-2 items-center justify-center bg-zinc-900"
+					onDraggingChange={() => {
+						console.log('dragging');
+						if (!latestGameData) return;
+						drawGame(gameCanvas, latestGameData);
+					}}
+				>
 					<div class="z-10 flex h-5 w-7 items-center justify-center rounded-sm text-zinc-300">
 						<!-- prettier-ignore -->
 						<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-grip-horizontal"><circle cx="12" cy="9" r="1"/><circle cx="19" cy="9" r="1"/><circle cx="5" cy="9" r="1"/><circle cx="12" cy="15" r="1"/><circle cx="19" cy="15" r="1"/><circle cx="5" cy="15" r="1"/></svg>

@@ -9,7 +9,7 @@
 			<p class="mb-6 text-zinc-400">Login to your CodeTiles account</p>
 			<form action={BASE_URL + '/api/auth/login'} method="post" class="space-y-4">
 				<div>
-					<label for="username" class="block text-sm font-medium text-zinc-300">Email</label>
+					<label for="username" class="block text-sm font-medium text-zinc-300">Username</label>
 					<input
 						type="text"
 						name="username"
