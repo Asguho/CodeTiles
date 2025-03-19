@@ -16,8 +16,10 @@
 	},
 	"dependencies": {
 		"@sveltejs/adapter-static": "^3.0.8",
+		"@tailwindcss/typography": "^0.5.16",
 		"monaco-editor": "^0.52.2",
-		"paneforge": "^0.0.6"
+		"paneforge": "^0.0.6",
+		"svelte-markdown": "^0.4.1"
 	},
 	"devDependencies": {
 		"@sveltejs/kit": "^2.16.0",
