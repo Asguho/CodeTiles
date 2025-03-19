@@ -18,6 +18,13 @@ export interface Unit {
   actionTaken?: boolean;
 }
 
+export interface Miner extends Unit {
+  type: "miner";
+  inventory: {
+    ore: number;
+  };
+}
+
 interface standardTile {
   type: TileType;
   position: Position;

@@ -41,7 +41,7 @@ class Unit {
       if (x < 0 || y < 0 || y >= map.length || x >= map[0].length) {
         return false;
       }
-      return map[y][x].type !== "wall" && map[y][x].type !== "ore";
+      return map[y][x].type !== "wall";
     };
 
     const path = Pathfinding.findPath(this.position, target, isWalkable);
