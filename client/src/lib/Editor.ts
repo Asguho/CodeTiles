@@ -44,9 +44,9 @@ export async function setupEditor(el: HTMLElement) {
 	// compiler options
 	const defaults = monaco.languages.typescript.javascriptDefaults.getCompilerOptions();
 	monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
-		...defaults,
+		/* ...defaults, */
 		target: monaco.languages.typescript.ScriptTarget.ESNext,
-		noLib: true,
+		/* noLib: true, */
 		allowNonTsExtensions: true
 	});
 
