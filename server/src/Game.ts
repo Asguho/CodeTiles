@@ -248,7 +248,7 @@ export class Game {
       return;
     }
     const tile = this.map[newPos.y][newPos.x];
-    if (tile.type != "ground") {
+    if (tile.type == "wall") {
       player.logs.push({
         type: "error",
         values: [
