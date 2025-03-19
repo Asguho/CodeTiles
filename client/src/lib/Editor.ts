@@ -31,7 +31,7 @@ export async function setupEditor(el: HTMLElement) {
 	monaco.editor.defineTheme('myTheme', theme);
 
 	//fetch the CodeTiles.d.ts file from the server
-	const response = await fetch(BASE_URL+'/api/types', {credentials: 'include'});
+	const response = await fetch(BASE_URL + '/api/types', { credentials: 'include' });
 	const types = await response.text();
 	const libUri = 'ts:filename/codetiles.d.ts';
 
@@ -43,7 +43,7 @@ export async function setupEditor(el: HTMLElement) {
 
 	// compiler options
 	monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
-		target: monaco.languages.typescript.ScriptTarget.ES2015,
+		target: monaco.languages.typescript.ScriptTarget.ESNext,
 		allowNonTsExtensions: true
 	});
 
@@ -76,7 +76,6 @@ export async function setupEditor(el: HTMLElement) {
 	return editor;
 }
 
-export const DEFAULT_VAL = 
-/*js*/ `CodeTiles.onTurn((game)=>{
+export const DEFAULT_VAL = /*js*/ `CodeTiles.onTurn((game)=>{
 	game.map.forEach((row)=>console.log(row));
 });`;
