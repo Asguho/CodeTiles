@@ -69,7 +69,37 @@ if (isBrowser) {
 	if (unitImages.miner) unitImages.miner.src = threeGif;
 }
 
+// Store references to GIF sources
+const unitGifSources = {
+	melee: oneGif,
+	ranged: twoGif,
+	miner: threeGif
+};
+
+// Track unit overlay elements
+let unitOverlays: HTMLDivElement | null = null;
+
+// Store internal game state and animation frame reference
+let currentGameState: TurnData | null = null;
+let animationFrameId: number | null = null;
+
 export function setupGameCanvas(canvas: HTMLCanvasElement) {
+	// Create a container for the canvas and overlay elements
+	const container = document.createElement('div');
+	container.style.position = 'relative';
+	canvas.parentNode?.insertBefore(container, canvas);
+	container.appendChild(canvas);
+
+	// Create a div for overlaying GIFs
+	unitOverlays = document.createElement('div');
+	unitOverlays.style.position = 'absolute';
+	unitOverlays.style.top = '0';
+	unitOverlays.style.left = '0';
+	unitOverlays.style.width = '100%';
+	unitOverlays.style.height = '100%';
+	unitOverlays.style.pointerEvents = 'none'; // Allow clicks to pass through to canvas
+	container.appendChild(unitOverlays);
+
 	// Set the canvas dimensions to match the display size
 	const updateCanvasDimensions = () => {
 		const dpr = window.devicePixelRatio || 1;
@@ -92,10 +122,20 @@ export function setupGameCanvas(canvas: HTMLCanvasElement) {
 		}
 	};
 
-	//farmor2
-
 	// Initial setup
 	updateCanvasDimensions();
+
+	// Set up animation loop for continuous rendering at ~60fps
+	function renderLoop() {
+		// Only render if we have game state data
+		if (currentGameState) {
+			renderGame(canvas, currentGameState);
+		}
+		animationFrameId = requestAnimationFrame(renderLoop);
+	}
+
+	// Start the animation loop
+	renderLoop();
 
 	// Add resize event listener
 	const resizeObserver = new ResizeObserver(() => {
@@ -105,17 +145,29 @@ export function setupGameCanvas(canvas: HTMLCanvasElement) {
 	// Observe the canvas for size changes
 	resizeObserver.observe(canvas);
 
-	// Also listen for window resize events
-	// window.addEventListener('resize', updateCanvasDimensions);
-
 	// Return a cleanup function to disconnect observers and event listeners
 	return () => {
 		resizeObserver.disconnect();
-		window.removeEventListener('resize', updateCanvasDimensions);
+		// Cancel animation frame if it's running
+		if (animationFrameId !== null) {
+			cancelAnimationFrame(animationFrameId);
+			animationFrameId = null;
+		}
+		// Remove the overlay container
+		if (unitOverlays && unitOverlays.parentNode) {
+			unitOverlays.parentNode.removeChild(unitOverlays);
+		}
 	};
 }
 
-export function drawGame(canvas: HTMLCanvasElement, gameState: TurnData) {
+// Function to update the game state without immediately redrawing
+export function updateGameState(gameState: TurnData) {
+	currentGameState = gameState;
+	console.log('Game state updated', gameState);
+}
+
+// Internal function to render the current game state
+function renderGame(canvas: HTMLCanvasElement, gameState: TurnData) {
 	const height = gameState.map.length;
 	const width = gameState.map[0].length;
 
@@ -124,8 +176,13 @@ export function drawGame(canvas: HTMLCanvasElement, gameState: TurnData) {
 	ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
 	ctx.fillStyle = '#FFFFFF';
 	ctx.imageSmoothingEnabled = false; // Disable image smoothing for pixelated rendering
+
+	// Clear previous overlay elements
+	if (unitOverlays) {
+		unitOverlays.innerHTML = '';
+	}
+
 	// Calculate grid size to ensure square cells
-	// Use the CSS dimensions (clientWidth/clientHeight) instead of canvas.width/height
 	const cellSizeX = canvas.clientWidth / width;
 	const cellSizeY = canvas.clientHeight / height;
 	const gridSize = Math.min(cellSizeX, cellSizeY);
@@ -137,7 +194,7 @@ export function drawGame(canvas: HTMLCanvasElement, gameState: TurnData) {
 	// Draw the grid
 	ctx.strokeStyle = '#000000';
 
-	// Draw the cells based on the game state // map[x][y].type = 'unknown' | 'ground' | 'wall' | 'ore'
+	// Draw the cells based on the game state
 	for (let y = 0; y < height; y++) {
 		for (let x = 0; x < width; x++) {
 			const cell = gameState.map[y][x];
@@ -148,7 +205,7 @@ export function drawGame(canvas: HTMLCanvasElement, gameState: TurnData) {
 			const cellType = cell.type;
 
 			// First draw ground tile as the base layer
-			const groundIndex = Math.floor(Math.random() * TileImages.grounds.length);
+			const groundIndex = 0; // Use a fixed index for ground tile
 			img = TileImages.grounds[groundIndex];
 
 			// Draw the ground tile
@@ -160,50 +217,35 @@ export function drawGame(canvas: HTMLCanvasElement, gameState: TurnData) {
 			switch (cellType) {
 				case 'wall': {
 					// Use x,y coordinates to create a deterministic index
-					const index = (x * 31 + y * 17) % TileImages.walls.length; //NOT RANDOM
+					const index = (x * 2 + y * 2) % TileImages.walls.length; //NOT RANDOM
 					img = TileImages.walls[index];
 					break;
 				}
 				case 'ore': {
-					const index = (x * 23 + y * 29) % TileImages.ores.length; //NOT RANDOM
+					const index = (x * 3 + y * 3) % TileImages.ores.length; //NOT RANDOM
 					img = TileImages.ores[index];
 					break;
 				}
 				case 'unknown': {
-					const index = (x * 13 + y * 19) % TileImages.unknowns.length; //NOT RANDOM
+					const index = (x * 4 + y * 4) % TileImages.unknowns.length; //NOT RANDOM
 					img = TileImages.unknowns[index];
 					break;
 				}
 				case 'ground': {
-					const index = (x * 13 + y * 14) % TileImages.grounds.length; //NOT RANDOM
+					const index = (x * 5 + y * 5) % TileImages.grounds.length; //NOT RANDOM
 					img = TileImages.grounds[index];
 					break;
 				}
 			}
 
 			// Draw the cell (image or fallback)
-			if (img) {
-				// Wait for the image to load before drawing
-				img.onload = () => {
-					ctx.drawImage(img, offsetX + x * gridSize, offsetY + y * gridSize, gridSize, gridSize);
-				};
-
-				// If the image is already cached and loaded
-				if (img.complete) {
-					ctx.drawImage(img, offsetX + x * gridSize, offsetY + y * gridSize, gridSize, gridSize);
-				} else {
-					// Fallback to rectangle while loading
-					ctx.fillStyle = '#EEEEEE';
-					ctx.fillRect(offsetX + x * gridSize, offsetY + y * gridSize, gridSize, gridSize);
-				}
+			if (img && img.complete) {
+				ctx.drawImage(img, offsetX + x * gridSize, offsetY + y * gridSize, gridSize, gridSize);
 			} else {
-				// Fallback to rectangle if image is null
+				// Fallback to rectangle if image is null or not loaded
 				ctx.fillStyle = '#EEEEEE';
 				ctx.fillRect(offsetX + x * gridSize, offsetY + y * gridSize, gridSize, gridSize);
 			}
-
-			// Draw cell border
-			//ctx.strokeRect(offsetX + x * gridSize, offsetY + y * gridSize, gridSize, gridSize);
 
 			// Draw base if present
 			if (cell.type === 'base') {
@@ -250,32 +292,23 @@ export function drawGame(canvas: HTMLCanvasElement, gameState: TurnData) {
 
 				// Use the first unit for displaying
 				const unitType = unitsAtPosition[0].type;
-				let unitImage = null;
-
-				// Calculate unit position and size
 				const unitSize = gridSize * 0.9;
 				const xPos = offsetX + x * gridSize + (gridSize - unitSize) / 2;
 				const yPos = offsetY + y * gridSize + (gridSize - unitSize) / 2;
 
-				switch (unitType) {
-					case 'melee':
-						unitImage = unitImages.melee;
-						break;
-					case 'ranged':
-						unitImage = unitImages.ranged;
-						break;
-					case 'miner':
-						unitImage = unitImages.miner;
-						break;
-					default:
-						unitImage = null;
-						break;
-				}
-
-				if (unitImage && unitImage.complete) {
-					ctx.drawImage(unitImage, xPos, yPos, unitSize, unitSize);
+				// Instead of drawing to canvas, create an img element for the GIF
+				if (unitOverlays && ['melee', 'ranged', 'miner'].includes(unitType)) {
+					const gifElement = document.createElement('img');
+					gifElement.src = unitGifSources[unitType as keyof typeof unitGifSources];
+					gifElement.style.position = 'absolute';
+					gifElement.style.left = `${xPos}px`;
+					gifElement.style.top = `${yPos}px`;
+					gifElement.style.width = `${unitSize}px`;
+					gifElement.style.height = `${unitSize}px`;
+					gifElement.style.imageRendering = 'pixelated'; // For pixelated look
+					unitOverlays.appendChild(gifElement);
 				} else {
-					// Fallback to a colored rectangle if no image or image not loaded
+					// Fallback for canvas drawing if overlay not available
 					ctx.fillStyle = '#FF9900'; // Orange fallback color
 					ctx.fillRect(xPos, yPos, unitSize, unitSize);
 				}
@@ -290,6 +323,9 @@ export function drawGame(canvas: HTMLCanvasElement, gameState: TurnData) {
 	ctx.textBaseline = 'top';
 	ctx.fillText(`Turn: ${gameState.turn}`, 10, 10);
 	ctx.fillText(`Coins: ${gameState.coins}`, 10, 30);
+}
 
-	console.log('drawing game', gameState);
+// Legacy function for backwards compatibility, now just updates the internal state
+export function drawGame(canvas: HTMLCanvasElement, gameState: TurnData) {
+	updateGameState(gameState);
 }
