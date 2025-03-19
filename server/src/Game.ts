@@ -69,7 +69,7 @@ export class Game {
   async start() {
     this.generateMap();
 
-    while (!this.isGameOver() && this.turn < 15) {
+    while (!this.isGameOver() && this.turn < 3) {
       this.resetUnitActions();
       await this.processTurn();
     }
@@ -155,7 +155,7 @@ export class Game {
         }
         try {
           return await res.json();
-          // deno-lint-ignore no-explicit-any
+        // deno-lint-ignore no-explicit-any
         } catch (e: any) {
           console.log(`JSON error parsing when parsing:`, res, e);
           return {
@@ -197,7 +197,7 @@ export class Game {
           this.attackWithUnit(player, unit, action.target!);
           break;
         case "mine":
-          this.mineResource(player, unit, action.target!);
+          this.mineResource(player, unit);
           break;
       }
 
@@ -248,7 +248,7 @@ export class Game {
       return;
     }
     const tile = this.map[newPos.y][newPos.x];
-    if (tile.type != "ground") {
+    if (tile.type == "wall") {
       player.logs.push({
         type: "error",
         values: [
@@ -316,7 +316,7 @@ export class Game {
   }
 
   // Mines an ore tile to collect resources
-  mineResource(player: Player, unit: Unit, target: Position) {
+  mineResource(player: Player, unit: Unit) {
     if (unit.owner !== player.id) {
       player.logs.push({
         type: "error",
@@ -326,19 +326,7 @@ export class Game {
       });
       return;
     }
-    const pos = target;
-    if (
-      Math.abs(unit.position.x - pos.x) + Math.abs(unit.position.y - pos.y) !== 1
-    ) {
-      player.logs.push({
-        type: "error",
-        values: [
-          `SERVER: Unit ${unit.id} must be adjacent to the ore to mine it.`,
-        ],
-      });
-      return;
-    }
-
+    const pos = unit.position;
     const tile = this.map[pos.y][pos.x];
     if (tile.type === "ore") {
       console.log(
