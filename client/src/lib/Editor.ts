@@ -42,8 +42,11 @@ export async function setupEditor(el: HTMLElement) {
 	});
 
 	// compiler options
+	const defaults = monaco.languages.typescript.javascriptDefaults.getCompilerOptions();
 	monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+		...defaults,
 		target: monaco.languages.typescript.ScriptTarget.ESNext,
+		noLib: true,
 		allowNonTsExtensions: true
 	});
 
@@ -55,6 +58,9 @@ export async function setupEditor(el: HTMLElement) {
 		automaticLayout: true,
 		theme: 'myTheme',
 		fontFamily: 'JetBrains Mono',
+		inlayHints: {
+			enabled: 'on'
+		},
 		fontLigatures: true,
 		language: 'javascript',
 		wrappingStrategy: 'advanced',
