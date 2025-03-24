@@ -81,7 +81,18 @@ let unitOverlays: HTMLDivElement | null = null;
 
 // Store internal game state and animation frame reference
 let currentGameState: TurnData | null = null;
+let previousGameState: TurnData | null = null;
 let animationFrameId: number | null = null;
+let animationStartTime: number | null = null;
+const ANIMATION_DURATION = 100; // Animation duration in milliseconds
+
+// Store unit animation states
+type AnimatedUnit = {
+	id: string;
+	startPosition: { x: number; y: number };
+	targetPosition: { x: number; y: number };
+};
+let animatingUnits: AnimatedUnit[] = [];
 
 export function setupGameCanvas(canvas: HTMLCanvasElement) {
 	// Create a container for the canvas and overlay elements
@@ -162,6 +173,38 @@ export function setupGameCanvas(canvas: HTMLCanvasElement) {
 
 // Function to update the game state without immediately redrawing
 export function updateGameState(gameState: TurnData) {
+	// If we have a previous game state, find units that have moved
+	if (currentGameState && gameState.units) {
+		// Reset animation list
+		animatingUnits = [];
+
+		// Create a map of previous unit positions for quick lookup
+		const previousUnitPositions = new Map();
+		currentGameState.units.forEach((unit) => {
+			previousUnitPositions.set(unit.id, { ...unit.position });
+		});
+
+		// Check which units have moved and need animation
+		gameState.units.forEach((unit) => {
+			const previousPos = previousUnitPositions.get(unit.id);
+			if (previousPos && (previousPos.x !== unit.position.x || previousPos.y !== unit.position.y)) {
+				// This unit has moved, add it to the animation list
+				animatingUnits.push({
+					id: unit.id,
+					startPosition: previousPos,
+					targetPosition: { ...unit.position }
+				});
+			}
+		});
+
+		// Start animation if we have units to animate
+		if (animatingUnits.length > 0) {
+			animationStartTime = performance.now();
+		}
+	}
+
+	// Store current state as previous for next update
+	previousGameState = currentGameState ? { ...currentGameState } : null;
 	currentGameState = gameState;
 	console.log('Game state updated', gameState);
 }
@@ -193,6 +236,33 @@ function renderGame(canvas: HTMLCanvasElement, gameState: TurnData) {
 
 	// Draw the grid
 	ctx.strokeStyle = '#000000';
+
+	// Calculate animation progress if we're animating
+	let animationProgress = 1; // Default to 1 (animation complete)
+	if (animationStartTime !== null && animatingUnits.length > 0) {
+		const currentTime = performance.now();
+		const elapsedTime = currentTime - animationStartTime;
+
+		if (elapsedTime < ANIMATION_DURATION) {
+			// Animation in progress
+			animationProgress = elapsedTime / ANIMATION_DURATION;
+		} else {
+			// Animation complete
+			animationStartTime = null;
+		}
+	}
+
+	// Create a map of animated positions for quick lookup
+	const animatedPositions = new Map();
+	if (animationProgress < 1) {
+		animatingUnits.forEach((unit) => {
+			const interpolatedX =
+				unit.startPosition.x + (unit.targetPosition.x - unit.startPosition.x) * animationProgress;
+			const interpolatedY =
+				unit.startPosition.y + (unit.targetPosition.y - unit.startPosition.y) * animationProgress;
+			animatedPositions.set(unit.id, { x: interpolatedX, y: interpolatedY });
+		});
+	}
 
 	// Draw the cells based on the game state
 	for (let y = 0; y < height; y++) {
@@ -271,50 +341,73 @@ function renderGame(canvas: HTMLCanvasElement, gameState: TurnData) {
 				ctx.lineWidth = 1;
 				ctx.strokeStyle = '#000000';
 			}
-
-			// Draw units present at this position
-			const unitsAtPosition = gameState.units.filter(
-				(unit) => unit.position.x === x && unit.position.y === y
-			);
-			if (unitsAtPosition.length > 0) {
-				// Draw unit count if more than one unit
-				if (unitsAtPosition.length > 1) {
-					ctx.fillStyle = '#000000'; // Black for unit count
-					ctx.font = `${gridSize * 0.4}px Arial`;
-					ctx.textAlign = 'center';
-					ctx.textBaseline = 'middle';
-					ctx.fillText(
-						unitsAtPosition.length.toString(),
-						offsetX + x * gridSize + gridSize * 0.25,
-						offsetY + y * gridSize + gridSize * 0.25
-					);
-				}
-
-				// Use the first unit for displaying
-				const unitType = unitsAtPosition[0].type;
-				const unitSize = gridSize * 0.9;
-				const xPos = offsetX + x * gridSize + (gridSize - unitSize) / 2;
-				const yPos = offsetY + y * gridSize + (gridSize - unitSize) / 2;
-
-				// Instead of drawing to canvas, create an img element for the GIF
-				if (unitOverlays && ['melee', 'ranged', 'miner'].includes(unitType)) {
-					const gifElement = document.createElement('img');
-					gifElement.src = unitGifSources[unitType as keyof typeof unitGifSources];
-					gifElement.style.position = 'absolute';
-					gifElement.style.left = `${xPos}px`;
-					gifElement.style.top = `${yPos}px`;
-					gifElement.style.width = `${unitSize}px`;
-					gifElement.style.height = `${unitSize}px`;
-					gifElement.style.imageRendering = 'pixelated'; // For pixelated look
-					unitOverlays.appendChild(gifElement);
-				} else {
-					// Fallback for canvas drawing if overlay not available
-					ctx.fillStyle = '#FF9900'; // Orange fallback color
-					ctx.fillRect(xPos, yPos, unitSize, unitSize);
-				}
-			}
 		}
 	}
+
+	// Draw units with their current animated position
+	gameState.units.forEach((unit) => {
+		// Get animated position if available, otherwise use the actual position
+		let displayPos = { ...unit.position };
+		const animatedPos = animatedPositions.get(unit.id);
+		if (animatedPos) {
+			displayPos = animatedPos;
+		}
+
+		// Calculate pixel position
+		const unitSize = gridSize * 0.9;
+		const xPos = offsetX + displayPos.x * gridSize + (gridSize - unitSize) / 2;
+		const yPos = offsetY + displayPos.y * gridSize + (gridSize - unitSize) / 2;
+
+		// Get the unit type
+		const unitType = unit.type;
+
+		// Draw the unit
+		if (unitOverlays && ['melee', 'ranged', 'miner'].includes(unitType)) {
+			const gifElement = document.createElement('img');
+			gifElement.src = unitGifSources[unitType as keyof typeof unitGifSources];
+			gifElement.style.position = 'absolute';
+			gifElement.style.left = `${xPos}px`;
+			gifElement.style.top = `${yPos}px`;
+			gifElement.style.width = `${unitSize}px`;
+			gifElement.style.height = `${unitSize}px`;
+			gifElement.style.imageRendering = 'pixelated'; // For pixelated look
+
+			// Add data attribute to identify the unit
+			gifElement.dataset.unitId = unit.id;
+
+			unitOverlays.appendChild(gifElement);
+		} else {
+			// Fallback to rectangle
+			ctx.fillStyle = '#FF9900'; // Orange fallback
+			ctx.fillRect(xPos, yPos, unitSize, unitSize);
+		}
+	});
+
+	// Draw unit counts (we can't do this in the cell loop anymore since units may be animating)
+	const unitCountsByCell = new Map();
+
+	gameState.units.forEach((unit) => {
+		// Use the real position for counting, not animated position
+		const cellKey = `${Math.floor(unit.position.x)}-${Math.floor(unit.position.y)}`;
+		const count = unitCountsByCell.get(cellKey) || 0;
+		unitCountsByCell.set(cellKey, count + 1);
+	});
+
+	// Draw counts for cells with multiple units
+	unitCountsByCell.forEach((count, cellKey) => {
+		if (count > 1) {
+			const [x, y] = cellKey.split('-').map(Number);
+			ctx.fillStyle = '#000000'; // Black for unit count
+			ctx.font = `${gridSize * 0.4}px Arial`;
+			ctx.textAlign = 'center';
+			ctx.textBaseline = 'middle';
+			ctx.fillText(
+				count.toString(),
+				offsetX + x * gridSize + gridSize * 0.25,
+				offsetY + y * gridSize + gridSize * 0.25
+			);
+		}
+	});
 
 	// Draw game info text
 	ctx.fillStyle = '#000000';

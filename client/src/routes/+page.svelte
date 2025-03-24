@@ -117,6 +117,7 @@
 	let tutPane: PaneAPI | undefined = $state(undefined);
 
 	import SvelteMarkdown from 'svelte-markdown';
+	import TaskRenderer from './task-renderer.svelte';
 	const tutorial = async () => {
 		const resp = await fetch('/tut.md');
 		const md = await resp.text();
@@ -225,6 +226,7 @@
 					class="prose prose-invert h-full max-w-full overflow-y-auto rounded-lg border-2 border-zinc-700 bg-zinc-800 p-2 text-zinc-200"
 				>
 					<SvelteMarkdown source={md}></SvelteMarkdown>
+					<TaskRenderer />
 				</div>
 			{/await}
 		</Pane>
