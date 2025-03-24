@@ -115,7 +115,7 @@
 
 	import SvelteMarkdown from 'svelte-markdown';
 	const tutorial = async () => {
-		const resp = await fetch('/tutorial.md');
+		const resp = await fetch('/tut.md');
 		const md = await resp.text();
 		return md;
 	};
