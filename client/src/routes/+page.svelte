@@ -112,6 +112,15 @@
 			uploading = false;
 		}
 	}
+
+	let isTutorial = $state(false);
+
+	import SvelteMarkdown from 'svelte-markdown';
+	const tutorial = async () => {
+		const resp = await fetch('/tut.md');
+		const md = await resp.text();
+		return md;
+	};
 </script>
 
 {#if websocketHasClosed}
@@ -137,6 +146,9 @@
 		<div
 			class="flex flex-row gap-2 *:rounded-md *:border *:border-zinc-700 *:bg-zinc-800 *:p-1 *:px-2 *:text-zinc-200"
 		>
+			<label for="tutorial" class="text-sm text-zinc-200"
+				><input type="checkbox" bind:checked={isTutorial} id="tutorial" />Tutorial</label
+			>
 			<!-- <button
 				class=""
 				disabled={uploading}
@@ -188,6 +200,32 @@
 
 <div class="h-[calc(100vh-3rem)] w-screen bg-zinc-900 p-1">
 	<PaneGroup direction="horizontal">
+		{#if isTutorial}
+			<Pane defaultSize={20}>
+				{#await tutorial() then md}
+					<!-- promise was fulfilled -->
+					<div
+						class="prose prose-invert h-full overflow-y-auto rounded-lg border-2 border-zinc-700 bg-zinc-800 p-2 text-zinc-200"
+					>
+						<SvelteMarkdown source={md}></SvelteMarkdown>
+					</div>
+				{/await}
+			</Pane>
+			<PaneResizer
+				class="relative flex w-2 items-center justify-center bg-zinc-900"
+				onDraggingChange={() => {
+					console.log('dragging');
+					if (!latestGameData) return;
+					drawGame(gameCanvas, latestGameData);
+				}}
+			>
+				<div class="z-10 flex h-7 w-5 items-center justify-center rounded-sm text-zinc-300">
+					<!-- prettier-ignore -->
+					<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-grip-vertical"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+				</div>
+			</PaneResizer>
+			<!-- content here -->
+		{/if}
 		<Pane defaultSize={50}>
 			<div class="flex h-full w-full rounded-lg border-2 border-zinc-700 bg-zinc-900 p-1">
 				<div id="editor" class="w-full">Loading editor...</div>
