@@ -6,7 +6,7 @@ export const user = pgTable("user", {
   projectName: text("project_name").notNull(),
   username: text("username").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
-  elo: integer("elo").notNull().default(100),
+  elo: integer("elo").notNull().default(1000),
 });
 
 export const session = pgTable("session", {

@@ -53,21 +53,21 @@ class Unit {
   }
 }
 class MeleeUnit extends Unit {
-  attack(target: Unit) {
+  attack(position: Position) {
     this.codeTiles.addAction({
       type: "attack",
       unitId: this.id,
-      target: target.position,
+      target: position,
     });
   }
 }
 
 class RangedUnit extends Unit {
-  attack(target: Unit) {
+  attack(position: Position) {
     this.codeTiles.addAction({
       type: "attack",
       unitId: this.id,
-      target: target.position,
+      target: position,
     });
   }
 }

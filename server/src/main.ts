@@ -119,24 +119,25 @@ const routes: Route[] = [
 				);
 			}
 
-			const [enemyPlayer] = await db
-				.select()
+			// Find enemy player with closest ELO and their latest deployment in one query
+			const [{ enemyPlayer, latestEnemyDeployment }] = await db
+				.select({
+					enemyPlayer: table.user,
+					latestEnemyDeployment: table.deployment
+				})
 				.from(table.user)
-				.where(
-					ne(table.user.id, user.id)
+				.where(ne(table.user.id, user.id))
+				.innerJoin(
+					table.deployment,
+					eq(table.deployment.userId, table.user.id)
 				)
 				.orderBy(
-					sql`ABS(${table.user.elo} - ${user.elo})`
+					sql`ABS(${table.user.elo} - ${user.elo})`,
+					desc(table.deployment.createdAt)
 				)
 				.limit(1);
-
-			const [latestEnemyDeployment] = await db
-				.select()
-				.from(table.deployment)
-				.where(eq(table.deployment.userId, enemyPlayer.id))
-				.orderBy(desc(table.deployment.createdAt))
-				.limit(1);
-			
+				
+			console.log("Enemy player:", enemyPlayer, latestEnemyDeployment);
 			
 			gameHandler.startGame([{ id: user.id, url: latestDeployment.url }, { id: enemyPlayer.id, url: latestEnemyDeployment.url }]);
 
