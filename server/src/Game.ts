@@ -1,5 +1,5 @@
 import { socketHandler } from "./SocketHandler.ts";
-import type { PlayerResponse, Position, Tile, TurnData, Unit } from "./types.ts";
+import type { Miner, PlayerResponse, Position, Tile, TurnData, Unit } from "./types.ts";
 
 interface Player {
   id: string;
@@ -332,7 +332,9 @@ export class Game {
       console.log(
         `Miner unit ${unit.id} is mining at (${pos.x},${pos.y}). Resources collected!`,
       );
-      player.coins += 20;
+      // player.coins += 20;
+      (unit as Miner).inventory.ore += 1;
+        
       this.map[pos.y][pos.x] = { ...tile, type: "ground" };
     } else {
       player.logs.push({

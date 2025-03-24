@@ -8,9 +8,10 @@ import * as table from "./db/schema.ts";
 import DeploymentClient from "./DeploymentClient.ts";
 import { getCookies } from "jsr:@std/http/cookie";
 import { GameHandler } from "./GameHandler.ts";
-import { desc, eq } from "drizzle-orm/expressions";
+import { desc, eq, ne } from "drizzle-orm/expressions";
 import { socketHandler } from "./SocketHandler.ts";
 import { getCloudCode } from "./isolates/isolate.ts";
+import { sql } from "drizzle-orm";
 
 const deploymentClient = new DeploymentClient();
 const gameHandler = new GameHandler();
@@ -118,7 +119,26 @@ const routes: Route[] = [
 				);
 			}
 
-			gameHandler.startGame([{ id: user.id, url: latestDeployment.url }]);
+			const [enemyPlayer] = await db
+				.select()
+				.from(table.user)
+				.where(
+					ne(table.user.id, user.id)
+				)
+				.orderBy(
+					sql`ABS(${table.user.elo} - ${user.elo})`
+				)
+				.limit(1);
+
+			const [latestEnemyDeployment] = await db
+				.select()
+				.from(table.deployment)
+				.where(eq(table.deployment.userId, enemyPlayer.id))
+				.orderBy(desc(table.deployment.createdAt))
+				.limit(1);
+			
+			
+			gameHandler.startGame([{ id: user.id, url: latestDeployment.url }, { id: enemyPlayer.id, url: latestEnemyDeployment.url }]);
 
 			return Response.json(
 				{ message: "Game started" },

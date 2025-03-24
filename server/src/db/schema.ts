@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, integer } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey().notNull(),
@@ -6,6 +6,7 @@ export const user = pgTable("user", {
   projectName: text("project_name").notNull(),
   username: text("username").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
+  elo: integer("elo").notNull().default(100),
 });
 
 export const session = pgTable("session", {

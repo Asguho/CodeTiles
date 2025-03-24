@@ -39,6 +39,7 @@ export async function validateSessionToken(token: string) {
 				username: table.user.username,
 				projectId: table.user.projectId,
 				projectName: table.user.projectName,
+				elo: table.user.elo,
 			},
 			session: table.session,
 		})
