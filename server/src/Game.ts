@@ -20,7 +20,7 @@ export class Game {
   mapWidth: number = 10;
   mapHeight: number = 10;
 
-  constructor(players: { id: string; url: string }[], private cleanUp: (outCome: string[] | null ) => void) {
+  constructor(players: { id: string; url: string }[], private cleanUp: (outCome: string[] | null) => void) {
     this.players = players.map(({ id, url }) => ({
       id,
       serverUrl: url,
@@ -74,25 +74,17 @@ export class Game {
     const sendMapToPlayers = (customLog: string) => {
       this.updatePlayerMapView();
       this.players.forEach((player) => {
+        player.logs.push({ type: "log", values: [customLog] });
         socketHandler.sendMessage(
           player.id,
-          JSON.stringify({
-            type: "TURN_DATA",
-            playerId: player.id,
-            map: player.mapView,
-            units: player.units,
-            coins: player.coins,
-            turn: this.turn,
-            basePosition: player.basePosition,
-            logs: [...player.logs, { type: "log", values: [customLog]}],
-          }),
+          JSON.stringify(this.createPayload(player)),
         );
-        player.logs = []; // Clear logs after sending
+        player.logs = [];
       });
-    }
+    };
     while (true) {
       if (this.isGameOver()) {
-        const winner = this.players.find((player) => player.basePosition); 
+        const winner = this.players.find((player) => player.basePosition);
         sendMapToPlayers(`Game Over. the winner was ${winner?.id}`);
 
         this.players.forEach((player) => {
@@ -104,11 +96,11 @@ export class Game {
             }),
           );
         });
-    
+
         this.cleanUp([winner!.id, ...lossers]);
         break;
       }
-      if(this.turn > 25) {
+      if (this.turn > 25) {
         sendMapToPlayers("Game over due to time limit.");
         this.players.forEach((player) => {
           socketHandler.sendMessage(
@@ -124,17 +116,25 @@ export class Game {
         break;
       }
 
-
       this.resetUnitActions();
       await this.processTurn();
     }
-
-
   }
 
   // Game over logic can be implemented here
   isGameOver(): boolean {
     return this.players.filter((player) => player.basePosition).length <= 1;
+  }
+  createPayload(player: Player): TurnData {
+    return {
+      type: "TURN_DATA",
+      playerId: player.id,
+      map: player.mapView || [],
+      units: this.players.flatMap((p) => p.units),
+      coins: player.coins,
+      turn: this.turn,
+      basePosition: player.basePosition!,
+    };
   }
 
   // Process a single turn for all players by sending requests and processing their responses
@@ -145,15 +145,7 @@ export class Game {
     // Update what each player can see
     this.updatePlayerMapView();
 
-    const payloads: TurnData[] = this.players.map((player) => ({
-      type: "TURN_DATA",
-      playerId: player.id,
-      map: player.mapView || [],
-      units: player.units,
-      coins: player.coins,
-      turn: this.turn,
-      basePosition: player.basePosition!,
-    }));
+    const payloads: TurnData[] = this.players.map((player) => this.createPayload(player));
 
     this.players.forEach((player, index) => {
       socketHandler.sendMessage(
@@ -163,7 +155,9 @@ export class Game {
       player.logs = []; // Clear logs after sending
     });
 
-    const playerRequests = this.players.map((player, index) => player.basePosition ? this.sendRequest(player, payloads[index]) : Promise.resolve({ actions: { units: [], shop: [] } }));
+    const playerRequests = this.players.map((player, index) =>
+      player.basePosition ? this.sendRequest(player, payloads[index]) : Promise.resolve({ actions: { units: [], shop: [] } })
+    );
     const responses = await Promise.all(playerRequests);
     responses.forEach((response, index) => {
       this.processActions(this.players[index], response);
@@ -190,7 +184,7 @@ export class Game {
         }
         try {
           return await res.json();
-        // deno-lint-ignore no-explicit-any
+          // deno-lint-ignore no-explicit-any
         } catch (e: any) {
           console.log(`JSON error parsing when parsing:`, res, e);
           return {
@@ -329,41 +323,16 @@ export class Game {
     }
     // Check if unit is within attack range - assuming range is 1 for melee, 3 for ranged
     const distanceToTarget = Math.sqrt(
-      Math.pow(unit.position.x - target.x, 2) + Math.pow(unit.position.y - target.y, 2)
+      Math.pow(unit.position.x - target.x, 2) + Math.pow(unit.position.y - target.y, 2),
     );
     const attackRange = unit.type === "melee" ? 1 : 3;
     if (distanceToTarget > attackRange) {
       player.logs.push({
         type: "error",
-        values: [`SERVER: Target at (${target.x},${target.y}) is out of range for ${unit.type} unit.`]
+        values: [`SERVER: Target at (${target.x},${target.y}) is out of range for ${unit.type} unit.`],
       });
       return;
     }
-
-    // Check if there's an enemy base at target position
-    const targetTile = this.map[target.y][target.x];
-    if (targetTile.type === "base" && targetTile.owner !== player.id) {
-      const damage = unit.type === "melee" ? 15 : 10;
-      console.log(`Unit ${unit.id} (${unit.type}) attacks enemy base for ${damage} damage`);
-      targetTile.health! -= damage;
-      
-      if (targetTile.health! <= 0) {
-        console.log(`Base at (${target.x},${target.y}) has been destroyed`);
-        // Convert base to ground
-        this.map[target.y][target.x] = { 
-          type: "ground", 
-          position: { x: target.x, y: target.y } 
-        };
-        // Remove base position from enemy player
-        const enemyPlayer = this.players.find(p => p.id === targetTile.owner);
-        if (enemyPlayer) {
-          enemyPlayer.basePosition = undefined;
-          lossers.push(enemyPlayer.id);
-        }
-      }
-      return;
-    }
-
 
     for (const enemy of this.players.filter((p) => p.id !== player.id)) {
       const targetUnit = enemy.units.find(
@@ -386,6 +355,30 @@ export class Game {
       type: "error",
       values: [`SERVER: No enemy unit found at (${target.x},${target.y})`],
     });
+
+    // Check if there's an enemy base at target position
+    const targetTile = this.map[target.y][target.x];
+    if (targetTile.type === "base" && targetTile.owner !== player.id) {
+      const damage = unit.type === "melee" ? 15 : 10;
+      console.log(`Unit ${unit.id} (${unit.type}) attacks enemy base for ${damage} damage`);
+      targetTile.health! -= damage;
+
+      if (targetTile.health! <= 0) {
+        console.log(`Base at (${target.x},${target.y}) has been destroyed`);
+        // Convert base to ground
+        this.map[target.y][target.x] = {
+          type: "ground",
+          position: { x: target.x, y: target.y },
+        };
+        // Remove base position from enemy player
+        const enemyPlayer = this.players.find((p) => p.id === targetTile.owner);
+        if (enemyPlayer) {
+          enemyPlayer.basePosition = undefined;
+          lossers.push(enemyPlayer.id);
+        }
+      }
+      return;
+    }
   }
 
   // Mines an ore tile to collect resources
@@ -407,7 +400,7 @@ export class Game {
       );
       // player.coins += 20;
       // (unit as Miner).inventory.ore += 1;
-        
+
       this.map[pos.y][pos.x] = { ...tile, type: "ground" };
     } else {
       player.logs.push({

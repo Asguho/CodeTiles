@@ -19,7 +19,23 @@ export function getCloudCode(code: string) {
 					return Response.json({actions, logs: [...logs, {level: "error", values: [evalError.name, evalError.message, evalError.stack]}]})
 				}
 				
-				return Response.json(CodeTiles)
+				function removeCircularReferences() {
+					const seen = new WeakSet();
+					return (key, value) => {
+						if (typeof value === "object" && value !== null) {
+						if (seen.has(value)) {
+							return "[Circular]"; // Replace circular references with this string
+						}
+						seen.add(value);
+						}
+						return value;
+					};
+				}
+
+				const s = JSON.stringify(CodeTiles.toJSON(), removeCircularReferences(), 2);
+				return new Response(s);
+				
+				// return Response.json(CodeTiles)
 			} catch (e: any) {
 				return Response.json({logs: [{level: "error", values: ["Backend code error", e.name, e.message, e.stack]}]})
 			}

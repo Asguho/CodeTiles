@@ -51,6 +51,9 @@ class Unit {
       console.warn("No valid path found to target position.");
     }
   }
+  isOwnedBy(playerId: string) {
+    return this.owner === playerId;
+  }
 }
 class MeleeUnit extends Unit {
   attack(position: Position) {

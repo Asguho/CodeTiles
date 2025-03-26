@@ -154,15 +154,6 @@ export default class DeploymentClient {
   }
 
   /**
-   * Get a list of projects for the configured org, with optional query params
-   */
-  // deno-lint-ignore no-explicit-any
-  async listProjects(query?: any): Promise<Response> {
-    const qs = new URLSearchParams(query).toString();
-    return await this.fetch(`${this.orgUrl}/projects?${qs}`, { method: "GET" });
-  }
-
-  /**
    * Create a project within the configured organization for the client.
    */
   async createProject(name?: string): Promise<Project> {
@@ -177,10 +168,39 @@ export default class DeploymentClient {
    * Get a list of deployments for the given project, with optional query params.
    */
   // deno-lint-ignore no-explicit-any
-  async listDeployments(projectId: string, query?: any): Promise<Response> {
+  async listDeployments(projectId: string, query?: any): Promise<Deployment[]> {
     const qs = new URLSearchParams(query).toString();
-    return await this.fetch(`/projects/${projectId}/deployments?${qs}`, {
+    const response = await this.fetch(`/projects/${projectId}/deployments?${qs}`, {
       method: "GET",
+    });
+
+    const deployments = await response.json() as Deployment[];
+    return deployments;
+  }
+  /**
+   * Delete a deployment by its ID.
+   * @param deploymentId The ID of the deployment to delete
+   * @returns A Response object from the deletion request
+   */
+  async deleteDeployment(deploymentId: string): Promise<Response> {
+    return await this.fetch(`/deployments/${deploymentId}`, {
+      method: "DELETE",
+    });
+  }
+  /**
+   * List projects of an organization
+   */
+  async listProjects(query?: any): Promise<Project[]> {
+    const qs = new URLSearchParams(query).toString();
+    const response = await this.fetch(`${this.orgUrl}/projects?${qs}`, { method: "GET" });
+
+    const projects = await response.json() as Project[];
+    return projects;
+  }
+
+  async deleteProject(projectId: string): Promise<Response> {
+    return await this.fetch(`${this.orgUrl}/projects/${projectId}`, {
+      method: "DELETE",
     });
   }
 
