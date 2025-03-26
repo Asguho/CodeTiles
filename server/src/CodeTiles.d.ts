@@ -32,6 +32,7 @@ declare class Unit {
     x: number;
     y: number;
   }, map: Tile[][]): void;
+  isOwnedBy(playerId: string): boolean;
 }
 declare class Tile {
   type: TileType;
