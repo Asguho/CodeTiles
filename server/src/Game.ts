@@ -1,5 +1,5 @@
 import { socketHandler } from "./SocketHandler.ts";
-import type { Miner, PlayerResponse, Position, Tile, TurnData, Unit } from "./types.ts";
+import type { GameSettings, Miner, PlayerResponse, Position, Tile, TurnData, Unit } from "./types.ts";
 
 interface Player {
   id: string;
@@ -18,8 +18,9 @@ export class Game {
   mapWidth: number = 10;
   mapHeight: number = 10;
   lossers: string[] = [];
-
-  constructor(players: { id: string; url: string }[], private cleanUp: (outCome: string[] | null) => void) {
+  isFogOfWar: boolean = false;
+  gameSettings: GameSettings;
+  constructor(players: { id: string; url: string }[], gameSettings: GameSettings, private cleanUp: (outCome: string[] | null) => void) {
     this.players = players.map(({ id, url }) => ({
       id,
       serverUrl: url,
@@ -27,12 +28,13 @@ export class Game {
       coins: 100,
       logs: [],
     }));
+    this.gameSettings = gameSettings;
   }
 
   generateMap() {
-    for (let y = 0; y < this.mapHeight; y++) {
+    for (let y = 0; y < this.gameSettings.map.height; y++) {
       const row: Tile[] = [];
-      for (let x = 0; x < this.mapWidth; x++) {
+      for (let x = 0; x < this.gameSettings.map.width; x++) {
         const rand = Math.random();
         let type: Tile["type"] = "ground";
         if (rand < 0.1) {
@@ -45,8 +47,8 @@ export class Game {
       this.map.push(row);
     }
     this.players.forEach((player) => {
-      const baseX = Math.floor(Math.random() * this.mapWidth);
-      const baseY = Math.floor(Math.random() * this.mapHeight);
+      const baseX = Math.floor(Math.random() * this.gameSettings.map.width);
+      const baseY = Math.floor(Math.random() * this.gameSettings.map.height);
       player.basePosition = { x: baseX, y: baseY };
       this.map[baseY][baseX] = {
         type: "base",
@@ -126,6 +128,7 @@ export class Game {
   createPayload(player: Player): TurnData {
     return {
       type: "TURN_DATA",
+      gameSettings: this.gameSettings,
       playerId: player.id,
       map: player.mapView || [],
       units: this.players.flatMap((p) => p.units),
@@ -267,9 +270,9 @@ export class Game {
     }
     if (
       newPos.x < 0 ||
-      newPos.x >= this.mapWidth ||
+      newPos.x >= this.gameSettings.map.width ||
       newPos.y < 0 ||
-      newPos.y >= this.mapHeight
+      newPos.y >= this.gameSettings.map.height
     ) {
       player.logs.push({
         type: "error",
@@ -415,12 +418,7 @@ export class Game {
 
   // Purchases new units if the player has enough coins
   buyUnit(player: Player, item: string, quantity: number) {
-    const costs: Record<string, number> = {
-      melee: 50,
-      ranged: 60,
-      miner: 40,
-    };
-    const costPerUnit = costs[item];
+    const costPerUnit = this.gameSettings.unit[item].price;
     if (!costPerUnit) {
       player.logs.push({
         type: "error",
@@ -447,7 +445,7 @@ export class Game {
         id: crypto.randomUUID(),
         type: item as "melee" | "ranged" | "miner",
         position: player.basePosition ? { ...player.basePosition } : { x: 0, y: 0 },
-        health: item === "ranged" ? 80 : 100,
+        health: this.gameSettings.unit[item].health,
         owner: player.id,
         actionTaken: false,
       };
@@ -457,11 +455,17 @@ export class Game {
 
   // Updates each player's map view with fog of war
   updatePlayerMapView() {
+    if (!this.gameSettings.fogOfWar) {
+      this.players.forEach((player) => {
+        player.mapView = this.map.map((row) => row.map((tile) => ({ ...tile })));
+      });
+      return;
+    }
     // Reset each player's map view first
     this.players.forEach((player) => {
       // Initialize empty map with fog of war (all unknown)
-      player.mapView = Array(this.mapHeight).fill(null).map((_, y) =>
-        Array(this.mapWidth).fill(null).map((_, x) => ({
+      player.mapView = Array(this.gameSettings.map.height).fill(null).map((_, y) =>
+        Array(this.gameSettings.map.width).fill(null).map((_, x) => ({
           type: "unknown",
           position: { x, y },
         }))
@@ -505,12 +509,12 @@ export class Game {
   ) {
     for (
       let y = Math.max(0, centerY - radius);
-      y <= Math.min(this.mapHeight - 1, centerY + radius);
+      y <= Math.min(this.gameSettings.map.height - 1, centerY + radius);
       y++
     ) {
       for (
         let x = Math.max(0, centerX - radius);
-        x <= Math.min(this.mapWidth - 1, centerX + radius);
+        x <= Math.min(this.gameSettings.map.width - 1, centerX + radius);
         x++
       ) {
         const distance = Math.sqrt(

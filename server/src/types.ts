@@ -1,7 +1,22 @@
 export type TileType = "unknown" | "ground" | "base" | "ore" | "wall";
 export type Direction = "north" | "south" | "east" | "west";
 export type UnitType = "melee" | "ranged" | "miner";
-
+export interface GameSettings {
+  map: {
+    width: number;
+    height: number;
+  };
+  maxTurns: number;
+  fogOfWar: boolean;
+  unit: {
+    [key: string]: {
+      health: number;
+      attack: number;
+      range: number;
+      price: number;
+    };
+  };
+}
 // Position interface
 export interface Position {
   x: number;
@@ -57,6 +72,7 @@ export type Tile = UnknownTile | GroundTile | OreTile | BaseTile | WallTile;
 // Main game state interface
 export interface TurnData {
   type: "TURN_DATA";
+  gameSettings: GameSettings;
   map: Tile[][];
   units: Array<Unit>;
   coins: number;
