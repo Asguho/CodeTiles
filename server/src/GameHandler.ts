@@ -3,6 +3,7 @@ import { Game } from "./Game.ts";
 import { user as userTable } from "./db/schema.ts";
 import { eq } from "drizzle-orm/expressions";
 import { GameSettings, TurnData } from "./types.ts";
+import { socketHandler } from "./SocketHandler.ts";
 
 const gameSettings: GameSettings = {
   map: {
@@ -121,7 +122,8 @@ export class GameHandler {
       };
 
       // Send message through the player's connection
-      player.sendMessage(message);
+
+      socketHandler.sendMessage(player.id, JSON.stringify(message));
     };
 
     // Tutorial logic checker that runs each turn
@@ -131,60 +133,54 @@ export class GameHandler {
       // Check if player has a miner
       if (!goals.buyMiner && player.units.some((unit) => unit.type === "miner")) {
         goals.buyMiner = true;
-        sendGoalUpdate(game);
       }
 
       // Check if any unit has moved from its starting position
-      if (!goals.moveUnit && player.units.some((unit) => unit.hasMoved)) {
+      if (
+        !goals.moveUnit &&
+        player.units.some((unit) => unit.position.x !== player.basePosition!.x || unit.position.y !== player.basePosition!.y)
+      ) {
         goals.moveUnit = true;
-        sendGoalUpdate(game);
       }
 
       // Check if a unit is on an ore tile
-      if (!goals.moveToOre && player.units.some((unit) => game.map.getTile(unit.position.x, unit.position.y).type === "ore")) {
+      if (!goals.moveToOre && player.units.some((unit) => game.map[unit.position.x][unit.position.y].type === "ore")) {
         goals.moveToOre = true;
-        sendGoalUpdate(game);
       }
 
       // Check if resources have been mined
-      if (!goals.mineOre && player.units.some((unit) => unit.type === "miner" && unit.resources > 0)) {
-        goals.mineOre = true;
-        sendGoalUpdate(game);
-      }
+      // if (!goals.mineOre && player.units.some((unit) => unit.type === "miner" && unit.resources > 0)) {
+      // goals.mineOre = true;
+      // }
 
       // Check if resources have been returned to base
-      if (!goals.returnResources && player.resources > 0) {
-        goals.returnResources = true;
-        sendGoalUpdate(game);
-      }
+      // if (!goals.returnResources && player.resources > 0) {
+      // goals.returnResources = true;
+      // }
 
       // Check if player has bought an attack unit
       if (!goals.buyAttackUnit && player.units.some((unit) => unit.type === "melee" || unit.type === "ranged")) {
         goals.buyAttackUnit = true;
-        sendGoalUpdate(game);
       }
 
       // Check if player has attacked an enemy unit
-      if (!goals.attackEnemyUnit && game.turnData.some((turn: TurnData) => turn.type === "attack" && turn.attackerId === player.id)) {
-        goals.attackEnemyUnit = true;
-        sendGoalUpdate(game);
-      }
+      // if (!goals.attackEnemyUnit && game.turnData.some((turn: TurnData) => turn.type === "attack" && turn.attackerId === player.id)) {
+      //   goals.attackEnemyUnit = true;
+      // }
 
       // Check if player has attacked enemy base
-      if (
-        !goals.attackEnemyBase && game.turnData.some((turn: TurnData) =>
-          turn.type === "attack" && turn.targetId &&
-          game.getUnitById(turn.targetId)?.isBase
-        )
-      ) {
-        goals.attackEnemyBase = true;
-        sendGoalUpdate(game);
-      }
+      // if (
+      //   !goals.attackEnemyBase && game.turnData.some((turn: TurnData) =>
+      //     turn.type === "attack" && turn.targetId &&
+      //     game.getUnitById(turn.targetId)?.isBase
+      //   )
+      // ) {
+      //   goals.attackEnemyBase = true;
+      // }
 
       // Check if player has won the game
-      if (!goals.winGame && game.isGameOver() && game.getWinner()?.id === player.id) {
+      if (!goals.winGame && game.isGameOver()) {
         goals.winGame = true;
-        sendGoalUpdate(game);
       }
 
       // Send complete summary at the end of each turn
@@ -203,7 +199,10 @@ export class GameHandler {
         totalGoals: Object.keys(goals).length,
         success: completedGoals === Object.keys(goals).length,
       };
-      player.sendMessage(message);
+      socketHandler.sendMessage(
+        player.id,
+        JSON.stringify(message),
+      );
     }, tutorialChecker);
 
     game.start();

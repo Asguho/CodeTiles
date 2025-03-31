@@ -119,6 +119,20 @@ const routes: Route[] = [
         );
       }
 
+      // Check if this is a tutorial game
+      const url = new URL(req.url);
+      const isTutorial = url.searchParams.get("tutorial") === "true";
+
+      if (isTutorial) {
+        // For tutorial, start a game against a bot
+        //   gameHandler.startGame([{ id: user.id, url: latestDeployment.url }, { id: "bot", url: "https://tutorial-bot.deno.dev" }]);
+        GameHandler.runTutorial({ id: user.id, url: latestDeployment.url });
+        return Response.json(
+          { message: "Tutorial game started" },
+          { headers: corsHeaders },
+        );
+      }
+
       // Find enemy player with closest ELO and their latest deployment in one query
       const [{ enemyPlayer, latestEnemyDeployment }] = await db
         .select({
