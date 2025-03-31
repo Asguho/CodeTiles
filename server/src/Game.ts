@@ -1,8 +1,6 @@
 import { socketHandler } from "./SocketHandler.ts";
 import type { Miner, PlayerResponse, Position, Tile, TurnData, Unit } from "./types.ts";
 
-let lossers: string[] = [];
-
 interface Player {
   id: string;
   serverUrl: string;
@@ -16,9 +14,10 @@ interface Player {
 export class Game {
   players: Player[];
   map: Tile[][] = [];
-  turn: number;
+  turn: number = 0;
   mapWidth: number = 10;
   mapHeight: number = 10;
+  lossers: string[] = [];
 
   constructor(players: { id: string; url: string }[], private cleanUp: (outCome: string[] | null) => void) {
     this.players = players.map(({ id, url }) => ({
@@ -28,7 +27,6 @@ export class Game {
       coins: 100,
       logs: [],
     }));
-    this.turn = 0;
   }
 
   generateMap() {
@@ -96,8 +94,8 @@ export class Game {
             }),
           );
         });
-
-        this.cleanUp([winner!.id, ...lossers]);
+        console.log(`Game Over. the winner was ${winner?.id}. the losers were ${this.lossers}`);
+        this.cleanUp([winner!.id, ...this.lossers]);
         break;
       }
       if (this.turn > 25) {
@@ -200,7 +198,7 @@ export class Game {
         }
       });
 
-      console.log(response.logs);
+      // console.log(response.logs);
 
       player.logs = response.logs || [];
       return response;
@@ -377,7 +375,7 @@ export class Game {
         const enemyPlayer = this.players.find((p) => p.id === targetTile.owner);
         if (enemyPlayer) {
           enemyPlayer.basePosition = undefined;
-          lossers.push(enemyPlayer.id);
+          this.lossers.push(enemyPlayer.id);
         }
       }
       return;
