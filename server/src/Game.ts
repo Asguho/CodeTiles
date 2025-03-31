@@ -329,7 +329,7 @@ export class Game {
     const distanceToTarget = Math.sqrt(
       Math.pow(unit.position.x - target.x, 2) + Math.pow(unit.position.y - target.y, 2),
     );
-    const attackRange = unit.type === "melee" ? 1 : 3;
+    const attackRange = this.gameSettings.unit[unit.type].range;
     if (distanceToTarget > attackRange) {
       player.logs.push({
         type: "error",
