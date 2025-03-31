@@ -361,8 +361,15 @@ export class Game {
     });
 
     // Check if there's an enemy base at target position
-    const targetTile = this.map[target.y][target.x];
-    if (targetTile.type === "base" && targetTile.owner !== player.id) {
+    const targetTile = this.map?.[target.y]?.[target.x];
+    if (!targetTile) {
+      player.logs.push({
+        type: "error",
+        values: [`SERVER: Invalid target position (${target.x},${target.y})`],
+      });
+      return;
+    }
+    if (targetTile?.type === "base" && targetTile.owner !== player.id) {
       const damage = unit.type === "melee" ? 15 : 10;
       console.log(`Unit ${unit.id} (${unit.type}) attacks enemy base for ${damage} damage`);
       targetTile.health! -= damage;
