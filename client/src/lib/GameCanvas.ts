@@ -101,6 +101,8 @@ export function setupGameCanvas(canvas: HTMLCanvasElement) {
 	// Create a container for the canvas and overlay elements
 	const container = document.createElement('div');
 	container.style.position = 'relative';
+	container.style.width = '100%';
+	container.style.height = '100%';
 	canvas.parentNode?.insertBefore(container, canvas);
 	container.appendChild(canvas);
 
