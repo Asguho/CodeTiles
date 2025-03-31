@@ -160,6 +160,9 @@ export class Game {
     );
     const responses = await Promise.all(playerRequests);
     responses.forEach((response, index) => {
+      if (!this.players[index].basePosition) {
+        return;
+      }
       this.processActions(this.players[index], response);
     });
   }
