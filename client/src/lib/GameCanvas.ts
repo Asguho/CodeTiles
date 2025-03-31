@@ -85,6 +85,8 @@ let previousGameState: TurnData | null = null;
 let animationFrameId: number | null = null;
 let animationStartTime: number | null = null;
 const ANIMATION_DURATION = 100; // Animation duration in milliseconds
+const HEALTH_BAR_HEIGHT = 4; // Height of the health bar in pixels
+const HEALTH_BAR_OFFSET = 2; // Offset above the unit in pixels
 
 // Store unit animation states
 type AnimatedUnit = {
@@ -375,11 +377,41 @@ function renderGame(canvas: HTMLCanvasElement, gameState: TurnData) {
 			// Add data attribute to identify the unit
 			gifElement.dataset.unitId = unit.id;
 
+			// Create health bar container div
+			const healthBarContainer = document.createElement('div');
+			healthBarContainer.style.position = 'absolute';
+			healthBarContainer.style.left = `${xPos}px`;
+			healthBarContainer.style.top = `${yPos - HEALTH_BAR_HEIGHT - HEALTH_BAR_OFFSET}px`;
+			healthBarContainer.style.width = `${unitSize}px`;
+			healthBarContainer.style.height = `${HEALTH_BAR_HEIGHT}px`;
+			healthBarContainer.style.backgroundColor = '#333333';
+
+			// Create health bar fill div
+			const healthBarFill = document.createElement('div');
+			healthBarFill.style.width = `${(unit.health / 100) * 100}%`;
+			healthBarFill.style.height = '100%';
+			healthBarFill.style.backgroundColor =
+				unit.health > 50 ? '#00FF00' : unit.health > 25 ? '#FFFF00' : '#FF0000';
+
+			healthBarContainer.appendChild(healthBarFill);
+			unitOverlays.appendChild(healthBarContainer);
 			unitOverlays.appendChild(gifElement);
 		} else {
 			// Fallback to rectangle
 			ctx.fillStyle = '#FF9900'; // Orange fallback
 			ctx.fillRect(xPos, yPos, unitSize, unitSize);
+
+			// Draw health bar for fallback rectangles
+			const healthBarWidth = unitSize * (unit.health / 100);
+			ctx.fillStyle = '#333333';
+			ctx.fillRect(xPos, yPos - HEALTH_BAR_HEIGHT - HEALTH_BAR_OFFSET, unitSize, HEALTH_BAR_HEIGHT);
+			ctx.fillStyle = unit.health > 50 ? '#00FF00' : unit.health > 25 ? '#FFFF00' : '#FF0000';
+			ctx.fillRect(
+				xPos,
+				yPos - HEALTH_BAR_HEIGHT - HEALTH_BAR_OFFSET,
+				healthBarWidth,
+				HEALTH_BAR_HEIGHT
+			);
 		}
 	});
 
