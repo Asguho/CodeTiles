@@ -87,6 +87,7 @@ let animationStartTime: number | null = null;
 const ANIMATION_DURATION = 100; // Animation duration in milliseconds
 const HEALTH_BAR_HEIGHT = 4; // Height of the health bar in pixels
 const HEALTH_BAR_OFFSET = 2; // Offset above the unit in pixels
+const ENEMY_LABEL_OFFSET = -7; // Offset for enemy label above health bar
 
 // Store unit animation states
 type AnimatedUnit = {
@@ -348,6 +349,13 @@ function renderGame(canvas: HTMLCanvasElement, gameState: TurnData) {
 
 	// Draw units with their current animated position
 	gameState.units.forEach((unit) => {
+		// Skip enemy units in fog of war
+		const unitCell = gameState.map[Math.floor(unit.position.y)][Math.floor(unit.position.x)];
+		const isEnemy = unit.owner !== gameState.playerId;
+		if (isEnemy && unitCell.type === 'unknown') {
+			return;
+		}
+
 		// Get animated position if available, otherwise use the actual position
 		let displayPos = { ...unit.position };
 		const animatedPos = animatedPositions.get(unit.id);
@@ -395,6 +403,22 @@ function renderGame(canvas: HTMLCanvasElement, gameState: TurnData) {
 
 			healthBarContainer.appendChild(healthBarFill);
 			unitOverlays.appendChild(healthBarContainer);
+
+			// Add enemy label if unit is an enemy
+			if (isEnemy) {
+				const enemyLabel = document.createElement('div');
+				enemyLabel.style.position = 'absolute';
+				enemyLabel.style.left = `${xPos}px`;
+				enemyLabel.style.top = `${yPos - HEALTH_BAR_HEIGHT - HEALTH_BAR_OFFSET - ENEMY_LABEL_OFFSET}px`;
+				enemyLabel.style.width = `${unitSize}px`;
+				enemyLabel.style.textAlign = 'center';
+				enemyLabel.style.color = '#FF0000';
+				enemyLabel.style.fontSize = '12px';
+				enemyLabel.style.fontFamily = 'Arial';
+				enemyLabel.textContent = 'ENEMY';
+				unitOverlays.appendChild(enemyLabel);
+			}
+
 			unitOverlays.appendChild(gifElement);
 		} else {
 			// Fallback to rectangle
@@ -412,6 +436,18 @@ function renderGame(canvas: HTMLCanvasElement, gameState: TurnData) {
 				healthBarWidth,
 				HEALTH_BAR_HEIGHT
 			);
+
+			// Draw enemy label if unit is an enemy
+			if (isEnemy) {
+				ctx.fillStyle = '#FF0000';
+				ctx.font = '12px Arial';
+				ctx.textAlign = 'center';
+				ctx.fillText(
+					'ENEMY',
+					xPos + unitSize / 2,
+					yPos - HEALTH_BAR_HEIGHT - HEALTH_BAR_OFFSET - ENEMY_LABEL_OFFSET + 12
+				);
+			}
 		}
 	});
 
