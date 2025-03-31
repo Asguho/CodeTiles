@@ -14,6 +14,7 @@ export interface GameSettings {
       attack: number;
       range: number;
       price: number;
+      damage?: number;
     };
   };
 }

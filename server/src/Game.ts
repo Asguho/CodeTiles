@@ -20,7 +20,12 @@ export class Game {
   lossers: string[] = [];
   isFogOfWar: boolean = false;
   gameSettings: GameSettings;
-  constructor(players: { id: string; url: string }[], gameSettings: GameSettings, private cleanUp: (outCome: string[] | null) => void) {
+  constructor(
+    players: { id: string; url: string }[],
+    gameSettings: GameSettings,
+    private cleanUp: (outCome: string[] | null) => void,
+    private callback?: (game: Game) => void,
+  ) {
     this.players = players.map(({ id, url }) => ({
       id,
       serverUrl: url,
@@ -117,6 +122,11 @@ export class Game {
       }
 
       this.resetUnitActions();
+      if (this.callback !== undefined) {
+        this.callback(this);
+      }
+      // const turnData = this.createPayload(this.players[0]);
+      // this.callback(turnData);
       await this.processTurn();
     }
   }
