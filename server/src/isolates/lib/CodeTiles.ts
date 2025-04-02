@@ -1,4 +1,4 @@
-import type { Direction, LogEntry, ShopAction, TileType, TurnData, UnitAction, UnitType } from "../../types.ts";
+import type { Direction, LogEntry, Miner, ShopAction, TileType, TurnData, UnitAction, UnitType } from "../../types.ts";
 import { type Cords, Pathfinding } from "./pathfinding.ts";
 
 class Unit {
@@ -75,12 +75,25 @@ class RangedUnit extends Unit {
   }
 }
 class MinerUnit extends Unit {
+  inventory: { ore: number };
   mine(target: Tile) {
     this.codeTiles.addAction({
       type: "mine",
       unitId: this.id,
       target: target.position,
     });
+  }
+
+  sell(){
+    this.codeTiles.addAction({
+      type: "sell",
+      unitId: this.id,
+    });
+  }
+  
+  constructor(id: string, health: number, owner: string, type: UnitType, position: { x: number; y: number }, codeTiles: CodeTiles, inventory: { ore: number }) {
+    super(id, health, owner, type, position, codeTiles);
+    this.inventory = inventory;
   }
 }
 
@@ -209,6 +222,7 @@ class Game {
             unitData.type,
             unitData.position,
             codeTiles,
+            (unitData as Miner).inventory,
           );
         default:
           return new Unit(

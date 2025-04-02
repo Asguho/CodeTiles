@@ -242,6 +242,10 @@ export class Game {
         case "mine":
           this.mineResource(player, unit);
           break;
+        case "sell":
+          this.sellResource(player, unit);
+          break;
+        
       }
 
       unit.actionTaken = true;
@@ -253,6 +257,57 @@ export class Game {
         this.buyUnit(player, order.item, order.quantity);
       }
     });
+  }
+  // Sells resources from a miner unit
+  sellResource(player: Player, unit: Unit) {
+    if (unit.owner !== player.id) {
+      player.logs.push({
+        type: "error",
+        values: [
+          `SERVER: Player ${player.id} is not allowed to sell resources with unit ${unit.id}`,
+        ],
+      });
+      return;
+    }
+
+    if (unit.type !== "miner") {
+      player.logs.push({
+        type: "error",
+        values: [`SERVER: Only miner units can sell resources.`],
+      });
+      return;
+    }
+
+    const miner = unit as Miner;
+    if (miner.inventory.ore <= 0) {
+      player.logs.push({
+        type: "error",
+        values: [`SERVER: Miner unit ${unit.id} has no ore to sell.`],
+      });
+      return;
+    }
+
+    // Check if the unit is at the player's base
+    if (!player.basePosition ||
+        unit.position.x !== player.basePosition.x ||
+        unit.position.y !== player.basePosition.y) {
+      player.logs.push({
+        type: "error",
+        values: [`SERVER: Miner can only sell resources at their own base.`],
+      });
+      return;
+    }
+
+    // Sell the ore
+    const oreValue = 20;
+    const totalValue = miner.inventory.ore * oreValue;
+    player.coins += totalValue;
+    
+    console.log(
+      `Miner unit ${unit.id} sold ${miner.inventory.ore} ore for ${totalValue} coins.`
+    );
+    
+    miner.inventory.ore = 0;
   }
 
   // Moves a unit in the specified direction
@@ -413,6 +468,14 @@ export class Game {
       });
       return;
     }
+
+    if(unit.type !== "miner") {
+      player.logs.push({
+        type: "error",
+        values: [`SERVER: Only miner units can mine resources.`],
+      });
+      return;
+    }
     const pos = unit.position;
     const tile = this.map[pos.y][pos.x];
     if (tile.type === "ore") {
@@ -420,7 +483,7 @@ export class Game {
         `Miner unit ${unit.id} is mining at (${pos.x},${pos.y}). Resources collected!`,
       );
       // player.coins += 20;
-      // (unit as Miner).inventory.ore += 1;
+      (unit as Miner).inventory.ore += 1;
 
       this.map[pos.y][pos.x] = { ...tile, type: "ground" };
     } else {
@@ -465,6 +528,7 @@ export class Game {
         health: this.gameSettings.unit[item].health,
         owner: player.id,
         actionTaken: false,
+        ...(item === "miner" ? { inventory: { ore: 0 } } : {})
       };
       player.units.push(newUnit);
     }
