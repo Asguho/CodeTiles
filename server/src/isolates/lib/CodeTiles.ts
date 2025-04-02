@@ -54,6 +54,15 @@ class Unit {
   isOwnedBy(playerId: string) {
     return this.owner === playerId;
   }
+  isMiner(): this is MinerUnit {
+    return this.type === "miner";
+  }
+  isMelee(): this is MeleeUnit {
+    return this.type === "melee";
+  }
+  isRanged(): this is RangedUnit {
+    return this.type === "ranged";
+  }
 }
 class MeleeUnit extends Unit {
   attack(position: Position) {
@@ -104,6 +113,9 @@ class Tile {
   constructor(type: TileType, position: { x: number; y: number }) {
     this.type = type;
     this.position = position;
+  }
+  isBase(): this is Base {
+    return this.type === "base";
   }
 }
 
