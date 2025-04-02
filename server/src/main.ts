@@ -62,12 +62,60 @@ const routes: Route[] = [
         status: 204,
         headers: corsHeaders,
       });
-    },
-  },
-  {
-    method: "POST",
-    pattern: new URLPattern({ pathname: "/api/start_game" }),
-    handler: async (req: Request) => {
+        },
+      },
+      {
+        method: "GET",
+        pattern: new URLPattern({ pathname: "/api/stats" }),
+        handler: async (req: Request) => {
+      const sessionCookie = getCookies(req.headers)["auth-session"];
+      if (!sessionCookie) {
+        return new Response("Unauthorized | no cookie", {
+          status: 401,
+          headers: corsHeaders,
+        });
+      }
+      const { session, user } = await validateSessionToken(sessionCookie);
+      if (!session || !user) {
+        return new Response("Unauthorized | invalid cookie", {
+          status: 401,
+          headers: corsHeaders,
+        });
+      }
+
+      // Get user stats
+      const userStats = await db.select().from(table.user).where(eq(table.user.id, user.id)).limit(1);
+      
+      // Get leaderboard around player (5 above and 5 below)
+      const leaderboard = await db
+        .select({
+          id: table.user.id,
+          username: table.user.username,
+          elo: table.user.elo,
+        })
+        .from(table.user)
+        .orderBy(desc(table.user.elo))
+        .limit(11);  // Get 11 to account for the current user
+
+      // Find user's rank
+      const userRank = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(table.user)
+        .where(sql`${table.user.elo} > ${user.elo}`);
+      
+      const rank = userRank[0].count + 1;
+
+      return Response.json({
+        user: userStats[0],
+        rank,
+        leaderboard,
+      }, { headers: corsHeaders });
+        },
+      },
+      {
+        method: "POST",
+        pattern: new URLPattern({ pathname: "/api/start_game" }),
+        handler: async (req: Request) => {
       const sessionCookie = getCookies(req.headers)["auth-session"];
       if (!sessionCookie) {
         return new Response("Unauthorized | no cookie", {
