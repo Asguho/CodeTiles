@@ -1,37 +1,36 @@
 <script lang="ts">
-	const tasks = [
-		{ id: 1, name: 'Buy a miner unit', completed: false },
-		{ id: 2, name: 'Move a unit', completed: false },
-		{ id: 3, name: 'Find nearest ore', completed: false },
-		{ id: 4, name: 'Go to ore position', completed: false },
-		{ id: 5, name: 'Mine ore', completed: false },
-		{ id: 6, name: 'console.log a message', completed: false },
-		{ id: 7, name: 'Buy a melee unit', completed: false },
-		{ id: 8, name: 'Find enemy', completed: false },
-		{ id: 9, name: 'Go to enemy position', completed: false },
-		{ id: 10, name: 'Attack enemy', completed: false }
-	];
+	import SvelteMarkdown from 'svelte-markdown';
 
-	function toggleTaskCompletion(taskId: number) {
-		const task = tasks.find((t) => t.id === taskId);
-		if (task) {
-			task.completed = !task.completed;
+	const { tutorialJson } = $props();
+
+	let goals: { name: string; completed: boolean; id: string; tutorial: string }[] = $state([]);
+	$effect(() => {
+		if (tutorialJson && tutorialJson.goals) {
+			goals = tutorialJson.goals.map(
+				(goal: { name: string; completed: boolean; id: number; tutorial: string }) => {
+					return {
+						name: goal.name,
+						completed: goal.completed,
+						tutorial: goal.tutorial,
+						id: goal.id
+					};
+				}
+			);
 		}
-	}
-
-	//show tasks always in the order of the tasks array but only show the next uncompleted task
+	});
+	//show goals always in the order of the goals array but only show the next uncompleted goal
 	//eg.
-	//if task 1 is completed, show task 1,2
-	//if task 1 and 2 are completed, show task 1,2,3
-	let tasksToShow: typeof tasks = $state([]);
+	//if goal 1 is completed, show goal 1,2
+	//if goal 1 and 2 are completed, show goal 1,2,3
+	let goalsToShow: typeof goals = $state([]);
 
 	$effect(() => {
-		const completedTasks = tasks.filter((task) => task.completed);
-		const nextUncompletedTask = tasks.find((task) => !task.completed);
-		if (nextUncompletedTask) {
-			tasksToShow = tasks.slice(0, tasks.indexOf(nextUncompletedTask) + 1);
+		/* const completedGoals = goals.filter((goal) => goal.completed); */
+		const nextUncompletedGoal = goals.find((goal) => !goal.completed);
+		if (nextUncompletedGoal) {
+			goalsToShow = goals.slice(0, goals.indexOf(nextUncompletedGoal) + 1);
 		} else {
-			tasksToShow = tasks;
+			goalsToShow = goals;
 		}
 	});
 </script>
@@ -39,18 +38,26 @@
 <div class="flex h-96 w-full flex-col items-start justify-start">
 	<!-- <div class="flex flex-row items-center justify-start gap-2">
 		<span class="flex size-6 items-center justify-center rounded-full bg-red-500"> X </span>
-		<span> 1. Task Name </span>
+		<span> 1. Goal Name </span>
 	</div> -->
 
 	<!-- <span class="h-6 w-3 border-r-[1px] border-stone-500"> </span> -->
-	{#each tasksToShow as task, i}
+	{#each goalsToShow as goal, i}
 		<div class="flex flex-row items-center justify-start gap-2">
 			<span class="flex size-6 items-center justify-center rounded-full border-2 border-stone-600">
-				{task.completed ? '✓' : 'X'}
+				{goal.completed ? '✓' : 'X'}
 			</span>
-			<span>{i + 1}. {task.name}</span>
+			<span>{i + 1}. {goal.name}</span>
 		</div>
-		{#if i < tasksToShow.length - 1}
+		{#if i == goalsToShow.length - 1}
+			<div
+				class="prose prose-invert prose-stone mt-4 w-full rounded-2xl border-2 border-stone-600 bg-stone-800 p-4"
+			>
+				<h2 class="text-2xl font-bold">Tutorial</h2>
+				<SvelteMarkdown source={goal.tutorial} />
+			</div>
+		{/if}
+		{#if i < goalsToShow.length - 1}
 			<span class="h-6 w-3 border-r-2 border-stone-600"></span>
 		{/if}
 	{/each}

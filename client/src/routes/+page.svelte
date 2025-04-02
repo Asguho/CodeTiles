@@ -51,6 +51,8 @@
 		uploading = false;
 	}
 
+	let tutorialJson = $state({});
+
 	const url = new URL(`/ws`, BASE_URL || location.href);
 	url.protocol = url.protocol.replace('http', 'ws');
 	let ws = new WebSocket(url.toString());
@@ -69,6 +71,9 @@
 				ingestLogs(consoleElement!, json.logs);
 			} else if (json?.type === 'LOG') {
 				ingestLogs(consoleElement!, json.logs);
+			} else if (json?.type === 'tutorial_complete') {
+				console.log('Tutorial complete!');
+				tutorialJson = json;
 			}
 		} catch (error) {
 			console.error('WEBSOKET DATA NOT JSON', event.data, error);
@@ -102,7 +107,7 @@
 		}
 		try {
 			uploading = true;
-			await fetch(BASE_URL + '/api/start_game', {
+			await fetch(`${BASE_URL}/api/start_game${isTutorial ? '?tutorial=true' : ''}`, {
 				method: 'POST',
 				credentials: 'include'
 			});
@@ -226,7 +231,7 @@
 					class="prose prose-invert h-full max-w-full overflow-y-auto rounded-lg border-2 border-zinc-700 bg-zinc-800 p-2 text-zinc-200"
 				>
 					<SvelteMarkdown source={md}></SvelteMarkdown>
-					<TaskRenderer />
+					<TaskRenderer {tutorialJson} />
 				</div>
 			{/await}
 		</Pane>
