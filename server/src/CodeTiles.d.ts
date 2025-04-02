@@ -13,7 +13,6 @@ interface Unit {
   position: Position;
   actionTaken?: boolean;
 }
-
 declare class Unit {
   id: string;
   health: number;
@@ -33,6 +32,30 @@ declare class Unit {
     y: number;
   }, map: Tile[][]): void;
   isOwnedBy(playerId: string): boolean;
+  isMiner(): this is MinerUnit;
+  isMelee(): this is MeleeUnit;
+  isRanged(): this is RangedUnit;
+}
+
+interface MeleeUnit extends Unit {
+  attack(target: {
+    x: number;
+    y: number;
+  }): void;
+}
+interface RangedUnit extends Unit {
+  attack(target: {
+    x: number;
+    y: number;
+  }): void;
+}
+
+interface MinerUnit extends Unit {
+  inventory: {
+    ore: number;
+  };
+  mine(target: Tile): void;
+  sell(): void;
 }
 declare class Tile {
   type: TileType;
@@ -44,7 +67,10 @@ declare class Tile {
     x: number;
     y: number;
   });
+
+  isBase(): this is Base;
 }
+
 declare class Base extends Tile {
   owner: string;
   health: number;
