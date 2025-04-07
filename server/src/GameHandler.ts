@@ -199,7 +199,7 @@ export class GameHandler {
 
     // Initialize tutorial game with AI opponent
     const game = new Game(
-      [player],
+      [player, { id: "AI", url: "https://important-dolphin-28-y3krkksasm7e.deno.dev/" }],
       gameSettings,
       () => {
         // Send final results when game ends
