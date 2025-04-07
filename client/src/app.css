@@ -1,2 +1,16 @@
 @import 'tailwindcss';
 @plugin "@tailwindcss/typography";
+
+::-webkit-scrollbar {
+	background-color: #ffffff00;
+	border-radius: 10px;
+	width: 10px;
+	height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+	background-color: oklch(55.6% 0 0);
+	border-radius: 10px;
+	width: 10px;
+	height: 10px;
+}
