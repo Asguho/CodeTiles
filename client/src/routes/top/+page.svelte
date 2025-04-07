@@ -48,9 +48,7 @@
 
 <div class="min-h-screen w-full bg-stone-950">
 	<a class="text-white" href="/">Back</a>
-	<div
-		class="container mx-auto mt-4 mt-6 w-full rounded-2xl border-2 border-stone-600 p-2 text-white"
-	>
+	<div class="container mx-auto mt-4 w-full rounded-2xl border-2 border-stone-600 p-2 text-white">
 		<h1 class="text-3xl text-amber-400">Your Leaderboard</h1>
 		{#await fetchTopPlayers()}
 			<!-- promise is pending -->
