@@ -162,8 +162,9 @@
 		<div
 			class="flex flex-row gap-2 *:rounded-md *:border *:border-zinc-700 *:bg-zinc-800 *:p-1 *:px-2 *:text-zinc-200"
 		>
-			<label for="tutorial" class="text-sm text-zinc-200"
-				><input type="checkbox" bind:checked={isTutorial} id="tutorial" />Tutorial</label
+			<label for="tutorial" class="flex items-baseline gap-2 text-sm text-zinc-200"
+				><input type="checkbox" bind:checked={isTutorial} id="tutorial" /><span>Tutorial</span
+				></label
 			>
 			<!-- <button
 				class=""
