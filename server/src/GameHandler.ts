@@ -7,10 +7,10 @@ import { socketHandler } from "./SocketHandler.ts";
 
 const gameSettings: GameSettings = {
   map: {
-    width: 20,
-    height: 20,
+    width: 15,
+    height: 15,
   },
-  maxTurns: 25,
+  maxTurns: 50,
   fogOfWar: false,
   unit: {
     melee: { health: 100, attack: 20, range: 1, price: 50, damage: 20 },
@@ -187,11 +187,29 @@ export class GameHandler {
         buyAttackUnitGoal.completed = true;
       }
 
-      // Check if player has won the game
-      const winGameGoal = goals.find((g) => g.name === "winGame");
-      if (winGameGoal && !winGameGoal.completed && game.isGameOver()) {
-        winGameGoal.completed = true;
+      // Check if player has attacked an enemy unit
+      const attackEnemyUnitGoal = goals.find((g) => g.name === "attackEnemyUnit");
+      if (
+        attackEnemyUnitGoal &&
+        !attackEnemyUnitGoal.completed &&
+        game.players[1].units.some((unit) => unit.health < game.gameSettings.unit[unit.type].health)
+      ) {
+        attackEnemyUnitGoal.completed = true;
       }
+
+      // Check if player has attacked an enemy base
+      const attackEnemyBaseGoal = goals.find((g) => g.name === "attackEnemyBase");
+      const enemyBase = game.players[1].basePosition;
+      if (
+        attackEnemyBaseGoal &&
+        !attackEnemyBaseGoal.completed &&
+        enemyBase &&
+        (game.map[enemyBase.y][enemyBase.x] as any).health < 100
+      ) {
+        attackEnemyBaseGoal.completed = true;
+      }
+
+      // Check if player has won the game
 
       // Send complete summary at the end of each turn
       sendGoalUpdate(game);
@@ -203,6 +221,11 @@ export class GameHandler {
       gameSettings,
       () => {
         // Send final results when game ends
+        const winGameGoal = goals.find((g) => g.name === "winGame");
+        if (winGameGoal && !winGameGoal.completed) {
+          winGameGoal.completed = true;
+        }
+
         const player = game.players[0];
         const completedGoals = goals.filter((goal) => goal.completed).length;
         const message = {
