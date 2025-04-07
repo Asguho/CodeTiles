@@ -2,7 +2,7 @@
 	import SvelteMarkdown from 'svelte-markdown';
 	import CodeBlockRenderer from '$lib/CodeBlockRenderer.svelte';
 
-	const { tutorialJson } = $props();
+	const { tutorialJson = $bindable() } = $props();
 
 	let goals: { name: string; completed: boolean; id: string; tutorial: string }[] = $state([]);
 	$effect(() => {
@@ -56,7 +56,7 @@
 		</div>
 		{#if i == goalsToShow.length - 1}
 			<div
-				class="prose prose-invert prose-stone mt-4 w-full rounded-2xl border-2 border-stone-600 bg-stone-800 p-4"
+				class="prose prose-invert prose-stone mt-4 w-full rounded-2xl border-2 border-stone-600 p-2"
 			>
 				<h2 class="text-2xl font-bold">Tutorial</h2>
 				<SvelteMarkdown renderers={{ code: CodeBlockRenderer }} source={goal.tutorial} />

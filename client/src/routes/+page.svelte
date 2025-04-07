@@ -72,7 +72,7 @@
 				ingestLogs(consoleElement!, json.logs);
 			} else if (json?.type === 'LOG') {
 				ingestLogs(consoleElement!, json.logs);
-			} else if (json?.type === 'tutorial_complete') {
+			} else if (json?.type === 'tutorial_complete' || json?.type === 'tutorial_progress') {
 				console.log('Tutorial complete!');
 				tutorialJson = json;
 			}
@@ -108,6 +108,7 @@
 		}
 		try {
 			uploading = true;
+			tutorialJson = {};
 			await fetch(`${BASE_URL}/api/start_game${isTutorial ? '?tutorial=true' : ''}`, {
 				method: 'POST',
 				credentials: 'include'
@@ -232,7 +233,7 @@
 				<div
 					class="prose prose-invert h-full max-w-full overflow-y-auto rounded-lg border-2 border-zinc-700 bg-zinc-800 p-2 text-zinc-200"
 				>
-					<TaskRenderer {tutorialJson} />
+					<TaskRenderer bind:tutorialJson />
 					<div class="border-1 my-6 w-full border-stone-500/50"></div>
 					<SvelteMarkdown renderers={{ code: CodeBlockRenderer }} source={md}></SvelteMarkdown>
 				</div>
