@@ -105,7 +105,7 @@ export class Game {
         this.cleanUp([winner!.id, ...this.lossers]);
         break;
       }
-      if (this.turn > 25) {
+      if (this.turn > this.gameSettings.maxTurns) {
         sendMapToPlayers("Game over due to time limit.");
         this.players.forEach((player) => {
           socketHandler.sendMessage(
