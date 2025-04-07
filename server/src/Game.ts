@@ -15,8 +15,6 @@ export class Game {
   players: Player[];
   map: Tile[][] = [];
   turn: number = 0;
-  mapWidth: number = 10;
-  mapHeight: number = 10;
   lossers: string[] = [];
   isFogOfWar: boolean = false;
   gameSettings: GameSettings;
@@ -27,7 +25,7 @@ export class Game {
     private cleanUp: (outCome: string[] | null) => void,
     private callback?: (game: Game) => void,
   ) {
-    this.players = players.map(({ id, url }) => ({
+    this.players = [...players].sort(() => Math.random() - 0.5).map(({ id, url }) => ({
       id,
       serverUrl: url,
       units: [],
