@@ -137,7 +137,7 @@ export class Game {
   isGameOver(): boolean {
     // check if we are in the tutorial mode
     if (this.playersInTheStart.length === 1) {
-      return true;
+      return false;
     }
     return this.players.filter((player) => player.basePosition).length <= 1;
   }
