@@ -35,7 +35,7 @@
 	});
 </script>
 
-<div class="flex h-96 w-full flex-col items-start justify-start">
+<div class="flex h-fit w-full flex-col items-start justify-start">
 	<!-- <div class="flex flex-row items-center justify-start gap-2">
 		<span class="flex size-6 items-center justify-center rounded-full bg-red-500"> X </span>
 		<span> 1. Goal Name </span>
@@ -44,9 +44,13 @@
 	<!-- <span class="h-6 w-3 border-r-[1px] border-stone-500"> </span> -->
 	{#each goalsToShow as goal, i}
 		<div class="flex flex-row items-center justify-start gap-2">
-			<span class="flex size-6 items-center justify-center rounded-full border-2 border-stone-600">
-				{goal.completed ? '✓' : 'X'}
-			</span>
+			{#if goal.completed}
+				<!-- prettier-ignore -->
+				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide stroke-green-500 lucide-check-icon lucide-check"><path d="M20 6 9 17l-5-5"/></svg>
+			{:else}
+				<!-- prettier-ignore -->
+				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide stroke-red-500 lucide-x-icon lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+			{/if}
 			<span>{i + 1}. {goal.name}</span>
 		</div>
 		{#if i == goalsToShow.length - 1}
@@ -60,5 +64,7 @@
 		{#if i < goalsToShow.length - 1}
 			<span class="h-6 w-3 border-r-2 border-stone-600"></span>
 		{/if}
+	{:else}
+		<p class="text-red-500">Run game to load tasks!!</p>
 	{/each}
 </div>
