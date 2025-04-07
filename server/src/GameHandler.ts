@@ -7,8 +7,8 @@ import { socketHandler } from "./SocketHandler.ts";
 
 const gameSettings: GameSettings = {
   map: {
-    width: 10,
-    height: 10,
+    width: 20,
+    height: 20,
   },
   maxTurns: 25,
   fogOfWar: false,

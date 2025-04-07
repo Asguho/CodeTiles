@@ -15,8 +15,6 @@ export class Game {
   players: Player[];
   map: Tile[][] = [];
   turn: number = 0;
-  mapWidth: number = 10;
-  mapHeight: number = 10;
   lossers: string[] = [];
   isFogOfWar: boolean = false;
   gameSettings: GameSettings;
