@@ -19,6 +19,7 @@
 		"@tailwindcss/typography": "^0.5.16",
 		"monaco-editor": "^0.52.2",
 		"paneforge": "^0.0.6",
+		"shiki": "^3.2.1",
 		"svelte-markdown": "^0.4.1"
 	},
 	"devDependencies": {

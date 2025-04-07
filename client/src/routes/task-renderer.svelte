@@ -1,5 +1,6 @@
 <script lang="ts">
 	import SvelteMarkdown from 'svelte-markdown';
+	import CodeBlockRenderer from '$lib/CodeBlockRenderer.svelte';
 
 	const { tutorialJson } = $props();
 
@@ -58,7 +59,7 @@
 				class="prose prose-invert prose-stone mt-4 w-full rounded-2xl border-2 border-stone-600 bg-stone-800 p-4"
 			>
 				<h2 class="text-2xl font-bold">Tutorial</h2>
-				<SvelteMarkdown source={goal.tutorial} />
+				<SvelteMarkdown renderers={{ code: CodeBlockRenderer }} source={goal.tutorial} />
 			</div>
 		{/if}
 		{#if i < goalsToShow.length - 1}

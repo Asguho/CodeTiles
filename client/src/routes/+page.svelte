@@ -7,6 +7,7 @@
 	import { PaneGroup, Pane, PaneResizer, type PaneAPI } from 'paneforge';
 	import { onMount } from 'svelte';
 	import type { TurnData, TurnDataWithLogs } from '../../../server/src/types.js';
+	import CodeBlockRenderer from '$lib/CodeBlockRenderer.svelte';
 
 	let websocketHasClosed = $state(false);
 
@@ -233,7 +234,7 @@
 				>
 					<TaskRenderer {tutorialJson} />
 					<div class="border-1 my-6 w-full border-stone-500/50"></div>
-					<SvelteMarkdown source={md}></SvelteMarkdown>
+					<SvelteMarkdown renderers={{ code: CodeBlockRenderer }} source={md}></SvelteMarkdown>
 				</div>
 			{/await}
 		</Pane>
