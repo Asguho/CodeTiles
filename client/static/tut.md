@@ -36,10 +36,6 @@ CodeTiles.onTurn((game) => {
 
 Inside this callback, you can access the game state through the game object, which provides information about the map, your units, your base, your coins, and the current turn.
 
-### Docs and reference
+<!-- ### Docs and reference
 
-- [Game API](/docs.html): A comprehensive guide to the game API, including all available functions and properties.
-
-## Tasks:
-
-To get the hang of the game, you will need to complete the following tasks:
+- [Game API](/docs.html): A comprehensive guide to the game API, including all available functions and properties. -->
