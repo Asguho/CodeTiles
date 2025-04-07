@@ -20,6 +20,7 @@ export class Game {
   lossers: string[] = [];
   isFogOfWar: boolean = false;
   gameSettings: GameSettings;
+  playersInTheStart: string[] = [];
   constructor(
     players: { id: string; url: string }[],
     gameSettings: GameSettings,
@@ -33,6 +34,7 @@ export class Game {
       coins: 100,
       logs: [],
     }));
+    this.playersInTheStart = this.players.map((player) => player.id);
     this.gameSettings = gameSettings;
   }
 
@@ -133,6 +135,10 @@ export class Game {
 
   // Game over logic can be implemented here
   isGameOver(): boolean {
+    // check if we are in the tutorial mode
+    if (this.playersInTheStart.length === 1) {
+      return true;
+    }
     return this.players.filter((player) => player.basePosition).length <= 1;
   }
   createPayload(player: Player): TurnData {
@@ -245,7 +251,6 @@ export class Game {
         case "sell":
           this.sellResource(player, unit);
           break;
-        
       }
 
       unit.actionTaken = true;
@@ -288,9 +293,11 @@ export class Game {
     }
 
     // Check if the unit is at the player's base
-    if (!player.basePosition ||
-        unit.position.x !== player.basePosition.x ||
-        unit.position.y !== player.basePosition.y) {
+    if (
+      !player.basePosition ||
+      unit.position.x !== player.basePosition.x ||
+      unit.position.y !== player.basePosition.y
+    ) {
       player.logs.push({
         type: "error",
         values: [`SERVER: Miner can only sell resources at their own base.`],
@@ -302,11 +309,11 @@ export class Game {
     const oreValue = 20;
     const totalValue = miner.inventory.ore * oreValue;
     player.coins += totalValue;
-    
+
     console.log(
-      `Miner unit ${unit.id} sold ${miner.inventory.ore} ore for ${totalValue} coins.`
+      `Miner unit ${unit.id} sold ${miner.inventory.ore} ore for ${totalValue} coins.`,
     );
-    
+
     miner.inventory.ore = 0;
   }
 
@@ -469,7 +476,7 @@ export class Game {
       return;
     }
 
-    if(unit.type !== "miner") {
+    if (unit.type !== "miner") {
       player.logs.push({
         type: "error",
         values: [`SERVER: Only miner units can mine resources.`],
@@ -528,7 +535,7 @@ export class Game {
         health: this.gameSettings.unit[item].health,
         owner: player.id,
         actionTaken: false,
-        ...(item === "miner" ? { inventory: { ore: 0 } } : {})
+        ...(item === "miner" ? { inventory: { ore: 0 } } : {}),
       };
       player.units.push(newUnit);
     }
