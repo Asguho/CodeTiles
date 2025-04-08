@@ -36,7 +36,6 @@ class Unit {
     });
   }
   isWithinRange(target: { x: number; y: number }) {
-    console.log("isWithinRange", this.position, target, this.range);
     return Math.pow(this.position.x - target.x, 2) + Math.pow(this.position.y - target.y, 2) <= Math.pow(this.range, 2);
   }
 
