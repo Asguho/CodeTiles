@@ -4,7 +4,14 @@
 
 	const { tutorialJson = $bindable() } = $props();
 
-	let goals: { name: string; completed: boolean; id: string; tutorial: string }[] = $state([]);
+	let goals: { name: string; completed: boolean; id: string; tutorial: string }[] = $state([
+		{
+			tutorial: '',
+			name: 'Run the game',
+			completed: false,
+			id: '0'
+		}
+	]);
 	$effect(() => {
 		if (tutorialJson && tutorialJson.goals) {
 			goals = tutorialJson.goals.map(
