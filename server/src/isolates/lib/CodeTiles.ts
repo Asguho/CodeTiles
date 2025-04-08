@@ -34,6 +34,11 @@ class Unit {
   }
 
   moveTowards(target: { x: number; y: number }, map: Tile[][]) {
+    if (target.x === this.position.x && target.y === this.position.y) {
+      console.warn("Target position is the same as current position.");
+      return;
+    }
+
     const isWalkable = (pos: Cords): boolean => {
       const x = pos.x;
       const y = pos.y;
@@ -43,7 +48,6 @@ class Unit {
       }
       return map[y][x].type !== "wall";
     };
-
     const path = Pathfinding.findPath(this.position, target, isWalkable);
     if (path && path.length > 0) {
       this.move(path[0]);
@@ -93,14 +97,22 @@ class MinerUnit extends Unit {
     });
   }
 
-  sell(){
+  sell() {
     this.codeTiles.addAction({
       type: "sell",
       unitId: this.id,
     });
   }
-  
-  constructor(id: string, health: number, owner: string, type: UnitType, position: { x: number; y: number }, codeTiles: CodeTiles, inventory: { ore: number }) {
+
+  constructor(
+    id: string,
+    health: number,
+    owner: string,
+    type: UnitType,
+    position: { x: number; y: number },
+    codeTiles: CodeTiles,
+    inventory: { ore: number },
+  ) {
     super(id, health, owner, type, position, codeTiles);
     this.inventory = inventory;
   }

@@ -83,5 +83,9 @@ export async function setupEditor(el: HTMLElement) {
 }
 
 export const DEFAULT_VAL = /*js*/ `CodeTiles.onTurn((game)=>{
-	game.map.forEach((row)=>console.log(row));
+	// Your code goes here
+	// All the code in here runs each turn
+	// You can use the game object to access the game state and make decisions
+	
+	console.log("Hello world!");
 });`;
