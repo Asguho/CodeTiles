@@ -31,6 +31,7 @@ await expect(loginButton).toBeVisible();
 
 
 test('AUTH - signup works', async ({ page }) => {
+  await page.context().clearCookies();
   await page.goto('/signup.html'); // Adjust the path to your signup page
   // Fill in the signup form
   await page.fill('input[name="username"]', randomName); // Adjust selector as needed
@@ -38,9 +39,19 @@ test('AUTH - signup works', async ({ page }) => {
   await page.click('button[type="submit"]'); // Adjust selector as needed
   // Wait for navigation after signup
   await page.waitForNavigation();
-  // Check if signup was successful by looking for a specific element on the next page
-  const monacoAriaContainer = page.locator('div.monaco-aria-container');
-  await expect(monacoAriaContainer).toBeVisible();
+  //await auth session cookie
+  const cookies = await page.context().cookies();
+
+  // Find the cookie with the name 'auth-session'
+  const authSessionCookie = cookies.find(cookie => cookie.name === 'auth-session');
+
+  // Assert that the cookie exists
+  expect(authSessionCookie).toBeDefined();
+
+  //remove cookies
+  await page.context().clearCookies();
+
+
 });
 
 
@@ -75,7 +86,16 @@ test('AUTH - login has fields', async ({ page }) => {
     await page.click('button[type="submit"]'); // Adjust selector as needed
     // Wait for navigation after login
     await page.waitForNavigation();
-    // Check if login was successful by looking for a specific element on the next page
-    const monacoAriaContainer = page.locator('div.monaco-aria-container');
-    await expect(monacoAriaContainer).toBeVisible();
+    //await auth session cookie
+    const cookies = await page.context().cookies();
+
+    // Find the cookie with the name 'auth-session'
+    const authSessionCookie = cookies.find(cookie => cookie.name === 'auth-session');
+
+    // Assert that the cookie exists
+    expect(authSessionCookie).toBeDefined();
+
+    //remove cookies
+    await page.context().clearCookies();
+
   });
