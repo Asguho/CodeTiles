@@ -25,7 +25,7 @@ export class Game {
     private cleanUp: (outCome: string[] | null) => void,
     private callback?: (game: Game) => void,
   ) {
-    this.players = [...players].sort(() => Math.random() - 0.5).map(({ id, url }) => ({
+    this.players = players.map(({ id, url }) => ({
       id,
       serverUrl: url,
       units: [],
