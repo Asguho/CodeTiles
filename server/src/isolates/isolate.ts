@@ -7,7 +7,7 @@ export function getCloudCode(code: string) {
 				try {
 					_gameinfo = await req.json();
 				} catch (e) {
-					return Response.json({logs: [{level: "error", values: ["No GameData JSON", "Please open the app through https://codetiles.voe.dk/"]}]})
+					return Response.json({logs: [{type: "error", values: ["No GameData JSON", "Please open the app through https://codetiles.voe.dk/"]}]})
 				}
 				const CodeTiles = new _CodeTiles(_gameinfo);
 
@@ -16,7 +16,7 @@ export function getCloudCode(code: string) {
 					CodeTiles.evaluate();
 				} catch (evalError) {
 					const { actions, logs } = CodeTiles.toJSON();
-					return Response.json({actions, logs: [...logs, {level: "error", values: [evalError.name, evalError.message, evalError.stack]}]})
+					return Response.json({actions, logs: [...logs, {type: "error", values: [evalError.name, evalError.message, evalError.stack]}]})
 				}
 				
 				function removeCircularReferences() {
@@ -37,7 +37,7 @@ export function getCloudCode(code: string) {
 				
 				// return Response.json(CodeTiles)
 			} catch (e: any) {
-				return Response.json({logs: [{level: "error", values: ["Backend code error", e.name, e.message, e.stack]}]})
+				return Response.json({logs: [{type: "error", values: ["Backend code error", e.name, e.message, e.stack]}]})
 			}
 		});
 	`;
