@@ -28,8 +28,7 @@
 
 		let res = await fetch(BASE_URL + '/api/get_code', {
 			method: 'GET',
-			credentials: 'include',
-			mode: 'no-cors'
+			credentials: 'include'
 		});
 		if (res.ok) {
 			let { code } = await res.json();
