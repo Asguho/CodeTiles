@@ -74,8 +74,16 @@ export async function setupEditor(el: HTMLElement) {
 			strings: true,
 			other: true,
 			comments: true
-		}
+		},
+		autoIndent: 'advanced',
+		formatOnPaste: true,
+		formatOnType: true,
+		tabSize: 2
 	});
+
+	setTimeout(() => {
+		editor.getAction('editor.action.formatDocument')?.run();
+	}, 1000);
 
 	console.log('editor setup complete', editor);
 
