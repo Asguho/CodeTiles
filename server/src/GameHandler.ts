@@ -106,7 +106,7 @@ export class GameHandler {
 
       this.games.delete(gameId);
     };
-    const game = new Game(players, gameSettings, cleanUp);
+    const game = new Game([...players].sort(() => Math.random() - 0.5), gameSettings, cleanUp);
     game.start();
     this.games.set(gameId, game);
   }
@@ -219,7 +219,7 @@ export class GameHandler {
       if (
         moveToOreGoal &&
         !moveToOreGoal.completed &&
-        player.units.some((unit) => game.map[unit.position.x][unit.position.y].type === "ore")
+        player.units.some((unit) => game.map[unit.position.y][unit.position.x].type === "ore")
       ) {
         moveToOreGoal.completed = true;
       }

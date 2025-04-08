@@ -2,28 +2,42 @@
 	import SvelteMarkdown from 'svelte-markdown';
 	import CodeBlockRenderer from '$lib/CodeBlockRenderer.svelte';
 
-	const { tutorialJson = $bindable() } = $props();
+	const { tutorialJson = $bindable(), md } = $props();
 
-	let goals: { name: string; completed: boolean; id: string; tutorial: string }[] = $state([
-		{
-			tutorial: '',
+	const firstTask = (isDone: boolean) => {
+		return {
+			tutorial: md,
 			name: 'Run the game',
-			completed: false,
+			completed: isDone,
+			isTutorialOpen: !isDone,
 			id: '0'
-		}
-	]);
+		};
+	};
+
+	let goals: {
+		name: string;
+		completed: boolean;
+		id: string;
+		tutorial: string;
+		isTutorialOpen: boolean;
+	}[] = $state([firstTask(false)]);
+
 	$effect(() => {
 		if (tutorialJson && tutorialJson.goals) {
-			goals = tutorialJson.goals.map(
-				(goal: { name: string; completed: boolean; id: number; tutorial: string }) => {
-					return {
-						name: goal.name,
-						completed: goal.completed,
-						tutorial: goal.tutorial,
-						id: goal.id
-					};
-				}
-			);
+			goals = [
+				firstTask(true),
+				...tutorialJson.goals.map(
+					(goal: { name: string; completed: boolean; id: number; tutorial: string }) => {
+						return {
+							name: goal.name,
+							completed: goal.completed,
+							tutorial: goal.tutorial,
+							isTutorialOpen: !goal.completed,
+							id: goal.id
+						};
+					}
+				)
+			];
 		}
 	});
 	//show goals always in the order of the goals array but only show the next uncompleted goal
@@ -60,19 +74,22 @@
 				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide stroke-red-500 lucide-x-icon lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
 			{/if}
 			<span>{i + 1}. {goal.name}</span>
-		</div>
-		{#if i == goalsToShow.length - 1}
-			<div
-				class="prose prose-invert prose-stone mt-4 w-full rounded-2xl border-2 border-stone-600 p-2"
+			<button
+				class="ml-auto rounded-full bg-stone-600 px-2 py-1 text-sm font-bold text-stone-200 opacity-70 hover:bg-stone-500"
+				onclick={() => (goal.isTutorialOpen = !goal.isTutorialOpen)}
 			>
-				<h2 class="text-2xl font-bold">Tutorial</h2>
+				{goal.isTutorialOpen ? 'Hide' : 'Show'}
+			</button>
+		</div>
+		{#if goal.isTutorialOpen}
+			<div
+				class="prose prose-invert prose-stone ml-[10px] mt-4 w-full rounded-2xl rounded-l-none border-0 border-l-2 border-stone-600 p-2"
+			>
 				<SvelteMarkdown renderers={{ code: CodeBlockRenderer }} source={goal.tutorial} />
 			</div>
 		{/if}
 		{#if i < goalsToShow.length - 1}
 			<span class="h-6 w-3 border-r-2 border-stone-600"></span>
 		{/if}
-	{:else}
-		<p class="text-red-500">Run game to load tasks!!</p>
 	{/each}
 </div>
