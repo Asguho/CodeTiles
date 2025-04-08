@@ -133,7 +133,6 @@ export class Pathfinding {
       const current = coordsMap.get(currentKey)!;
 
       // If we've reached the target, reconstruct and return the path
-      console.log("Current:", current, "End:", end);
       if (current.x === end.x && current.y === end.y) {
         return this.reconstructPath(current, cameFrom);
       }
