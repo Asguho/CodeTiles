@@ -246,9 +246,7 @@
 				<div
 					class="prose prose-invert h-full max-w-full overflow-y-auto rounded-lg border-2 border-zinc-700 bg-zinc-800 p-2 text-zinc-200"
 				>
-					<TaskRenderer bind:tutorialJson />
-					<div class="border-1 my-6 w-full border-stone-500/50"></div>
-					<SvelteMarkdown renderers={{ code: CodeBlockRenderer }} source={md}></SvelteMarkdown>
+					<TaskRenderer {md} bind:tutorialJson />
 				</div>
 			{/await}
 		</Pane>
