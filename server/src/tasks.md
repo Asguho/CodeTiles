@@ -33,7 +33,7 @@ for (const unit of game.units) {
 # mineOre
 I forrige afsnit lærte du at flytte dine `units` hen til en `ore`. Nu skal du lære at mine den. Det kan du gøre ved at kalde `mine` metoden på din `unit` og give den `ore` som parameter.
 
-I eksempelet herunder introducere vi en helper funktion `arePositionsEqual`, som tjekker om to positioner er ens. Det er vigtigt at tjekke, da det kan være at din `unit` ikke er nået hen til `ore` endnu og derfor ikke kan mine den.
+I eksemplet herunder introducerer vi en helper funktion `arePositionsEqual`, som tjekker om to positioner er ens. Det er vigtigt at tjekke, da det kan være at din `unit` ikke er nået hen til `ore` endnu og derfor ikke kan mine den.
 ```ts
 //helper function
 function arePositionsEqual(pos1, pos2) {
