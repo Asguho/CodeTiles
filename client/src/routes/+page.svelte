@@ -26,11 +26,25 @@
 		setupConsole(consoleElement!);
 		codeEditor = await setupEditor(document.getElementById('editor')!);
 
-		let res = await fetch(BASE_URL + '/api/get_code', { method: 'GET', credentials: 'include' });
+		let res = await fetch(BASE_URL + '/api/get_code', {
+			method: 'GET',
+			credentials: 'include',
+			mode: 'no-cors'
+		});
 		if (res.ok) {
 			let { code } = await res.json();
 			codeEditor?.setValue(code);
 			lastSavedcode = code;
+			//if no code is returned, open the tutorial pane
+			if (!code) {
+				isTutorial = true;
+				tutPane?.expand();
+			}
+		} else {
+			console.error('Error fetching code:', res.statusText);
+			//open the tutorial pane if no code is returned
+			isTutorial = true;
+			tutPane?.expand();
 		}
 	});
 
@@ -52,7 +66,7 @@
 		uploading = false;
 	}
 
-	let tutorialJson = $state({});
+	let tutorialJson = $state([]);
 
 	const url = new URL(`/ws`, BASE_URL || location.href);
 	url.protocol = url.protocol.replace('http', 'ws');
@@ -74,7 +88,7 @@
 				ingestLogs(consoleElement!, json.logs);
 			} else if (json?.type === 'tutorial_complete' || json?.type === 'tutorial_progress') {
 				console.log('Tutorial complete!');
-				tutorialJson = json;
+				tutorialJson = json as any;
 			}
 		} catch (error) {
 			console.error('WEBSOKET DATA NOT JSON', event.data, error);
@@ -108,7 +122,7 @@
 		}
 		try {
 			uploading = true;
-			tutorialJson = {};
+			tutorialJson = [];
 			await fetch(`${BASE_URL}/api/start_game${isTutorial ? '?tutorial=true' : ''}`, {
 				method: 'POST',
 				credentials: 'include'
