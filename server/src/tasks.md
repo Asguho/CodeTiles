@@ -92,8 +92,9 @@ for (const unit of game.units) {
 	if (unit.isMelee()) {
 		// Vælger den første fjende. I fremtiden kan du måske vælge den der er tættest på din base.
 		const enemy = enemies[0];
-
-		unit.attack(enemy.position);
+		if(unit.isWithinRange(enemy.position)) {
+			unit.attack(enemy.position);
+		} 
 	}
 }
 ```
