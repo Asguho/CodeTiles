@@ -1,6 +1,6 @@
 export function getCloudCode(code: string) {
-  return /*js*/ `
-		import { CodeTiles as _CodeTiles } from "./CodeTiles.ts";
+	return /*js*/ `
+		import { CodeTiles as _CodeTiles, areCordinatesEqual } from "./CodeTiles.ts";
 		Deno.serve(async (req) => {
 			try {
 				let _gameinfo: any;
