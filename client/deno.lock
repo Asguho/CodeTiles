@@ -1,6 +1,7 @@
 {
   "version": "4",
   "specifiers": {
+    "npm:@playwright/test@^1.45.0": "1.51.1",
     "npm:@sveltejs/adapter-static@^3.0.8": "3.0.8_@sveltejs+kit@2.17.2__@sveltejs+vite-plugin-svelte@5.0.3___svelte@5.20.2____acorn@8.14.0___vite@6.1.1____lightningcss@1.29.1__svelte@5.20.2___acorn@8.14.0__vite@6.1.1___lightningcss@1.29.1_@sveltejs+vite-plugin-svelte@5.0.3__svelte@5.20.2___acorn@8.14.0__vite@6.1.1___lightningcss@1.29.1_svelte@5.20.2__acorn@8.14.0_vite@6.1.1__lightningcss@1.29.1",
     "npm:@sveltejs/kit@^2.16.0": "2.17.2_@sveltejs+vite-plugin-svelte@5.0.3__svelte@5.20.2___acorn@8.14.0__vite@6.1.1___lightningcss@1.29.1_svelte@5.20.2__acorn@8.14.0_vite@6.1.1__lightningcss@1.29.1",
     "npm:@sveltejs/vite-plugin-svelte@5": "5.0.3_svelte@5.20.2__acorn@8.14.0_vite@6.1.1__lightningcss@1.29.1",
@@ -124,6 +125,12 @@
       "dependencies": [
         "@jridgewell/resolve-uri",
         "@jridgewell/sourcemap-codec"
+      ]
+    },
+    "@playwright/test@1.51.1": {
+      "integrity": "sha512-nM+kEaTSAoVlXmMPH10017vn3FSiFqr/bh4fKg9vmAdMfd9SDqRZNvPSiAHADc/itWak+qPvMPZQOPwCBW7k7Q==",
+      "dependencies": [
+        "playwright"
       ]
     },
     "@polka/url@1.0.0-next.28": {
@@ -546,6 +553,9 @@
     "fdir@6.4.3": {
       "integrity": "sha512-PMXmW2y1hDDfTSRc9gaXIuCCRpuoz3Kaz8cUelp3smouvfT632ozg2vrT6lJsHKKOF59YLbOGfAWGUcKEfRMQw=="
     },
+    "fsevents@2.3.2": {
+      "integrity": "sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA=="
+    },
     "fsevents@2.3.3": {
       "integrity": "sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw=="
     },
@@ -747,6 +757,16 @@
     },
     "picocolors@1.1.1": {
       "integrity": "sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA=="
+    },
+    "playwright-core@1.51.1": {
+      "integrity": "sha512-/crRMj8+j/Nq5s8QcvegseuyeZPxpQCZb6HNk3Sos3BlZyAknRjoyJPFWkpNn8v0+P3WiwqFF8P+zQo4eqiNuw=="
+    },
+    "playwright@1.51.1": {
+      "integrity": "sha512-kkx+MB2KQRkyxjYPc3a0wLZZoDczmppyGJIvQ43l+aZihkaVvmu/21kiyaHeHjiFxjxNNFnUncKmcGIyOojsaw==",
+      "dependencies": [
+        "fsevents@2.3.2",
+        "playwright-core"
+      ]
     },
     "postcss-selector-parser@6.0.10": {
       "integrity": "sha512-IQ7TZdoaqbT+LCpShg46jnZVlhWD2w6iQYAcYXfHARZ7X1t/UGhhceQDs5X0cGqKvYlHNOuv7Oa1xmb0oQuA3w==",
@@ -1034,6 +1054,7 @@
   "workspace": {
     "packageJson": {
       "dependencies": [
+        "npm:@playwright/test@^1.45.0",
         "npm:@sveltejs/adapter-static@^3.0.8",
         "npm:@sveltejs/kit@^2.16.0",
         "npm:@sveltejs/vite-plugin-svelte@5",
