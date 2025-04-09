@@ -73,6 +73,7 @@ export type Tile = UnknownTile | GroundTile | OreTile | BaseTile | WallTile;
 // Main game state interface
 export interface TurnData {
   type: "TURN_DATA";
+  gameId: string;
   gameSettings: GameSettings;
   map: Tile[][];
   units: Array<Unit>;

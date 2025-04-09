@@ -41,11 +41,9 @@ const loadTutorialContent = async () => {
 };
 
 export class GameHandler {
-  private games: Map<string, Game> = new Map();
   private static tutorials: Record<string, string> = {};
 
   constructor() {
-    this.games = new Map();
     // Initialize tutorials when GameHandler is created
     loadTutorialContent().then((content) => {
       GameHandler.tutorials = content;
@@ -104,11 +102,9 @@ export class GameHandler {
         );
       }
 
-      this.games.delete(gameId);
     };
     const game = new Game([...players].sort(() => Math.random() - 0.5), gameSettings, cleanUp);
     game.start();
-    this.games.set(gameId, game);
   }
 
   static runTutorial(player: { id: string; url: string }) {

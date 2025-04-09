@@ -19,6 +19,7 @@ export class Game {
   isFogOfWar: boolean = false;
   gameSettings: GameSettings;
   playersInTheStart: string[] = [];
+  gameId: string = crypto.randomUUID();
   constructor(
     players: { id: string; url: string }[],
     gameSettings: GameSettings,
@@ -150,6 +151,7 @@ export class Game {
   createPayload(player: Player): TurnData {
     return {
       type: "TURN_DATA",
+      gameId: this.gameId,
       gameSettings: this.gameSettings,
       playerId: player.id,
       map: player.mapView || [],
