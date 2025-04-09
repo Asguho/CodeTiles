@@ -178,13 +178,32 @@ export class Game {
       player.logs = []; // Clear logs after sending
     });
 
-    const playerRequests = this.players.map((player, index) =>
-      player.basePosition ? this.sendRequest(player, payloads[index]) : Promise.resolve({ actions: { units: [], shop: [] } })
-    );
+    // Set a timeout of 500ms for each player's turn
+    const timeoutDuration = 500;
+    const playerRequests = this.players.map((player, index) => {
+      if (!player.basePosition) {
+      return Promise.resolve({ actions: { units: [], shop: [] } });
+      }
+      
+      // Create a promise that times out after 500ms
+      return Promise.race([
+      this.sendRequest(player, payloads[index]),
+      new Promise<PlayerResponse>((resolve) => {
+        setTimeout(() => {
+        player.logs.push({
+          type: "error",
+          values: ["SERVER: Request timed out - turn skipped"]
+        });
+        resolve({ actions: { units: [], shop: [] } });
+        }, timeoutDuration);
+      })
+      ]);
+    });
+    
     const responses = await Promise.all(playerRequests);
     responses.forEach((response, index) => {
       if (!this.players[index].basePosition) {
-        return;
+      return;
       }
       this.processActions(this.players[index], response);
     });
