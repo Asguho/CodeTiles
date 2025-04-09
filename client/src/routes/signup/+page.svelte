@@ -1,5 +1,29 @@
-<script>
+<script lang="ts">
 	import { BASE_URL } from '$lib/utils';
+
+	async function handleSubmit(event: SubmitEvent) {
+		event.preventDefault();
+		const formData = new FormData(event.target as HTMLFormElement);
+
+		try {
+			const response = await fetch(BASE_URL + '/api/auth/signup', {
+				method: 'POST',
+				body: formData
+			});
+
+			if (!response.ok) {
+				const errorText = await response.json();
+				alert(errorText.message || 'An error occurred during signup.');
+				return;
+			}
+
+			// Successful signup - redirect or handle as needed
+			window.location.href = '/';
+		} catch (error) {
+			// @ts-ignore
+			alert('Error during signup: ' + error.message);
+		}
+	}
 </script>
 
 <div class="flex min-h-screen items-center justify-center bg-zinc-900">
@@ -7,7 +31,7 @@
 		<div class="w-3/5 p-8">
 			<h1 class="mb-6 text-2xl font-bold text-white">Create an account</h1>
 			<p class="mb-6 text-zinc-400">Sign up for your CodeTiles account</p>
-			<form action={BASE_URL + '/api/auth/signup'} method="post" class="space-y-4">
+			<form on:submit={handleSubmit} class="space-y-4">
 				<div>
 					<label for="username" class="block text-sm font-medium text-zinc-300">Username</label>
 					<input
