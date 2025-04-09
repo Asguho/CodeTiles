@@ -15,6 +15,9 @@
 	let gameCanvas: HTMLCanvasElement;
 	let latestGameData: any = null;
 
+	let runningGame = $state(false);
+	$inspect(runningGame);
+
 	console.log('Hello, Vite!', document);
 
 	let codeEditor: editor.IStandaloneCodeEditor | null = null;
@@ -99,6 +102,10 @@
 			} else if (json?.type === 'tutorial_complete' || json?.type === 'tutorial_progress') {
 				console.log('Tutorial complete!');
 				tutorialJson = json as any;
+			} else if (json?.type === 'GAME_OVER') {
+				console.log('Game over!');
+				// Handle game over logic here
+				runningGame = false;
 			}
 		} catch (error) {
 			console.error('WEBSOKET DATA NOT JSON', event.data, error);
@@ -132,6 +139,7 @@
 		}
 		try {
 			uploading = true;
+			runningGame = true;
 			tutorialJson = [];
 			await fetch(`${BASE_URL}/api/start_game${isTutorial ? '?tutorial=true' : ''}`, {
 				method: 'POST',
@@ -224,7 +232,7 @@
 			> -->
 			<button
 				class="flex h-8 w-20 items-center justify-center gap-3 rounded-md border border-zinc-700 bg-zinc-800 p-1 text-zinc-200 hover:bg-zinc-700 disabled:cursor-not-allowed disabled:bg-zinc-700"
-				disabled={uploading}
+				disabled={uploading || runningGame}
 				onclick={() => {
 					handleRun();
 				}}
