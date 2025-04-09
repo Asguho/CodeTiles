@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { clearConsole, ingestLogs, setupConsole } from '$lib/Console';
+	import { addTurnDivider, clearConsole, ingestLogs, setupConsole } from '$lib/Console';
 	import { setupEditor, getMarkers } from '$lib/Editor';
 	import { setupGameCanvas, drawGame } from '$lib/GameCanvas';
 	import { BASE_URL } from '$lib/utils';
@@ -94,6 +94,9 @@
 			const json = JSON.parse(event.data.toString()) as TurnDataWithLogs;
 			if (json?.type === 'TURN_DATA') {
 				drawGame(gameCanvas, json);
+				if (json.turn !== 1) {
+					addTurnDivider(consoleElement!, json.turn - 1);
+				}
 				latestGameData = json;
 				console.log('Game data received:', json.logs);
 				ingestLogs(consoleElement!, json.logs);

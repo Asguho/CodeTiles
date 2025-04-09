@@ -77,6 +77,28 @@ function ingestLogs(el: HTMLDivElement, logs: { type: string; values: string[] }
 	el.scrollTop = el.scrollHeight;
 }
 
+function addTurnDivider(el: HTMLDivElement, t: number) {
+	console.log('adding turn divider', t);
+
+	const pre = document.createElement('pre');
+	pre.innerText = `Turn ${t}`;
+	pre.style.width = '100%';
+	pre.style.maxWidth = '100%';
+	pre.style.display = 'block';
+	pre.style.overflowWrap = 'break-word';
+	pre.className = 'console-turn-divider';
+	pre.style.cssText +=
+		'color: #50fa7b; font-weight: bold; font-size: 16px; text-align: center; ' +
+		'padding: 10px 0; margin: 15px 0; border-top: 1px solid rgba(80,250,123,0.4); ' +
+		'background-image: linear-gradient(to bottom, rgba(80,250,123,0.1), transparent);';
+
+	el.appendChild(pre);
+	consoleLines.push(pre);
+
+	//scroll to bottom
+	el.scrollTop = el.scrollHeight;
+}
+
 function clearConsole(el: HTMLDivElement) {
 	el.innerHTML = '';
 	consoleLines.length = 0;
@@ -116,5 +138,6 @@ export {
 	getAmountOfWarnings,
 	getAmountOfInfos,
 	getAmountOfLogs,
-	getConsole
+	getConsole,
+	addTurnDivider
 };
