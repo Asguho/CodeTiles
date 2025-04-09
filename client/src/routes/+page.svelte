@@ -4,7 +4,8 @@
 		clearConsole,
 		ingestLogs,
 		setupConsole,
-		getAmountOfLines
+		getAmountOfLines,
+		addConsoleLine
 	} from '$lib/Console';
 	import { setupEditor, getMarkers } from '$lib/Editor';
 	import { setupGameCanvas, drawGame } from '$lib/GameCanvas';
@@ -30,6 +31,8 @@
 	let consoleElement: HTMLDivElement | null = null;
 	let lastSavedcode = $state('');
 
+	let consoleTab = $state('console');
+
 	let markers: editor.IMarkerData[] = $state([]);
 
 	//every 1000ms uddate the markers
@@ -38,6 +41,12 @@
 		markers = getMarkers();
 	};
 	setInterval(updateMarkers, 1000);
+
+	$effect(() => {
+		if (markers.length > 0) {
+			consoleTab = 'errors';
+		}
+	});
 
 	let consoleLines = $state(0);
 	//every 1000ms update the console lines
@@ -158,6 +167,7 @@
 		try {
 			uploading = true;
 			runningGame = true;
+			consoleTab = 'console';
 			tutorialJson = [];
 			await fetch(`${BASE_URL}/api/start_game${isTutorial ? '?tutorial=true' : ''}`, {
 				method: 'POST',
@@ -166,6 +176,10 @@
 			uploading = false;
 		} catch (error) {
 			console.error('Error starting game:', error);
+			addConsoleLine(consoleElement!, {
+				type: 'error',
+				values: ['Error starting game. Please try again.', JSON.stringify(error)]
+			});
 			uploading = false;
 		}
 	}
@@ -175,6 +189,8 @@
 
 	import SvelteMarkdown from 'svelte-markdown';
 	import TaskRenderer from './task-renderer.svelte';
+	import { json } from '@sveltejs/kit';
+	import monaco from '$lib/monaco.js';
 	const tutorial = async () => {
 		const resp = await fetch('/tut.md');
 		const md = await resp.text();
@@ -345,7 +361,7 @@
 				</PaneResizer>
 				<Pane defaultSize={50} id="console-pane" class="relative">
 					<Tabs.Root
-						value="console"
+						bind:value={consoleTab}
 						class="flex h-full flex-col rounded-lg border border-zinc-700 bg-zinc-800 p-2"
 					>
 						<Tabs.List class="">
@@ -385,7 +401,7 @@
 						</Tabs.Content>
 						<Tabs.Content value="errors" class="h-full flex-1">
 							<div
-								class="pointer-events-none left-0 top-0 z-10 h-full w-full overflow-y-scroll rounded-md bg-zinc-950 p-2"
+								class="left-0 top-0 z-10 h-full w-full overflow-y-scroll rounded-md bg-zinc-950 p-2"
 							>
 								{#each markers as marker}
 									<div
@@ -416,6 +432,28 @@
 											<span class="text-xs text-zinc-400">
 												Line {marker.startLineNumber}:{marker.startColumn}
 											</span>
+											<!-- goto btn -->
+											<button
+												class="ml-auto rounded-md bg-zinc-700 px-2 py-1 text-xs font-bold text-zinc-200 opacity-70 hover:bg-zinc-600 hover:text-zinc-100 hover:opacity-100"
+												disabled={runningGame}
+												onclick={() => {
+													codeEditor?.setPosition({
+														lineNumber: marker.startLineNumber,
+														column: marker.startColumn
+													});
+													codeEditor?.focus();
+													// Optionally, add a selection to highlight the error
+													codeEditor?.setSelection({
+														startLineNumber: marker.startLineNumber,
+														startColumn: marker.startColumn,
+														endLineNumber: marker.endLineNumber || marker.startLineNumber,
+														endColumn: marker.endColumn || marker.startColumn + 1
+													});
+													codeEditor?.revealLineInCenter(marker.startLineNumber);
+												}}
+											>
+												Go to line
+											</button>
 										</div>
 										<p
 											class={`mt-1 text-sm ${
@@ -441,3 +479,9 @@
 		</Pane>
 	</PaneGroup>
 </div>
+
+<style>
+	.line-pulse {
+		background-color: rgb(255, 0, 0);
+	}
+</style>
