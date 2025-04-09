@@ -164,7 +164,9 @@ export class Game {
   async processTurn() {
     this.turn++;
     console.log(`Starting turn ${this.turn}`);
-
+    
+    const turnStartTime = Date.now();
+    
     // Update what each player can see
     this.updatePlayerMapView();
 
@@ -178,35 +180,35 @@ export class Game {
       player.logs = []; // Clear logs after sending
     });
 
-    // Set a timeout of 500ms for each player's turn
-    const timeoutDuration = 500;
+    const maxTimeout = 250;
+    const minTurnDuration = 250;
+    
+    // Process player turns - skip for players without a base
     const playerRequests = this.players.map((player, index) => {
-      if (!player.basePosition) {
-      return Promise.resolve({ actions: { units: [], shop: [] } });
-      }
+      if (!player.basePosition) return Promise.resolve({ actions: { units: [], shop: [] } });
       
-      // Create a promise that times out after 500ms
       return Promise.race([
       this.sendRequest(player, payloads[index]),
-      new Promise<PlayerResponse>((resolve) => {
+      new Promise<PlayerResponse>(resolve => {
         setTimeout(() => {
-        player.logs.push({
-          type: "error",
-          values: ["SERVER: Request timed out - turn skipped"]
-        });
+        player.logs.push({ type: "error", values: ["SERVER: Request timed out - turn skipped"] });
         resolve({ actions: { units: [], shop: [] } });
-        }, timeoutDuration);
+        }, maxTimeout);
       })
       ]);
     });
     
+    // Process all player responses
     const responses = await Promise.all(playerRequests);
-    responses.forEach((response, index) => {
-      if (!this.players[index].basePosition) {
-      return;
-      }
-      this.processActions(this.players[index], response);
+    this.players.forEach((player, index) => {
+      if (player.basePosition) this.processActions(player, responses[index]);
     });
+    
+    // Ensure consistent turn pacing
+    const elapsed = Date.now() - turnStartTime;
+    if (elapsed < minTurnDuration) {
+      await new Promise(resolve => setTimeout(resolve, minTurnDuration - elapsed));
+    }
   }
 
   // Sends a POST request to the player's server with the current game state data
