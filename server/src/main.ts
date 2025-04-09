@@ -62,12 +62,12 @@ const routes: Route[] = [
         status: 204,
         headers: corsHeaders,
       });
-        },
-      },
-      {
-        method: "GET",
-        pattern: new URLPattern({ pathname: "/api/stats" }),
-        handler: async (req: Request) => {
+    },
+  },
+  {
+    method: "GET",
+    pattern: new URLPattern({ pathname: "/api/stats" }),
+    handler: async (req: Request) => {
       const sessionCookie = getCookies(req.headers)["auth-session"];
       if (!sessionCookie) {
         return new Response("Unauthorized | no cookie", {
@@ -85,8 +85,7 @@ const routes: Route[] = [
 
       // Get user stats
       const userStats = await db.select().from(table.user).where(eq(table.user.id, user.id)).limit(1);
-      
-      // Get leaderboard around player (5 above and 5 below)
+
       const leaderboard = await db
         .select({
           id: table.user.id,
@@ -95,27 +94,27 @@ const routes: Route[] = [
         })
         .from(table.user)
         .orderBy(desc(table.user.elo))
-        .limit(11);  // Get 11 to account for the current user
+        .limit(11);
 
       // Find user's rank
-      const userRank = await db
+      const [userRank] = await db
         .select({ count: sql<number>`count(*)` })
         .from(table.user)
         .where(sql`${table.user.elo} > ${user.elo}`);
-      
-      const rank = userRank[0].count + 1;
+
+      const rank = Number(userRank.count) + 1;
 
       return Response.json({
         user: userStats[0],
         rank,
         leaderboard,
       }, { headers: corsHeaders });
-        },
-      },
-      {
-        method: "POST",
-        pattern: new URLPattern({ pathname: "/api/start_game" }),
-        handler: async (req: Request) => {
+    },
+  },
+  {
+    method: "POST",
+    pattern: new URLPattern({ pathname: "/api/start_game" }),
+    handler: async (req: Request) => {
       const sessionCookie = getCookies(req.headers)["auth-session"];
       if (!sessionCookie) {
         return new Response("Unauthorized | no cookie", {

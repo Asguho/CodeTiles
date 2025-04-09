@@ -51,15 +51,23 @@ export class Game {
       }
       this.map.push(row);
     }
-    this.players.forEach((player) => {
-      const baseX = Math.floor(Math.random() * this.gameSettings.map.width);
-      const baseY = Math.floor(Math.random() * this.gameSettings.map.height);
-      player.basePosition = { x: baseX, y: baseY };
-      this.map[baseY][baseX] = {
-        type: "base",
-        health: 100,
-        owner: player.id,
-        position: { x: baseX, y: baseY },
+    const radius = Math.floor(Math.min(this.gameSettings.map.height, this.gameSettings.map.width) / 2);
+    const centerX = Math.floor(this.gameSettings.map.width / 2);
+    const centerY = Math.floor(this.gameSettings.map.height / 2);
+    const randomOffset = Math.random() * Math.PI; // Random offset between 0 and π
+
+    // Place bases evenly spaced around the circle
+    this.players.forEach((player, index) => {
+      // Calculate angle based on player index for even spacing
+      const angle = (index / this.players.length) * 2 * Math.PI + randomOffset;
+      const x = Math.round(centerX + radius * Math.cos(angle));
+      const y = Math.round(centerY + radius * Math.sin(angle));
+      player.basePosition = { x, y };
+      this.map[y][x] = {
+      type: "base",
+      health: 100,
+      owner: player.id,
+      position: { x, y },
       };
     });
   }
@@ -156,7 +164,9 @@ export class Game {
   async processTurn() {
     this.turn++;
     console.log(`Starting turn ${this.turn}`);
-
+    
+    const turnStartTime = Date.now();
+    
     // Update what each player can see
     this.updatePlayerMapView();
 
@@ -170,16 +180,35 @@ export class Game {
       player.logs = []; // Clear logs after sending
     });
 
-    const playerRequests = this.players.map((player, index) =>
-      player.basePosition ? this.sendRequest(player, payloads[index]) : Promise.resolve({ actions: { units: [], shop: [] } })
-    );
-    const responses = await Promise.all(playerRequests);
-    responses.forEach((response, index) => {
-      if (!this.players[index].basePosition) {
-        return;
-      }
-      this.processActions(this.players[index], response);
+    const maxTimeout = 250;
+    const minTurnDuration = 250;
+    
+    // Process player turns - skip for players without a base
+    const playerRequests = this.players.map((player, index) => {
+      if (!player.basePosition) return Promise.resolve({ actions: { units: [], shop: [] } });
+      
+      return Promise.race([
+      this.sendRequest(player, payloads[index]),
+      new Promise<PlayerResponse>(resolve => {
+        setTimeout(() => {
+        player.logs.push({ type: "error", values: ["SERVER: Request timed out - turn skipped"] });
+        resolve({ actions: { units: [], shop: [] } });
+        }, maxTimeout);
+      })
+      ]);
     });
+    
+    // Process all player responses
+    const responses = await Promise.all(playerRequests);
+    this.players.forEach((player, index) => {
+      if (player.basePosition) this.processActions(player, responses[index]);
+    });
+    
+    // Ensure consistent turn pacing
+    const elapsed = Date.now() - turnStartTime;
+    if (elapsed < minTurnDuration) {
+      await new Promise(resolve => setTimeout(resolve, minTurnDuration - elapsed));
+    }
   }
 
   // Sends a POST request to the player's server with the current game state data
