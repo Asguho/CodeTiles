@@ -36,7 +36,7 @@ const loadTutorialContent = async () => {
     const [name, ...content] = section.trim().split("\n");
     tutorials[name.replaceAll("#", "").trim()] = content.join("\n").trim();
   });
-  console.log("Loaded tutorials:", tutorials);
+  // console.log("Loaded tutorials:", tutorials);
   return tutorials;
 };
 
@@ -280,9 +280,22 @@ export class GameHandler {
     };
 
     // Initialize tutorial game with AI opponent
+    const tutGameSettings: GameSettings = {
+      map: {
+        width: 10,
+        height: 10,
+      },
+      maxTurns: 25,
+      fogOfWar: false,
+      unit: {
+        melee: { health: 100, attack: 20, range: 1, price: 50, damage: 20 },
+        ranged: { health: 80, attack: 15, range: 3, price: 60 },
+        miner: { health: 50, attack: 5, range: 1, price: 40 },
+      },
+    };
     const game = new Game(
       [player, { id: "AI", url: "https://important-dolphin-28-y3krkksasm7e.deno.dev/" }],
-      gameSettings,
+      tutGameSettings,
       () => {
         // Send final results when game ends
         const winGameGoal = goals.find((g) => g.name === "winGame");
