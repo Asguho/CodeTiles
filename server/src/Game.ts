@@ -51,15 +51,23 @@ export class Game {
       }
       this.map.push(row);
     }
-    this.players.forEach((player) => {
-      const baseX = Math.floor(Math.random() * this.gameSettings.map.width);
-      const baseY = Math.floor(Math.random() * this.gameSettings.map.height);
-      player.basePosition = { x: baseX, y: baseY };
-      this.map[baseY][baseX] = {
-        type: "base",
-        health: 100,
-        owner: player.id,
-        position: { x: baseX, y: baseY },
+    const radius = Math.floor(Math.min(this.gameSettings.map.height, this.gameSettings.map.width) / 2);
+    const centerX = Math.floor(this.gameSettings.map.width / 2);
+    const centerY = Math.floor(this.gameSettings.map.height / 2);
+    const randomOffset = Math.random() * Math.PI; // Random offset between 0 and π
+
+    // Place bases evenly spaced around the circle
+    this.players.forEach((player, index) => {
+      // Calculate angle based on player index for even spacing
+      const angle = (index / this.players.length) * 2 * Math.PI + randomOffset;
+      const x = Math.round(centerX + radius * Math.cos(angle));
+      const y = Math.round(centerY + radius * Math.sin(angle));
+      player.basePosition = { x, y };
+      this.map[y][x] = {
+      type: "base",
+      health: 100,
+      owner: player.id,
+      position: { x, y },
       };
     });
   }

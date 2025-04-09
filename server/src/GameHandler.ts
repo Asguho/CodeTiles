@@ -10,7 +10,7 @@ const gameSettings: GameSettings = {
     width: 15,
     height: 15,
   },
-  maxTurns: 25,
+  maxTurns: 35,
   fogOfWar: false,
   unit: {
     melee: { health: 100, attack: 20, range: 1, price: 50, damage: 20 },
