@@ -1,5 +1,11 @@
 <script lang="ts">
-	import { addTurnDivider, clearConsole, ingestLogs, setupConsole } from '$lib/Console';
+	import {
+		addTurnDivider,
+		clearConsole,
+		ingestLogs,
+		setupConsole,
+		getAmountOfLines
+	} from '$lib/Console';
 	import { setupEditor, getMarkers } from '$lib/Editor';
 	import { setupGameCanvas, drawGame } from '$lib/GameCanvas';
 	import { BASE_URL } from '$lib/utils';
@@ -28,11 +34,20 @@
 
 	//every 1000ms uddate the markers
 	const updateMarkers = () => {
-		console.log('Updating markers...');
 		if (!codeEditor) return;
 		markers = getMarkers();
 	};
 	setInterval(updateMarkers, 1000);
+
+	let consoleLines = $state(0);
+	//every 1000ms update the console lines
+	const updateConsoleLines = () => {
+		if (!consoleElement) return;
+		const lines = getAmountOfLines();
+		consoleLines = lines;
+	};
+
+	setInterval(updateConsoleLines, 1000);
 
 	onMount(async () => {
 		console.log('Hello, Vite!', document);
@@ -338,11 +353,13 @@
 								value="console"
 								class="rounded-md rounded-b-none px-4 py-1 text-sm text-zinc-100 data-[state=active]:bg-zinc-950"
 							>
-								{#if true}
-									<!-- content here -->
+								{#if consoleLines > 0}
 									Console
+									<span
+										class="ml-2 rounded-full border-2 border-blue-400 bg-blue-600 px-1 text-xs text-white"
+										>{consoleLines}</span
+									>
 								{:else}
-									<!-- else content here -->
 									Console
 								{/if}
 							</Tabs.Trigger>

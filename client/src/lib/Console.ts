@@ -108,6 +108,10 @@ function getConsoleLines() {
 	return consoleLines;
 }
 
+function getAmountOfLines() {
+	return consoleLines.length;
+}
+
 function getAmountOfErrors() {
 	return consoleLines.filter((line) => line.className === 'console-error').length;
 }
@@ -139,5 +143,6 @@ export {
 	getAmountOfInfos,
 	getAmountOfLogs,
 	getConsole,
-	addTurnDivider
+	addTurnDivider,
+	getAmountOfLines
 };
