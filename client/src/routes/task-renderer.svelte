@@ -1,6 +1,7 @@
 <script lang="ts">
 	import SvelteMarkdown from 'svelte-markdown';
 	import CodeBlockRenderer from '$lib/CodeBlockRenderer.svelte';
+	import { fade } from 'svelte/transition';
 
 	const { tutorialJson = $bindable(), md } = $props();
 
@@ -64,32 +65,34 @@
 	</div> -->
 
 	<!-- <span class="h-6 w-3 border-r-[1px] border-stone-500"> </span> -->
-	{#each goalsToShow as goal, i}
-		<div class="flex flex-row items-center justify-start gap-2">
-			{#if goal.completed}
-				<!-- prettier-ignore -->
-				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide stroke-green-500 lucide-check-icon lucide-check"><path d="M20 6 9 17l-5-5"/></svg>
-			{:else}
-				<!-- prettier-ignore -->
-				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide stroke-red-500 lucide-x-icon lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-			{/if}
-			<span>{i + 1}. {goal.name}</span>
-			<button
-				class="ml-auto rounded-full bg-stone-600 px-2 py-1 text-sm font-bold text-stone-200 opacity-70 hover:bg-stone-500"
-				onclick={() => (goal.isTutorialOpen = !goal.isTutorialOpen)}
-			>
-				{goal.isTutorialOpen ? 'Hide' : 'Show'}
-			</button>
-		</div>
-		{#if goal.isTutorialOpen}
-			<div
-				class="prose prose-invert prose-stone ml-[10px] mt-4 w-full rounded-2xl rounded-l-none border-0 border-l-2 border-stone-600 p-2"
-			>
-				<SvelteMarkdown renderers={{ code: CodeBlockRenderer }} source={goal.tutorial} />
+	{#each goalsToShow as goal, i (goal.name)}
+		<div in:fade>
+			<div class="flex flex-row items-center justify-start gap-2">
+				{#if goal.completed}
+					<!-- prettier-ignore -->
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide stroke-green-500 lucide-check-icon lucide-check"><path d="M20 6 9 17l-5-5"/></svg>
+				{:else}
+					<!-- prettier-ignore -->
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide stroke-red-500 lucide-x-icon lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+				{/if}
+				<span>{i + 1}. {goal.name}</span>
+				<button
+					class="ml-auto rounded-full bg-stone-600 px-2 py-1 text-sm font-bold text-stone-200 opacity-70 hover:bg-stone-500"
+					onclick={() => (goal.isTutorialOpen = !goal.isTutorialOpen)}
+				>
+					{goal.isTutorialOpen ? 'Hide' : 'Show'}
+				</button>
 			</div>
-		{/if}
-		{#if i < goalsToShow.length - 1}
-			<span class="h-6 w-3 border-r-2 border-stone-600"></span>
-		{/if}
+			{#if goal.isTutorialOpen}
+				<div
+					class="prose prose-invert prose-stone ml-[10px] mt-4 w-full rounded-2xl rounded-l-none border-0 border-l-2 border-stone-600 p-2"
+				>
+					<SvelteMarkdown renderers={{ code: CodeBlockRenderer }} source={goal.tutorial} />
+				</div>
+			{/if}
+			{#if i < goalsToShow.length - 1}
+				<span class="h-6 w-3 border-r-2 border-stone-600"></span>
+			{/if}
+		</div>
 	{/each}
 </div>
