@@ -5,6 +5,8 @@ import { BASE_URL } from './utils';
 let editor: Monaco.editor.IStandaloneCodeEditor;
 let monaco: typeof Monaco;
 
+let markers: Monaco.editor.IMarkerData[] = [];
+
 const theme: Monaco.editor.IStandaloneThemeData = {
 	base: 'vs-dark' as Monaco.editor.BuiltinTheme,
 	inherit: true,
@@ -68,7 +70,6 @@ export async function setupEditor(el: HTMLElement) {
 		wordWrap: 'on',
 		minimap: { enabled: false }, // Disable minimap
 		stickyScroll: { enabled: false }, // Disable sticky scroll
-		lineNumbers: 'off', // Show line numbers
 		//allow suggestions in strings
 		quickSuggestions: {
 			strings: true,
@@ -85,9 +86,24 @@ export async function setupEditor(el: HTMLElement) {
 		editor.getAction('editor.action.formatDocument')?.run();
 	}, 1000);
 
+	monaco.editor.onDidChangeMarkers(([uri]) => {
+		markers = monaco.editor.getModelMarkers({ resource: uri });
+		console.log(
+			'markers:',
+			markers.map(
+				({ message, startLineNumber, startColumn, endLineNumber, endColumn }) =>
+					`${message} [${startLineNumber}:${startColumn}-${endLineNumber}:${endColumn}]`
+			)
+		);
+	});
+
 	console.log('editor setup complete', editor);
 
 	return editor;
+}
+
+export function getMarkers() {
+	return markers;
 }
 
 export const DEFAULT_VAL = /*js*/ `CodeTiles.onTurn((game)=>{

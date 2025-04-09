@@ -1,13 +1,14 @@
 <script lang="ts">
 	import { clearConsole, ingestLogs, setupConsole } from '$lib/Console';
-	import { setupEditor } from '$lib/Editor';
+	import { setupEditor, getMarkers } from '$lib/Editor';
 	import { setupGameCanvas, drawGame } from '$lib/GameCanvas';
 	import { BASE_URL } from '$lib/utils';
 	import { editor } from 'monaco-editor';
 	import { PaneGroup, Pane, PaneResizer, type PaneAPI } from 'paneforge';
 	import { onMount } from 'svelte';
+	import { Tabs } from 'bits-ui';
+
 	import type { TurnData, TurnDataWithLogs } from '../../../server/src/types.js';
-	import CodeBlockRenderer from '$lib/CodeBlockRenderer.svelte';
 
 	let websocketHasClosed = $state(false);
 
@@ -19,6 +20,16 @@
 	let codeEditor: editor.IStandaloneCodeEditor | null = null;
 	let consoleElement: HTMLDivElement | null = null;
 	let lastSavedcode = $state('');
+
+	let markers: editor.IMarkerData[] = $state([]);
+
+	//every 1000ms uddate the markers
+	const updateMarkers = () => {
+		console.log('Updating markers...');
+		if (!codeEditor) return;
+		markers = getMarkers();
+	};
+	setInterval(updateMarkers, 1000);
 
 	onMount(async () => {
 		console.log('Hello, Vite!', document);
@@ -306,11 +317,97 @@
 						<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-grip-horizontal"><circle cx="12" cy="9" r="1"/><circle cx="19" cy="9" r="1"/><circle cx="5" cy="9" r="1"/><circle cx="12" cy="15" r="1"/><circle cx="19" cy="15" r="1"/><circle cx="5" cy="15" r="1"/></svg>
 					</div>
 				</PaneResizer>
-				<Pane defaultSize={50} id="console-pane">
-					<div
-						class="flex h-full rounded-lg border border-zinc-700 bg-zinc-800 p-2 text-zinc-200"
-						bind:this={consoleElement}
-					></div>
+				<Pane defaultSize={50} id="console-pane" class="relative">
+					<Tabs.Root
+						value="console"
+						class="flex h-full flex-col rounded-lg border border-zinc-700 bg-zinc-800 p-2"
+					>
+						<Tabs.List class="">
+							<Tabs.Trigger
+								value="console"
+								class="rounded-md rounded-b-none px-4 py-1 text-sm text-zinc-100 data-[state=active]:bg-zinc-950"
+							>
+								{#if true}
+									<!-- content here -->
+									Console
+								{:else}
+									<!-- else content here -->
+									Console
+								{/if}
+							</Tabs.Trigger>
+							<Tabs.Trigger
+								value="errors"
+								class="rounded-md rounded-b-none px-4 py-1 text-sm text-zinc-100 data-[state=active]:bg-zinc-950"
+							>
+								{#if markers.length > 0}
+									Errors <span
+										class="ml-2 rounded-full border-2 border-red-500 bg-red-400 px-1 text-xs text-black"
+										>{markers.length}</span
+									>
+								{:else}
+									Errors
+								{/if}
+							</Tabs.Trigger>
+						</Tabs.List>
+						<Tabs.Content
+							value="console"
+							class="h-full flex-1 rounded-md rounded-tl-none bg-zinc-950"
+						>
+							<div class="flex h-full text-zinc-200" bind:this={consoleElement}></div>
+						</Tabs.Content>
+						<Tabs.Content value="errors" class="h-full flex-1">
+							<div
+								class="pointer-events-none left-0 top-0 z-10 h-full w-full overflow-y-scroll rounded-md bg-zinc-950 p-2"
+							>
+								{#each markers as marker}
+									<div
+										class={`mb-2 rounded-md border p-2 shadow-sm ${
+											marker.severity === 8
+												? 'border-red-500 bg-red-950'
+												: marker.severity === 4
+													? 'border-yellow-500 bg-yellow-950'
+													: 'border-blue-500 bg-blue-950'
+										}`}
+									>
+										<div class="flex items-center gap-2">
+											<span
+												class={`rounded px-1.5 py-0.5 text-xs font-medium ${
+													marker.severity === 8
+														? 'bg-red-500 text-red-100'
+														: marker.severity === 4
+															? 'bg-yellow-500 text-yellow-100'
+															: 'bg-blue-500 text-blue-100'
+												}`}
+											>
+												{marker.severity === 8
+													? 'Error'
+													: marker.severity === 4
+														? 'Warning'
+														: 'Info'}
+											</span>
+											<span class="text-xs text-zinc-400">
+												Line {marker.startLineNumber}:{marker.startColumn}
+											</span>
+										</div>
+										<p
+											class={`mt-1 text-sm ${
+												marker.severity === 8
+													? 'text-red-200'
+													: marker.severity === 4
+														? 'text-yellow-200'
+														: 'text-blue-200'
+											}`}
+										>
+											{marker.message}
+										</p>
+										{#if marker.source}
+											<p class="mt-0.5 text-xs text-zinc-400">Source: {marker.source}</p>
+										{/if}
+									</div>
+								{/each}
+							</div>
+						</Tabs.Content>
+					</Tabs.Root>
 				</Pane>
 			</PaneGroup>
 		</Pane>
