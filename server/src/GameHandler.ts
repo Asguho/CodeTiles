@@ -10,11 +10,11 @@ const gameSettings: GameSettings = {
     width: 15,
     height: 15,
   },
-  maxTurns: 50,
+  maxTurns: 75,
   fogOfWar: false,
   unit: {
     melee: { health: 100, attack: 20, range: 1, price: 50, damage: 20 },
-    ranged: { health: 80, attack: 15, range: 3, price: 60 },
+    ranged: { health: 80, attack: 15, range: 3, price: 60, damage: 15 },
     miner: { health: 50, attack: 5, range: 1, price: 40 },
     // healer: { health: 60, attack: 10, range: 2, price: 70 },
     // scout: { health: 40, attack: 5, range: 4, price: 30 },
@@ -101,7 +101,6 @@ export class GameHandler {
           } ${player2.username || player2Id} (${ratingPlayer2} → ${newRatingPlayer2})`,
         );
       }
-
     };
     const game = new Game([...players].sort(() => Math.random() - 0.5), gameSettings, cleanUp);
     game.start();
