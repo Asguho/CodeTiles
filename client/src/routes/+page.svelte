@@ -42,11 +42,11 @@
 	};
 	setInterval(updateMarkers, 1000);
 
-	$effect(() => {
+	/* $effect(() => {
 		if (markers.length > 0) {
 			consoleTab = 'errors';
 		}
-	});
+	}); */
 
 	let consoleLines = $state(0);
 	//every 1000ms update the console lines
