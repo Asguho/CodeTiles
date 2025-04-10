@@ -3,7 +3,6 @@
     let isResizing = false;
     import { BASE_URL } from '$lib/utils';
 
-    // State to track which sections are expanded
     let expandedSections: { [key: string]: boolean } = {
         section1: false,
         section2: false,
@@ -52,7 +51,15 @@
                     class="toggle-button"
                     on:click={() => toggleSection('section1')}
                 >
-                    <span class="arrow">{expandedSections.section1 ? '▼' : '▶'}</span> Section 1
+                    <svg
+                        class="arrow"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        data-expanded={expandedSections.section1}
+                    >
+                        <path d="M8 5l8 7-8 7z" />
+                    </svg>
+                    Section 1
                 </button>
                 {#if expandedSections.section1}
                     <ul class="ml-4 space-y-1">
@@ -66,7 +73,15 @@
                     class="toggle-button"
                     on:click={() => toggleSection('section2')}
                 >
-                    <span class="arrow">{expandedSections.section2 ? '▼' : '▶'}</span> Section 2
+                    <svg
+                        class="arrow"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        data-expanded={expandedSections.section2}
+                    >
+                        <path d="M8 5l8 7-8 7z" />
+                    </svg>
+                    Section 2
                 </button>
                 {#if expandedSections.section2}
                     <ul class="ml-4 space-y-1">
@@ -80,7 +95,15 @@
                     class="toggle-button"
                     on:click={() => toggleSection('section3')}
                 >
-                    <span class="arrow">{expandedSections.section3 ? '▼' : '▶'}</span> Section 3
+                    <svg
+                        class="arrow"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        data-expanded={expandedSections.section3}
+                    >
+                        <path d="M8 5l8 7-8 7z" />
+                    </svg>
+                    Section 3
                 </button>
                 {#if expandedSections.section3}
                     <ul class="ml-4 space-y-1">
@@ -91,6 +114,7 @@
             </li>
         </ul>
     </div>
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div class="resizer" on:mousedown={startResize}></div>
     <div class="documentation">
         <h1 class="text-3xl font-bold text-white">Documentation</h1>
@@ -128,7 +152,6 @@
             <section id="section3-2" class="mt-4">
                 <h3 class="text-lg font-semibold text-zinc-300">Subsection 3.2</h3>
                 <p class="mt-2 text-zinc-400">Content for subsection 3.2...</p>
-            </section>
         </section>
     </div>
 </div>
@@ -195,20 +218,18 @@
     }
 
     .arrow {
-        display: inline-block;
-        font-size: 1.5rem; /* Larger arrow size */
-        color: #6b7280; /* Grey arrow */
-        font-weight: bold;
-        transform: rotate(0deg); /* Default rotation */
-        transition: transform 0.2s ease, color 0.2s ease; /* Smooth rotation and hover effect */
-    }
-
-    .arrow:hover {
-        color: #9ca3af; /* Slightly lighter grey on hover */
+        width: 1rem;
+        height: 1rem;
+        fill: #6b7280; /* Grey arrow */
+        transition: transform 0.2s ease, fill 0.2s ease; /* Smooth rotation and hover effect */
     }
 
     .arrow[data-expanded="true"] {
         transform: rotate(90deg); /* Rotate when expanded */
+    }
+
+    .arrow:hover {
+        fill: #9ca3af; /* Slightly lighter grey on hover */
     }
 
     .go-back-button {
