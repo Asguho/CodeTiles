@@ -65,10 +65,10 @@ export class Game {
       const y = Math.round(centerY + radius * Math.sin(angle));
       player.basePosition = { x, y };
       this.map[y][x] = {
-      type: "base",
-      health: 100,
-      owner: player.id,
-      position: { x, y },
+        type: "base",
+        health: 100,
+        owner: player.id,
+        position: { x, y },
       };
     });
   }
@@ -154,7 +154,7 @@ export class Game {
       gameId: this.gameId,
       gameSettings: this.gameSettings,
       playerId: player.id,
-      map: player.mapView || [],
+      map: this.map,
       units: this.players.flatMap((p) => p.units),
       coins: player.coins,
       turn: this.turn,
@@ -166,9 +166,9 @@ export class Game {
   async processTurn() {
     this.turn++;
     console.log(`Starting turn ${this.turn}`);
-    
+
     const turnStartTime = Date.now();
-    
+
     // Update what each player can see
     this.updatePlayerMapView();
 
@@ -184,32 +184,32 @@ export class Game {
 
     const maxTimeout = 250;
     const minTurnDuration = 250;
-    
+
     // Process player turns - skip for players without a base
     const playerRequests = this.players.map((player, index) => {
       if (!player.basePosition) return Promise.resolve({ actions: { units: [], shop: [] } });
-      
+
       return Promise.race([
-      this.sendRequest(player, payloads[index]),
-      new Promise<PlayerResponse>(resolve => {
-        setTimeout(() => {
-        player.logs.push({ type: "error", values: ["SERVER: Request timed out - turn skipped"] });
-        resolve({ actions: { units: [], shop: [] } });
-        }, maxTimeout);
-      })
+        this.sendRequest(player, payloads[index]),
+        new Promise<PlayerResponse>((resolve) => {
+          setTimeout(() => {
+            player.logs.push({ type: "error", values: ["SERVER: Request timed out - turn skipped"] });
+            resolve({ actions: { units: [], shop: [] } });
+          }, maxTimeout);
+        }),
       ]);
     });
-    
+
     // Process all player responses
     const responses = await Promise.all(playerRequests);
     this.players.forEach((player, index) => {
       if (player.basePosition) this.processActions(player, responses[index]);
     });
-    
+
     // Ensure consistent turn pacing
     const elapsed = Date.now() - turnStartTime;
     if (elapsed < minTurnDuration) {
-      await new Promise(resolve => setTimeout(resolve, minTurnDuration - elapsed));
+      await new Promise((resolve) => setTimeout(resolve, minTurnDuration - elapsed));
     }
   }
 
