@@ -59,7 +59,7 @@
                     >
                         <path d="M8 5l8 7-8 7z" />
                     </svg>
-                    Section 1
+                    <a href=#section1>Section 1</a>
                 </button>
                 {#if expandedSections.section1}
                     <ul class="ml-4 space-y-1">
@@ -81,7 +81,7 @@
                     >
                         <path d="M8 5l8 7-8 7z" />
                     </svg>
-                    Section 2
+                    <a href=#section2>Section 2</a>
                 </button>
                 {#if expandedSections.section2}
                     <ul class="ml-4 space-y-1">
@@ -103,7 +103,7 @@
                     >
                         <path d="M8 5l8 7-8 7z" />
                     </svg>
-                    Section 3
+                    <a href=#section3>Section 3</a>
                 </button>
                 {#if expandedSections.section3}
                     <ul class="ml-4 space-y-1">
@@ -189,11 +189,13 @@
 
     .table-of-contents a {
         text-decoration: none;
-        color: #60a5fa; /* Light blue links */
+        color: #a1a1aa; /* Grey color for links */
     }
 
     .table-of-contents a:hover {
         text-decoration: underline;
+        color: #d4d4d8; /* Slightly lighter grey on hover */
+
     }
 
     .table-of-contents ul ul {
