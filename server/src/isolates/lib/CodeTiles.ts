@@ -55,7 +55,7 @@ class Unit {
       if (x < 0 || y < 0 || y >= this.game.map.tiles.length || x >= this.game.map.tiles[0].length) {
         return false;
       }
-      console.log("isWalkable", this.game.map.tiles[y][x]);
+      // console.log("isWalkable", this.game.map.tiles[y][x]);
       return this.game.map.tiles[y][x].type !== "wall";
     };
     const path = Pathfinding.findPath(this.position, target, isWalkable);
