@@ -55,7 +55,10 @@ class Unit {
       if (x < 0 || y < 0 || y >= this.game.map.tiles.length || x >= this.game.map.tiles[0].length) {
         return false;
       }
-      return !(this.game.units.some((unit) => unit.position.x === x && unit.position.y === y) || this.game.map.tiles[y][x].type == "wall");
+      if (this.game.map.tiles[y][x].type !== "wall") {
+        return true;
+      }
+      return !this.game.units.some((unit) => unit.position.x === x && unit.position.y === y);
     };
     const path = Pathfinding.findPath(this.position, target, isWalkable);
     if (path && path.length > 0) {
