@@ -187,10 +187,7 @@
 	let isTutorial = $state(false);
 	let tutPane: PaneAPI | undefined = $state(undefined);
 
-	import SvelteMarkdown from 'svelte-markdown';
 	import TaskRenderer from './task-renderer.svelte';
-	import { json } from '@sveltejs/kit';
-	import monaco from '$lib/monaco.js';
 	const tutorial = async () => {
 		const resp = await fetch('/tut.md');
 		const md = await resp.text();
@@ -230,11 +227,46 @@
 		<div
 			class="flex flex-row gap-2 *:rounded-md *:border *:border-zinc-700 *:bg-zinc-800 *:p-1 *:px-2 *:text-zinc-200"
 		>
-			<label for="tutorial" class="flex items-baseline gap-2 text-sm text-zinc-200"
-				><input type="checkbox" bind:checked={isTutorial} id="tutorial" /><span>Tutorial</span
-				></label
+		<label for="tutorial" class="flex items-center gap-2 text-sm text-zinc-200">
+			<input
+				type="checkbox"
+				bind:checked={isTutorial}
+				id="tutorial"
+				class="hidden"
+			/>
+			<span
+				class="flex items-center justify-center w-5 h-5 rounded border border-zinc-700 bg-zinc-800 text-zinc-200 hover:bg-zinc-700"
 			>
-			<a href="/docs/all_symbols.html">docs</a>
+				{#if isTutorial}
+					<!-- Checkmark icon -->
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						class="w-4 h-4 text-white"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="currentColor"
+						stroke-width="2"
+					>
+						<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+					</svg>
+				{:else}
+					<!-- Invisible placeholder to maintain size -->
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						class="w-4 h-4 text-transparent"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="currentColor"
+						stroke-width="2"
+					>
+						<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+					</svg>
+				{/if}
+			</span>
+			<span>Tutorial</span>
+		</label>
+			<a href="/docs.html">Documentation</a>
+			<a href="/top">Leaderboard</a>
 			<!-- <button
 				class=""
 				disabled={uploading}

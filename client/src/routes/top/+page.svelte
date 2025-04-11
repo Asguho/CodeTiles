@@ -47,9 +47,11 @@
 </script>
 
 <div class="min-h-screen w-full bg-stone-950">
-	<a class="text-white" href="/">Back</a>
+	<button class="go-back-button mb-4" onclick={() => (window.location.href = '/')}>
+		Go Back
+	</button>
 	<div class="container mx-auto mt-4 w-full rounded-2xl border-2 border-stone-600 p-2 text-white">
-		<h1 class="text-3xl text-amber-400">Your Leaderboard</h1>
+		<h1 class="text-3xl text-amber-400">Top CodeTiles Players</h1>
 		{#await fetchTopPlayers()}
 			<!-- promise is pending -->
 			<p>Loading...</p>
@@ -98,3 +100,21 @@
 		{/await}
 	</div>
 </div>
+
+<style>
+	.go-back-button {
+		background-color: #272727;
+		color: #e0e0e0;
+		border: none;
+		padding: 0.5rem 1rem;
+		border-radius: 5px;
+		cursor: pointer;
+		max-width: 200px; /* Limit the width to outline the text */
+		text-align: left;
+		margin: 1rem 1rem; /* Add margin to the right */
+	}
+
+	.go-back-button:hover {
+		background-color: #444;
+	}
+</style>
