@@ -66,7 +66,7 @@
 
 	<!-- <span class="h-6 w-3 border-r-[1px] border-stone-500"> </span> -->
 	{#each goalsToShow as goal, i (goal.name)}
-		<div in:fade>
+		<div in:fade class="w-full max-w-full overflow-x-hidden">
 			<div class="flex flex-row items-center justify-start gap-2">
 				{#if goal.completed}
 					<!-- prettier-ignore -->
@@ -91,7 +91,7 @@
 				</div>
 			{/if}
 			{#if i < goalsToShow.length - 1}
-				<span class="h-6 w-3 border-r-2 border-stone-600"></span>
+				<span class="ml-3 h-6 w-3 border-r-2 border-stone-600"></span>
 			{/if}
 		</div>
 	{/each}
