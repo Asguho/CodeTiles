@@ -91,7 +91,7 @@
 				</div>
 			{/if}
 			{#if i < goalsToShow.length - 1}
-				<span class="ml-3 h-6 w-3 border-r-2 border-stone-600"></span>
+				<span class="ml-[10px] h-6 w-3 border-r-2 border-stone-600"></span>
 			{/if}
 		</div>
 	{/each}
