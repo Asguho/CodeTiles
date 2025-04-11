@@ -266,7 +266,7 @@
 			<span>Tutorial</span>
 		</label>
 			<a href="/docs.html">Documentation</a>
-			<a href="/top">Leaderboard</a>
+			<a href="/top.html">Leaderboard</a>
 			<!-- <button
 				class=""
 				disabled={uploading}
