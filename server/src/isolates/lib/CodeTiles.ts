@@ -56,7 +56,12 @@ class Unit {
         return false;
       }
       // console.log("isWalkable", this.game.map.tiles[y][x]);
-      return this.game.map.tiles[y][x].type !== "wall";
+      if (this.game.map.tiles[y][x].type === "wall") {
+        return false;
+      }
+      return this.game.units.some((unit) => {
+        return unit.position.x === x && unit.position.y === y && unit.owner !== this.owner;
+      });
     };
     const path = Pathfinding.findPath(this.position, target, isWalkable);
     if (path && path.length > 0) {
