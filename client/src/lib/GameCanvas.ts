@@ -87,7 +87,7 @@ let animationStartTime: number | null = null;
 const ANIMATION_DURATION = 100; // Animation duration in milliseconds
 const HEALTH_BAR_HEIGHT = 4; // Height of the health bar in pixels
 const HEALTH_BAR_OFFSET = 2; // Offset above the unit in pixels
-const ENEMY_LABEL_OFFSET = -7; // Offset for enemy label above health bar
+const ENEMY_LABEL_OFFSET = 15; // Offset for enemy label above health bar
 
 // Store unit animation states
 type AnimatedUnit = {
