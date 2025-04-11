@@ -280,7 +280,7 @@ export class GameHandler {
         width: 10,
         height: 10,
       },
-      maxTurns: 25,
+      maxTurns: 35,
       fogOfWar: false,
       unit: {
         melee: { health: 100, attack: 20, range: 1, price: 50, damage: 20 },
