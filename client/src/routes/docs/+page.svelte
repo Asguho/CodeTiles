@@ -167,12 +167,12 @@
             <section id="section1-2" class="mt-4">
                 <h3 class="text-xl font-semibold text-zinc-300">Methods</h3>
                 <p>There are no methods in the Game class. </p>
-
             </section>
-        </section>    
+        </section>
+        
         <section id="section2" class="mt-6">
             <h2 class="text-2xl font-semibold text-zinc-300">Class GameMap</h2>
-            <p class="mt-2 text-zinc-400">The GameMap class is the primary class where the map is stored <br>Often referenced as map</p>
+            <p class="mt-2 text-zinc-400">The GameMap class represents the game map and provides methods for interacting with it.</p>
             <section id="section2-1" class="mt-4">
                 <h3 class="text-xl font-semibold text-zinc-300">Properties</h3>
                 <table class="table">
@@ -186,14 +186,14 @@
                     <tbody>
                         <tr>
                             <td>tiles</td>
-                            <td>Tile[]</td>
-                            <td>An array of all tiles on the map.</td>
+                            <td>Tile[][]</td>
+                            <td>A 2D array of tiles representing the game map.</td>
                         </tr>
                     </tbody>
                 </table>
             </section>
             <section id="section2-2" class="mt-4">
-                <h3 class="text-lg font-semibold text-zinc-300">Methods</h3>
+                <h3 class="text-xl font-semibold text-zinc-300">Methods</h3>
                 <table class="table">
                     <thead>
                         <tr>
@@ -206,16 +206,18 @@
                     <tbody>
                         <tr>
                             <td>findNearest</td>
-                            <td>start: Position (&lbrace; x: number; y: number &rbrace;), isTarget: TileType</td>                            <td>Tile</td>
+                            <td>start: Position, isTarget: (tile: Tile) => boolean</td>
+                            <td>Tile</td>
                             <td>Finds the nearest tile of a specific type from a starting position.</td>
                         </tr>
                     </tbody>
                 </table>
             </section>
         </section>
+        
         <section id="section3" class="mt-6">
-            <h2 class="text-2xl font-semibold text-zinc-300">class Tile</h2>
-            <p class="mt-2 text-zinc-400">The Tile class is the class that has fields and methods for the tile components of the map.</p>
+            <h2 class="text-2xl font-semibold text-zinc-300">Class Tile</h2>
+            <p class="mt-2 text-zinc-400">The Tile class represents a single tile on the game map.</p>
             <section id="section3-1" class="mt-4">
                 <h3 class="text-xl font-semibold text-zinc-300">Properties</h3>
                 <table class="table">
@@ -238,9 +240,10 @@
                             <td>The position of the tile on the map.</td>
                         </tr>
                     </tbody>
+                </table>
             </section>
             <section id="section3-2" class="mt-4">
-                <h3 class="text-xl font-semibold text-zinc-300">methods</h3>
+                <h3 class="text-xl font-semibold text-zinc-300">Methods</h3>
                 <table class="table">
                     <thead>
                         <tr>
@@ -252,22 +255,80 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td>isAdjacent</td>
-                            <td>other: Tile</td>
+                            <td>isBase</td>
+                            <td>None</td>
                             <td>boolean</td>
-                            <td>Checks if the tile is adjacent to another tile.</td>
-                        </tr>
-                        <tr>
-                            <td>isType</td>
-                            <td>type: TileType</td>
-                            <td>boolean</td>
-                            <td>Checks if the tile is of a specific type.</td>
+                            <td>Checks if the tile is a base.</td>
                         </tr>
                     </tbody>
+                </table>
             </section>
-            <section id="section3-3" class="mt-4">
-                <h3 class="text-xl font-semibold text-zinc-300">TileTypes</h3>
-                <p class="mt-2 text-zinc-400">The TileType enum defines the different types of tiles.</p>
+        </section>
+        
+        <section id="section4" class="mt-6">
+            <h2 class="text-2xl font-semibold text-zinc-300">Class Base</h2>
+            <p class="mt-2 text-zinc-400">
+                The Base class represents a player's base. It extends from 
+                <a href="#section3" class="text-blue-400 hover:underline">Class Tile</a>.
+            </p>
+            <section id="section4-1" class="mt-4">
+                <h3 class="text-xl font-semibold text-zinc-300">Properties</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>owner</td>
+                            <td>string</td>
+                            <td>The ID of the player who owns the base.</td>
+                        </tr>
+                        <tr>
+                            <td>health</td>
+                            <td>number</td>
+                            <td>The current health of the base.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </section>
+        
+        <section id="section5" class="mt-6">
+            <h2 class="text-2xl font-semibold text-zinc-300">Class Shop</h2>
+            <p class="mt-2 text-zinc-400">The Shop class allows players to buy units.</p>
+            <section id="section5-1" class="mt-4">
+                <h3 class="text-xl font-semibold text-zinc-300">Methods</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Parameters</th>
+                            <th>Return Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>buy</td>
+                            <td>item: UnitType, quantity: number</td>
+                            <td>void</td>
+                            <td>Buys a specified quantity of units of the given type.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </section>
+        
+        <section id="section6" class="mt-6">
+            <h2 class="text-2xl font-semibold text-zinc-300">Enums and Types</h2>
+            <p class="mt-2 text-zinc-400">Various enums and types used throughout the CodeTiles library.</p>
+            <section id="section6-1" class="mt-4">
+                <h3 class="text-xl font-semibold text-zinc-300">TileType</h3>
+                <p class="mt-2 text-zinc-400">Represents the type of a tile.</p>
                 <table class="table">
                     <thead>
                         <tr>
@@ -277,28 +338,239 @@
                     </thead>
                     <tbody>
                         <tr>
-                        <th>Unknown</th>
-                        <th>The Tile is not known</th>
-                    </tr>
-                        <tr>
-                            <td>Base</td>
-                            <td>The Tile is a base.</td>
+                            <td>unknown</td>
+                            <td>The tile type is unknown.</td>
                         </tr>
                         <tr>
-                            <td>Wall</td>
-                            <td>The Tile is a wall.</td>
+                            <td>ground</td>
+                            <td>The tile is ground.</td>
                         </tr>
                         <tr>
-                            <td>Ground</td>
-                            <td>The Tile is a floor.</td>
+                            <td>base</td>
+                            <td>The tile is a base.</td>
                         </tr>
                         <tr>
-                            <td>Ore</td>
-                            <td>The Tile is a water.</td>
+                            <td>ore</td>
+                            <td>The tile contains ore.</td>
+                        </tr>
+                        <tr>
+                            <td>wall</td>
+                            <td>The tile is a wall.</td>
                         </tr>
                     </tbody>
                 </table>
+            </section>
         </section>
+        <section id="section7" class="mt-6">
+            <h2 class="text-2xl font-semibold text-zinc-300">Class Unit</h2>
+            <p class="mt-2 text-zinc-400">The Unit class represents a unit in the game.</p>
+            <section id="section7-1" class="mt-4">
+                <h3 class="text-xl font-semibold text-zinc-300">Properties</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>id</td>
+                            <td>string</td>
+                            <td>The unique identifier of the unit.</td>
+                        </tr>
+                        <tr>
+                            <td>type</td>
+                            <td>UnitType</td>
+                            <td>The type of the unit (e.g., melee, ranged, miner).</td>
+                        </tr>
+                        <tr>
+                            <td>owner</td>
+                            <td>string</td>
+                            <td>The ID of the player who owns the unit.</td>
+                        </tr>
+                        <tr>
+                            <td>health</td>
+                            <td>number</td>
+                            <td>The current health of the unit.</td>
+                        </tr>
+                        <tr>
+                            <td>position</td>
+                            <td>Position</td>
+                            <td>The position of the unit on the map.</td>
+                        </tr>
+                        <tr>
+                            <td>actionTaken</td>
+                            <td>boolean (optional)</td>
+                            <td>Indicates whether the unit has taken an action this turn.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+            <section id="section7-2" class="mt-4">
+                <h3 class="text-xl font-semibold text-zinc-300">Methods</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Parameters</th>
+                            <th>Return Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>move</td>
+                            <td>direction: Direction</td>
+                            <td>void</td>
+                            <td>Moves the unit in the specified direction.</td>
+                        </tr>
+                        <tr>
+                            <td>isWithinRange</td>
+                            <td>target: Position</td>
+                            <td>boolean</td>
+                            <td>Checks if the target position is within the unit's range.</td>
+                        </tr>
+                        <tr>
+                            <td>moveTowards</td>
+                            <td>target: Position</td>
+                            <td>null | Direction[]</td>
+                            <td>Calculates the directions to move towards the target position.</td>
+                        </tr>
+                        <tr>
+                            <td>isOwnedBy</td>
+                            <td>playerId: string</td>
+                            <td>boolean</td>
+                            <td>Checks if the unit is owned by the specified player.</td>
+                        </tr>
+                        <tr>
+                            <td>isMiner</td>
+                            <td>None</td>
+                            <td>boolean</td>
+                            <td>Checks if the unit is a miner.</td>
+                        </tr>
+                        <tr>
+                            <td>isMelee</td>
+                            <td>None</td>
+                            <td>boolean</td>
+                            <td>Checks if the unit is a melee unit.</td>
+                        </tr>
+                        <tr>
+                            <td>isRanged</td>
+                            <td>None</td>
+                            <td>boolean</td>
+                            <td>Checks if the unit is a ranged unit.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </section>
+        
+        <section id="section8" class="mt-6">
+            <h2 class="text-2xl font-semibold text-zinc-300">Class MeleeUnit</h2>
+            <p class="mt-2 text-zinc-400">The MeleeUnit class represents a melee unit in the game.</p>
+            <section id="section8-1" class="mt-4">
+                <h3 class="text-xl font-semibold text-zinc-300">Methods</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Parameters</th>
+                            <th>Return Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>attack</td>
+                            <td>target: Position</td>
+                            <td>void</td>
+                            <td>Attacks the specified target position.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </section>
+        
+        <section id="section9" class="mt-6">
+            <h2 class="text-2xl font-semibold text-zinc-300">Class RangedUnit</h2>
+            <p class="mt-2 text-zinc-400">The RangedUnit class represents a ranged unit in the game.</p>
+            <section id="section9-1" class="mt-4">
+                <h3 class="text-xl font-semibold text-zinc-300">Methods</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Parameters</th>
+                            <th>Return Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>attack</td>
+                            <td>target: Position</td>
+                            <td>void</td>
+                            <td>Attacks the specified target position.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </section>
+        
+        <section id="section10" class="mt-6">
+            <h2 class="text-2xl font-semibold text-zinc-300">Class MinerUnit</h2>
+            <p class="mt-2 text-zinc-400">The MinerUnit class represents a miner unit in the game.</p>
+            <section id="section10-1" class="mt-4">
+                <h3 class="text-xl font-semibold text-zinc-300">Properties</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>inventory</td>
+                            <td>&lbrace; ore: number &rbrace;</td>
+                            <td>The inventory of the miner, containing the amount of ore.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+            <section id="section10-2" class="mt-4">
+                <h3 class="text-xl font-semibold text-zinc-300">Methods</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Parameters</th>
+                            <th>Return Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>mine</td>
+                            <td>target: Tile</td>
+                            <td>void</td>
+                            <td>Mines ore from the specified tile.</td>
+                        </tr>
+                        <tr>
+                            <td>sell</td>
+                            <td>None</td>
+                            <td>void</td>
+                            <td>Sells the ore in the miner's inventory.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </section>
+        
+
 
     </div>
 </div>
