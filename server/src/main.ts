@@ -370,8 +370,19 @@ const routes: Route[] = [
         response.headers.set(key, value);
       }
       return response;
-    },
-  },
+        },
+      },
+      {
+        pattern: new URLPattern({ pathname: "/docs/*" }),
+        method: "GET", 
+        handler: (req: Request) => {
+          console.log("Serving docs", req.url);
+          return serveDir(req, {
+            fsRoot: "./",
+            showIndex: true,
+          });
+        },
+      },
 ];
 
 function defaultHandler(req: Request) {

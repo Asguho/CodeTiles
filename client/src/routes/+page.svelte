@@ -234,6 +234,7 @@
 				><input type="checkbox" bind:checked={isTutorial} id="tutorial" /><span>Tutorial</span
 				></label
 			>
+			<a href="/docs/all_symbols.html">docs</a>
 			<!-- <button
 				class=""
 				disabled={uploading}
