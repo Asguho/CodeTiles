@@ -61,8 +61,11 @@ export class Game {
     this.players.forEach((player, index) => {
       // Calculate angle based on player index for even spacing
       const angle = (index / this.players.length) * 2 * Math.PI + randomOffset;
-      const x = Math.round(centerX + radius * Math.cos(angle));
-      const y = Math.round(centerY + radius * Math.sin(angle));
+      let x = Math.round(centerX + radius * Math.cos(angle));
+      let y = Math.round(centerY + radius * Math.sin(angle));
+      // Clamp x and y to ensure they stay within map bounds
+      x = Math.min(Math.max(x, 0), this.gameSettings.map.width - 1);
+      y = Math.min(Math.max(y, 0), this.gameSettings.map.height - 1);
       player.basePosition = { x, y };
       this.map[y][x] = {
         type: "base",
