@@ -15,9 +15,10 @@ RUN deno run build
 # Setup server
 WORKDIR /app/server
 RUN deno cache --node-modules-dir npm:drizzle-orm npm:drizzle-orm/postgres-js
+RUN deno task gen:doc
 
 # Compile the main app so that it doesn't need to be compiled each startup/entry.
-RUN deno cache --node-modules-dir main.ts
+RUN deno cache --node-modules-dir src/main.ts
 
 # make empty directory called .cache
 RUN mkdir -p .cache
