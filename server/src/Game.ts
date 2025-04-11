@@ -66,6 +66,7 @@ export class Game {
       // Clamp x and y to ensure they stay within map bounds
       x = Math.min(Math.max(x, 0), this.gameSettings.map.width - 1);
       y = Math.min(Math.max(y, 0), this.gameSettings.map.height - 1);
+      console.log("Placing base at:", x, y);
       player.basePosition = { x, y };
       this.map[y][x] = {
         type: "base",
