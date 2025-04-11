@@ -79,7 +79,7 @@ unit.move("south"); // Moves the unit south
 const target = { x: 3, y: 3 };
 const withinRange = unit.isWithinRange(target); // Checks if the target is within range
 
-const directions = unit.moveTowards(target); // Calculates directions to move towards the target
+const directions = unit.moveTowards(target); // gives directions to move towards the target
 
 
 const tile = game.map.tiles[1][1];
@@ -91,7 +91,7 @@ const isminer = unit.isMiner(); // Checks if the unit is a miner
 const isMelee = unit.isMelee(); // Checks if the unit is a melee unit
 const isRanged = unit.isRanged(); // Checks if the unit is a ranged unit
 `;
-	const getDistance = `const distance = game.getDistance({ x: 1, y: 2 }, { x: 3, y: 4 });  // Distance will be 7`;
+	const getDistance = `const distance = game.getDistance({ x: 0, y: 0 }, { x: 3, y: 4 });  // Distance will be 7`;
 
 	const buyExample = `
 game.shop.buy("melee", 5); // Buys 5 melee units 
