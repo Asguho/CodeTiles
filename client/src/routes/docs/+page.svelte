@@ -222,7 +222,7 @@ const isBase = tile.isBase(); // Returns true if the tile is a base`;
 						<tr>
 							<td>getDistance</td>
 							<td
-								>pos1: Position (&rbrace; x, y &lbrace;), pos2: Position (&rbrace; x, y &lbrace;)</td
+								>pos1: Position (&lbrace; x, y &rbrace;), pos2: Position (&lbrace; x, y &rbrace;)</td
 							>
 							<td>number</td>
 							<td>Calculates the distance between the two positions.</td>
