@@ -88,6 +88,12 @@ declare class Unit {
     },
   ): null | Direction[];
   /**
+   * Checks if the unit is on the specified tile.
+   * @param tile - The tile to check.
+   * @returns True if the unit is on the tile, false otherwise.
+   */
+  isUnitOnTile(tile: Tile): boolean;
+  /**
    * Checks if the unit is owned by the specified player.
    * @param playerId - The ID of the player to check ownership.
    * @returns True if the unit is owned by the player, false otherwise.
@@ -196,6 +202,7 @@ declare class Base extends Tile {
     },
     health: number,
   );
+
 }
 /**
  * Represents the shop where players can buy units.
@@ -212,7 +219,19 @@ declare class Shop {
    * @param quantity - The quantity of units to buy.
    */
   buy(item: UnitType, quantity: number): void;
+
+  /**
+   * Checks if the shop has a specific unit type available for purchase.
+   * @param item - The type of unit to check.
+   * @param quantity - The quantity of units to check.
+   * @returns True if the unit type is available, false otherwise.
+   */
+  canAfford(item: UnitType, quantity: number): boolean;
+
+  getPrice(item: UnitType, quantity: number): number;
+
 }
+
 /**
  * Represents the game map, which holds a 2D array of tiles and provides methods to interact with the map.
  */
@@ -254,6 +273,14 @@ declare class Game {
    * Creates a new game instance.
    */
   constructor();
+  /**
+ * Checks if the given coordinate is within the bounds of the game map.
+ * @param coord - The coordinate to check.
+ * @param map - The game map.
+ * @returns True if the coordinate is within bounds, false otherwise.
+ */
+ getDistance(a: { x: number; y: number }, b: { x: number; y: number }): number;
+
 }
 /**
  * Compares two coordinate objects to check if they are equal.

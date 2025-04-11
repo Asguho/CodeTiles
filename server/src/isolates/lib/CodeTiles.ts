@@ -38,6 +38,14 @@ class Unit {
       direction,
     });
   }
+  isUnitOnTile(tile: Tile): boolean{
+    if (tile instanceof Tile) {
+      return this.position.x === tile.position.x && this.position.y === tile.position.y;
+    } else{ 
+      return false;
+    }
+  }
+
   isWithinRange(target: { x: number; y: number }) {
     return Math.pow(this.position.x - target.x, 2) + Math.pow(this.position.y - target.y, 2) <= Math.pow(this.range, 2);
   }
@@ -159,10 +167,12 @@ class Base extends Tile {
     this.owner = owner;
     this.health = health;
   }
+  
 }
 
 class Shop {
   #codeTiles: CodeTiles;
+  #prices = { melee: 50, ranged: 60, miner: 40 };
 
   constructor(codeTiles: CodeTiles) {
     this.#codeTiles = codeTiles;
@@ -175,6 +185,16 @@ class Shop {
       quantity,
     });
   }
+  canAfford(item: UnitType, quantity: number): boolean {
+    const price = this.#prices[item as "melee" | "ranged" | "miner"];
+    return this.#codeTiles.getCoins() >= price * quantity;
+
+  }
+  getPrice(item: UnitType, quantity: number): number {
+    return this.#prices[item] * quantity;
+  }
+
+
 }
 class GameMap {
   tiles: Tile[][];
@@ -278,10 +298,17 @@ class Game {
     this.turn = gameState.turn;
     this.shop = new Shop(codeTiles);
   }
+  getDistance(a: { x: number; y: number }, b: { x: number; y: number }): number {
+    return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+  }
 }
 
 class CodeTiles {
   #game: Game;
+
+  getCoins() {
+    return this.#game.coins;
+  }
   #actions: { units: UnitAction[]; shop: ShopAction[] } = { units: [], shop: [] };
   #logs: LogEntry[] = [];
   #playerFunction?: (game: Game) => void;

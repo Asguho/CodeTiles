@@ -5,12 +5,6 @@
     let isResizing = false;
     let searchQuery = ''; // Search query for filtering TOC
     import { BASE_URL } from '$lib/utils';
-    // Removed duplicate import
-    
-
-
-
-
 
     let expandedSections: { [key: string]: boolean } = {};
     let sections: { id: string; title: string; content: string; subsections: { id: string; title: string }[] }[] = [];
@@ -71,7 +65,43 @@
         return section.subsections.some((sub) => sub.title.toLowerCase().includes(query));
     }
 
-    let findNear  = `const nearestOre = game.map.findNearest(game.base.position, tile => tile.type === TileType.ore);`;
+    const findNear  = `const nearestOre = game.map.findNearest(game.base.position, tile => tile.type === TileType.ore);`;
+    const unitMethods = `
+unit.move("south"); // Moves the unit south
+
+const target = { x: 3, y: 3 };
+const withinRange = unit.isWithinRange(target); // Checks if the target is within range
+
+const directions = unit.moveTowards(target); // Calculates directions to move towards the target
+
+
+const tile = game.map.tiles[1][1];
+const isUnitPresent = unit.isUnitOnTile(tile); // Checks if the unit is on the specified tile
+
+const isOwned = unit.isOwnedBy('player1'); // Checks if the unit is owned by player1
+
+const isminer = unit.isMiner(); // Checks if the unit is a miner
+const isMelee = unit.isMelee(); // Checks if the unit is a melee unit
+const isRanged = unit.isRanged(); // Checks if the unit is a ranged unit
+`;
+    const getDistance = `const distance = game.getDistance({ x: 1, y: 2 }, { x: 3, y: 4 });  // Distance will be 7`;
+
+    const buyExample = `
+game.shop.buy("melee", 5); // Buys 5 melee units 
+const canBuy = game.shop.canAfford("melee", 5); // Checks if the player can buy 5 melee units
+const cost = game.shop.getPrice("melee", 5); // Gets the cost of 5 melee units
+
+`;
+
+    const attackExample = `const targetPosition = { x: 5, y: 5 };
+meleeUnit.attack(targetPosition); // Attacks the target position`;
+
+    const mineExamples = `const oreTile = game.map.tiles[2][3];
+minerUnit.mine(oreTile); // Mines ore from the specified tile
+minerUnit.sell(); // Sells the ore in the miner's inventory`;
+
+    const isBaseExample = `const tile = game.map.tiles[0][0];
+const isBase = tile.isBase(); // Returns true if the tile is a base`;
 
 
     // Extract sections after the DOM is loaded
@@ -183,8 +213,31 @@
             </section>
             <section id="section1-2" class="mt-4">
                 <h3 class="text-xl font-semibold text-zinc-300">Methods</h3>
-                <p>There are no methods in the Game class. </p>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Parameters</th>
+                            <th>Return Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>getDistance</td>
+                            <td>pos1: Position (&rbrace; x, y &lbrace;), pos2: Position (&rbrace; x, y &lbrace;)</td>
+                            <td>number</td>
+                            <td>Calculates the distance between the two positions.</td>
+                        </tr>
+                    </tbody>
+                </table>
             </section>
+            <section id="section1-3" class="mt-4">
+                <h3 class="text-xl font-semibold text-zinc-300">Examples</h3>
+                <div class="code-container">
+                    <pre><code class="language-js">{getDistance}</code></pre>
+                </div>
+                </section>
         </section>
         
         <section id="section2" class="mt-6">
@@ -286,6 +339,12 @@
                     </tbody>
                 </table>
             </section>
+            <section id="section3-3" class="mt-4">
+                <h3 class="text-xl font-semibold text-zinc-300">Examples</h3>
+                <div class="code-container">
+                    <pre><code class="language-js">{isBaseExample}</code></pre>
+                </div>
+            </section>
         </section>
         
         <section id="section4" class="mt-6">
@@ -318,12 +377,19 @@
                     </tbody>
                 </table>
             </section>
+            <section id="section4-2" class="mt-4">
+                <h3 class="text-xl font-semibold text-zinc-300">Methods</h3>
+                The Base class inherits all methods from the Tile class, and does currently not have any specific methods.
+            </section>
         </section>
         
         <section id="section5" class="mt-6">
             <h2 class="text-2xl font-semibold text-zinc-300">Class Shop</h2>
             <p class="mt-2 text-zinc-400">The Shop class allows players to buy units.</p>
-            <section id="section5-1" class="mt-4">
+            <section id ="section5-1" class="mt-4">
+                <h3 class="text-xl font-semibold text-zinc-300">Properties</h3>
+                <p>This class does not currently have any properties.</p>
+            <section id="section5-2" class="mt-4">
                 <h3 class="text-xl font-semibold text-zinc-300">Methods</h3>
                 <table class="table">
                     <thead>
@@ -342,7 +408,28 @@
                             <td>Buys a specified quantity of units of the given type.</td>
                         </tr>
                     </tbody>
+                    <tbody>
+                        <tr>
+                            <td>canAfford</td>
+                            <td>item: UnitType, quantity: number</td>
+                            <td>boolean</td>
+                            <td>Checks if the player can afford the specified quantity of units.</td>
+                        </tr>
+                    </tbody>
+                    <tbody>
+                        <tr>
+                            <td>getPrice</td>
+                            <td>item: UnitType, quantity: number</td>
+                            <td>number</td>
+                            <td>Gets the price of the specified quantity of units.</td>
+                        </tr>
                 </table>
+            </section>
+            <section id="section5-3" class="mt-4">
+                <h3 class="text-xl font-semibold text-zinc-300">Examples</h3>
+                <div class="code-container">
+                    <pre><code class="language-js">{buyExample}</code></pre>
+                </div>
             </section>
         </section>
         
@@ -383,6 +470,89 @@
                     </tbody>
                 </table>
             </section>
+
+            <section id="section6-2" class="mt-4">
+                <h3 class="text-xl font-semibold text-zinc-300">Position</h3>
+                <p class="mt-2 text-zinc-400">Represents a position on the game map.</p>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>x</td>
+                            <td>number</td>
+                            <td>The x-coordinate of the position.</td>
+                        </tr>
+                        <tr>
+                            <td>y</td>
+                            <td>number</td>
+                            <td>The y-coordinate of the position.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+            <section id="section6-3" class="mt-4">
+                <h3 class="text-xl font-semibold text-zinc-300">Direction</h3>
+                <p class="mt-2 text-zinc-400">Represents a direction on the game map.</p>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>north</td>
+                            <td>Direction north.</td>
+                        </tr>
+                        <tr>
+                            <td>south</td>
+                            <td>Direction south.</td>
+                        </tr>
+                        <tr>
+                            <td>east</td>
+                            <td>Direction east.</td>
+                        </tr>
+                        <tr>
+                            <td>west</td>
+                            <td>Direction west.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+            <section id="section6-4" class="mt-4">
+                <h3 class="text-xl font-semibold text-zinc-300">UnitType</h3>
+                <p class="mt-2 text-zinc-400">Represents the type of a unit.</p>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>melee</td>
+                            <td>Melee unit type.</td>
+                        </tr>
+                        <tr>
+                            <td>ranged</td>
+                            <td>Ranged unit type.</td>
+                        </tr>
+                        <tr>
+                            <td>miner</td>
+                            <td>Miner unit type.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
         </section>
         <section id="section7" class="mt-6">
             <h2 class="text-2xl font-semibold text-zinc-300">Class Unit</h2>
@@ -485,9 +655,20 @@
                             <td>boolean</td>
                             <td>Checks if the unit is a ranged unit.</td>
                         </tr>
+                        <tr>
+                            <td>isUnitOnTile</td>
+                            <td>tile: Tile</td>
+                            <td>boolean</td>
+                            <td>Checks if the unit is on the specified tile.</td>
+                        </tr>
                     </tbody>
                 </table>
             </section>
+            <section id="section7-3" class="mt-4">
+                <h3 class="text-xl font-semibold text-zinc-300">Examples</h3>
+                <div class="code-container">
+                    <pre><code class="language-js">{unitMethods}</code></pre>
+                </div>
         </section>
         
         <section id="section8" class="mt-6">
@@ -495,6 +676,10 @@
             <p class="mt-2 text-zinc-400">The MeleeUnit class represents a melee unit in the game. It inherits from 
                 <a href="#section7" class="text-blue-400 hover:underline">Class Unit</a>.</p>
             <section id="section8-1" class="mt-4">
+                <h3 class="text-xl font-semibold text-zinc-300">Properties</h3>
+                <p>This class does not currently have any specific properties, however it inherits from the Unit Class</p>
+            </section>
+            <section id="section8-2" class="mt-4">
                 <h3 class="text-xl font-semibold text-zinc-300">Methods</h3>
                 <table class="table">
                     <thead>
@@ -514,6 +699,12 @@
                         </tr>
                     </tbody>
                 </table>
+            </section>
+            <section id="section8-3" class="mt-4">
+                <h3 class="text-xl font-semibold text-zinc-300">Examples</h3>
+                <div class="code-container">
+                    <pre><code class="language-js">{attackExample}</code></pre>
+                </div>
             </section>
         </section>
         
@@ -522,6 +713,10 @@
             <p class="mt-2 text-zinc-400">The RangedUnit class represents a ranged unit in the game. It inherits from 
                 <a href="#section7" class="text-blue-400 hover:underline">Class Unit</a>.</p>
             <section id="section9-1" class="mt-4">
+               <h3 class="text-xl font-semibold text-zinc-300">Properties</h3>
+               <p>This class does not currently have any specific properties, however it inherits from the Unit Class</p>
+            </section>
+            <section id="section9-2" class="mt-4">
                 <h3 class="text-xl font-semibold text-zinc-300">Methods</h3>
                 <table class="table">
                     <thead>
@@ -541,6 +736,12 @@
                         </tr>
                     </tbody>
                 </table>
+            </section>
+            <section id="section9-3" class="mt-4">
+                <h3 class="text-xl font-semibold text-zinc-300">Examples</h3>
+                <div class="code-container">
+                    <pre><code class="language-js">{attackExample}</code></pre>
+                </div>
             </section>
         </section>
         
@@ -593,6 +794,12 @@
                         </tr>
                     </tbody>
                 </table>
+            </section>
+            <section id="section10-3" class="mt-4">
+                <h3 class="text-xl font-semibold text-zinc-300">Examples</h3>
+                <div class="code-container">
+                    <pre><code class="language-js">{mineExamples}</code></pre>
+                </div>
             </section>
         </section>
         
