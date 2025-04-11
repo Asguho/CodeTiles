@@ -59,9 +59,6 @@ class Unit {
       if (this.game.map.tiles[y][x].type == "wall") {
         return false;
       }
-      console.log("isWalkable", this.game.map.tiles[y][x], !this.game.units.some((unit) => {
-        return unit.position.x == x && unit.position.y == y;
-      }));
 
       return !this.game.units.some((unit) => {
         return unit.position.x == x && unit.position.y == y;

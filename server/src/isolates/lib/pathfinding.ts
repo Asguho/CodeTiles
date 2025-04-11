@@ -151,7 +151,7 @@ export class Pathfinding {
         coordsMap.set(neighborKey, neighbor);
 
         // Skip if neighbor is in closed set or not walkable
-        if (closedSet.has(neighborKey) || !(isWalkable(neighbor) || (neighbor == end))) {
+        if (closedSet.has(neighborKey) || !(isWalkable(neighbor) || (neighbor.x == end.x && neighbor.y == end.y))) {
           continue;
         }
 
