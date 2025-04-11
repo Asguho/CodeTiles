@@ -1,8 +1,16 @@
 <script lang="ts">
+
+
     let tocWidth = 300; // Initial width of the Table of Contents in pixels
     let isResizing = false;
     let searchQuery = ''; // Search query for filtering TOC
     import { BASE_URL } from '$lib/utils';
+    // Removed duplicate import
+    
+
+
+
+
 
     let expandedSections: { [key: string]: boolean } = {};
     let sections: { id: string; title: string; content: string; subsections: { id: string; title: string }[] }[] = [];
@@ -63,10 +71,19 @@
         return section.subsections.some((sub) => sub.title.toLowerCase().includes(query));
     }
 
+    let findNear  = `const nearestOre = game.map.findNearest(game.base.position, tile => tile.type === TileType.ore);`;
+
+
     // Extract sections after the DOM is loaded
     import { onMount } from 'svelte';
-    onMount(() => {
+    import './prism.css';
+    let Prism;
+
+    onMount(async () => {
         extractSections();
+        const module = await import('./prism.js');
+        Prism = module.default; // Assign the default export to Prism
+        Prism.highlightAll();
     });
 </script>
 
@@ -212,6 +229,12 @@
                         </tr>
                     </tbody>
                 </table>
+            </section>
+            <section id="section2-3" class="mt-4">
+                <h3 class="text-xl font-semibold text-zinc-300">Examples</h3>
+                <div class="code-container">
+                    <pre><code class="language-js">{findNear}</code></pre>
+                </div>
             </section>
         </section>
         
@@ -750,4 +773,13 @@
 .table tr:hover {
     background-color: #333; /* Highlight row on hover */
 }
+.code-container {
+        margin: 0.5rem 0; /* Reduced vertical spacing */
+        background-color: #272727; /* Slightly lighter grey than the code box */
+        padding: 0.5rem 0.75rem; /* Reduced padding for a smaller container */
+        border-radius: 8px; /* Slightly smaller rounded corners */
+        overflow-x: auto;
+        box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for a box effect */
+}
+
 </style>
