@@ -268,7 +268,7 @@
         <section id="section4" class="mt-6">
             <h2 class="text-2xl font-semibold text-zinc-300">Class Base</h2>
             <p class="mt-2 text-zinc-400">
-                The Base class represents a player's base. It extends from 
+                The Base class represents a player's base. It inherits from 
                 <a href="#section3" class="text-blue-400 hover:underline">Class Tile</a>.
             </p>
             <section id="section4-1" class="mt-4">
@@ -469,7 +469,8 @@
         
         <section id="section8" class="mt-6">
             <h2 class="text-2xl font-semibold text-zinc-300">Class MeleeUnit</h2>
-            <p class="mt-2 text-zinc-400">The MeleeUnit class represents a melee unit in the game.</p>
+            <p class="mt-2 text-zinc-400">The MeleeUnit class represents a melee unit in the game. It inherits from 
+                <a href="#section7" class="text-blue-400 hover:underline">Class Unit</a>.</p>
             <section id="section8-1" class="mt-4">
                 <h3 class="text-xl font-semibold text-zinc-300">Methods</h3>
                 <table class="table">
@@ -495,7 +496,8 @@
         
         <section id="section9" class="mt-6">
             <h2 class="text-2xl font-semibold text-zinc-300">Class RangedUnit</h2>
-            <p class="mt-2 text-zinc-400">The RangedUnit class represents a ranged unit in the game.</p>
+            <p class="mt-2 text-zinc-400">The RangedUnit class represents a ranged unit in the game. It inherits from 
+                <a href="#section7" class="text-blue-400 hover:underline">Class Unit</a>.</p>
             <section id="section9-1" class="mt-4">
                 <h3 class="text-xl font-semibold text-zinc-300">Methods</h3>
                 <table class="table">
@@ -521,7 +523,8 @@
         
         <section id="section10" class="mt-6">
             <h2 class="text-2xl font-semibold text-zinc-300">Class MinerUnit</h2>
-            <p class="mt-2 text-zinc-400">The MinerUnit class represents a miner unit in the game.</p>
+            <p class="mt-2 text-zinc-400">The MinerUnit class represents a miner unit in the game. It inherits from 
+                <a href="#section7" class="text-blue-400 hover:underline">Class Unit</a>.</p>
             <section id="section10-1" class="mt-4">
                 <h3 class="text-xl font-semibold text-zinc-300">Properties</h3>
                 <table class="table">
