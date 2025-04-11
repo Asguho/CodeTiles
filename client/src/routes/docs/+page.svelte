@@ -214,16 +214,90 @@
             </section>
         </section>
         <section id="section3" class="mt-6">
-            <h2 class="text-2xl font-semibold text-zinc-300">Section 3</h2>
-            <p class="mt-2 text-zinc-400">Content for section 3.</p>
+            <h2 class="text-2xl font-semibold text-zinc-300">class Tile</h2>
+            <p class="mt-2 text-zinc-400">The Tile class is the class that has fields and methods for the tile components of the map.</p>
             <section id="section3-1" class="mt-4">
-                <h3 class="text-xl font-semibold text-zinc-300">Subsection 3.1</h3>
-                <p>Content for subsection 3.1.</p>
+                <h3 class="text-xl font-semibold text-zinc-300">Properties</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>type</td>
+                            <td>TileType</td>
+                            <td>The type of the tile.</td>
+                        </tr>
+                        <tr>
+                            <td>position</td>
+                            <td>Position</td>
+                            <td>The position of the tile on the map.</td>
+                        </tr>
+                    </tbody>
             </section>
             <section id="section3-2" class="mt-4">
-                <h3 class="text-xl font-semibold text-zinc-300">Subsection 3.2</h3>
-                <p>Content for subsection 3.2.</p>
+                <h3 class="text-xl font-semibold text-zinc-300">methods</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Parameters</th>
+                            <th>Return Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>isAdjacent</td>
+                            <td>other: Tile</td>
+                            <td>boolean</td>
+                            <td>Checks if the tile is adjacent to another tile.</td>
+                        </tr>
+                        <tr>
+                            <td>isType</td>
+                            <td>type: TileType</td>
+                            <td>boolean</td>
+                            <td>Checks if the tile is of a specific type.</td>
+                        </tr>
+                    </tbody>
             </section>
+            <section id="section3-3" class="mt-4">
+                <h3 class="text-xl font-semibold text-zinc-300">TileTypes</h3>
+                <p class="mt-2 text-zinc-400">The TileType enum defines the different types of tiles.</p>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                        <th>Unknown</th>
+                        <th>The Tile is not known</th>
+                    </tr>
+                        <tr>
+                            <td>Base</td>
+                            <td>The Tile is a base.</td>
+                        </tr>
+                        <tr>
+                            <td>Wall</td>
+                            <td>The Tile is a wall.</td>
+                        </tr>
+                        <tr>
+                            <td>Ground</td>
+                            <td>The Tile is a floor.</td>
+                        </tr>
+                        <tr>
+                            <td>Ore</td>
+                            <td>The Tile is a water.</td>
+                        </tr>
+                    </tbody>
+                </table>
         </section>
 
     </div>
