@@ -110,6 +110,10 @@ export const signup = async (req: Request) => {
 	const formData = await req.formData();
 	const username = formData.get("username") as string;
 	const password = formData.get("password") as string;
+	const [existingusername] = await db.select().from(table.user).where(eq(table.user.username, username));
+	if (existingusername) {
+		return new Response(JSON.stringify({ message: "Username already exists" }), { status: 400 });
+	}
 
 	if (!validateUsername(username)) {
 		return new Response(JSON.stringify({ message: "Invalid username" }), {
@@ -161,6 +165,7 @@ export const signup = async (req: Request) => {
 		console.error(_e);
 		return new Response(JSON.stringify({ message: "An error has occurred" }), { status: 500 });
 	}
+
 };
 export const githubLogin = async (req: Request) => {
     const url = new URL("https://github.com/login/oauth/authorize");
@@ -207,10 +212,17 @@ export const githubCallback = async (req: Request) => {
     const userData = await userResponse.json();
 
     // Check if the providerUserId already exists in the database
-    const [existingUserOAuth] = await db
-        .select()
-        .from(table.userOAuth)
-        .where(eq(table.userOAuth.providerUserId, userData.id.toString()));
+	const [existingusername] = await db.select().from(table.user).where(eq(table.user.username, userData.login));
+	const [existingUserOAuth] = await db
+	.select()
+	.from(table.userOAuth)
+	.where(eq(table.userOAuth.providerUserId, userData.id.toString()));
+
+	if (existingusername) {
+		if (!(existingUserOAuth)) {
+			return new Response(JSON.stringify({ message: "Username already exists" }), { status: 400 });
+		}
+	}
 
 	if (existingUserOAuth) {
 		// Log in the user
