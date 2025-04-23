@@ -82,11 +82,12 @@ export const login = async (req: Request) => {
 	const password = formData.get("password") as string;
 
 	const [user] = await db.select().from(table.user).where(eq(table.user.username, username));
-	const [userAuth] = await db.select().from(table.userAuth).where(eq(table.userAuth.userId, user.id));
-
 	if (!user) {
 		return new Response(JSON.stringify({ message: "Invalid username or password" }), { status: 400 });
 	}
+	const [userAuth] = await db.select().from(table.userAuth).where(eq(table.userAuth.userId, user.id));
+
+
 	const validPassword = await verify(userAuth.passwordHash, password, {
 		memoryCost: 19456,
 		timeCost: 2,
