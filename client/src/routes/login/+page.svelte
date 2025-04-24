@@ -35,7 +35,7 @@
 		<div class="w-3/5 p-8">
 			<h1 class="mb-6 text-2xl font-bold text-white">Welcome back</h1>
 			<p class="mb-6 text-zinc-400">Login to your CodeTiles account</p>
-			<form on:submit={handleSubmit} class="space-y-4">
+			<form onsubmit={handleSubmit} class="space-y-4">
 				<div>
 					<label for="username" class="block text-sm font-medium text-zinc-300">Username</label>
 					<input
