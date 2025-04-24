@@ -21,6 +21,8 @@
 
 	let gameCanvas: HTMLCanvasElement;
 	let latestGameData: any = null;
+	let gameOver = $state(false);
+    let lastWinner = $state('');
 
 	let runningGame = $state(false);
 	$inspect(runningGame);
@@ -130,7 +132,12 @@
 				console.log('Tutorial complete!');
 				tutorialJson = json as any;
 			} else if (json?.type === 'GAME_OVER') {
-				console.log('Game over!');
+				gameOver = true;
+				lastWinner = (json as any).winner || 'No winner'; 
+				addConsoleLine(consoleElement!, {
+					type: 'info',
+					values: ['Game over! Winner:', lastWinner,  ' Gameover: ' + gameOver]
+				});
 				// Handle game over logic here
 				runningGame = false;
 			}
@@ -218,6 +225,28 @@
 			</button>
 		</div>
 	</div>
+{/if}
+{#if gameOver && !runningGame}
+    <div class="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
+        <div class="rounded-lg border border-zinc-700 bg-zinc-800 bg-opacity-90 p-6 shadow-xl text-center pointer-events-auto">
+            <h2 class="mb-3 text-2xl font-bold text-zinc-100">Game Over</h2>
+            <p class="mb-4 text-lg text-zinc-300">
+                {#if lastWinner === 'No winner'}
+                    No winner was determined for this game.
+                {:else}
+                    The winner is <span class="font-semibold text-white">{lastWinner}</span>!
+                {/if}
+            </p>
+            <button
+                class="mt-4 w-full rounded-md bg-indigo-600 py-2 font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                onclick={() => {
+                    gameOver = false;
+                }}
+            >
+                Next
+            </button>
+        </div>
+    </div>
 {/if}
 
 <div class="bg-zinc-900 px-1 pt-1">
