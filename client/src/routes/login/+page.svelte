@@ -71,7 +71,7 @@
 			</div>
 			<button
 				class="mt-6 flex w-full justify-center rounded-md border border-zinc-600 bg-zinc-700 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-zinc-600 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2"
-				on:click={continueWithGitHub}
+				onclick={continueWithGitHub}
 			>
 				<svg class="mr-2 h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
 					<path
