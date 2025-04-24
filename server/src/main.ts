@@ -2,7 +2,7 @@ import { serveDir } from "jsr:@std/http/file-server";
 import { type Route, route } from "jsr:@std/http/unstable-route";
 import { retry } from "jsr:@std/async";
 
-import { login, signup, validateSessionToken } from "./auth.ts";
+import { login, signup, validateSessionToken, githubCallback, githubLogin } from "./auth.ts";
 import { db } from "./db/index.ts";
 import * as table from "./db/schema.ts";
 import DeploymentClient from "./DeploymentClient.ts";
@@ -353,6 +353,16 @@ const routes: Route[] = [
       }
       return response;
     },
+  },
+  {
+    method: "GET",
+    pattern: new URLPattern({ pathname: "/api/auth/github" }),
+    handler: githubLogin,
+  },
+  {
+    method: "GET",
+    pattern: new URLPattern({ pathname: "/api/auth/github/callback" }),
+    handler: githubCallback,
   },
   {
     pattern: new URLPattern({ pathname: "/api/types" }),

@@ -1,12 +1,21 @@
 import { integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
-  id: text("id").primaryKey().notNull(),
+  id: text("id").primaryKey().notNull(), // f.eks. 'local-123' eller 'github-456'
+  username: text("username").notNull().unique(),
   projectId: text("project_id").notNull(),
   projectName: text("project_name").notNull(),
-  username: text("username").notNull().unique(),
-  passwordHash: text("password_hash").notNull(),
   elo: integer("elo").notNull().default(1000),
+});
+
+export const userAuth = pgTable("user_auth", {
+  userId: text("user_id").primaryKey().references(() => user.id).notNull(),
+  passwordHash: text("password_hash").notNull(),
+});
+export const userOAuth = pgTable("user_oauth", {
+  userId: text("user_id").primaryKey().references(() => user.id).notNull(),
+  provider: text("provider").notNull(), // f.eks. 'github'
+  providerUserId: text("provider_user_id").notNull(), // f.eks. GitHub-ID
 });
 
 export const session = pgTable("session", {

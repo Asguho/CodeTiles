@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { BASE_URL } from '$lib/utils';
 
+
 	async function handleSubmit(event: SubmitEvent) {
 		event.preventDefault();
 		const formData = new FormData(event.target as HTMLFormElement);
@@ -24,6 +25,9 @@
 			alert('Error during signup: ' + error.message);
 		}
 	}
+	function continueWithGitHub() {
+        window.location.href = `${BASE_URL}/api/auth/github`;
+    }
 </script>
 
 <div class="flex min-h-screen items-center justify-center bg-zinc-900">
@@ -31,7 +35,7 @@
 		<div class="w-3/5 p-8">
 			<h1 class="mb-6 text-2xl font-bold text-white">Welcome back</h1>
 			<p class="mb-6 text-zinc-400">Login to your CodeTiles account</p>
-			<form on:submit={handleSubmit} class="space-y-4">
+			<form onsubmit={handleSubmit} class="space-y-4">
 				<div>
 					<label for="username" class="block text-sm font-medium text-zinc-300">Username</label>
 					<input
@@ -67,6 +71,7 @@
 			</div>
 			<button
 				class="mt-6 flex w-full justify-center rounded-md border border-zinc-600 bg-zinc-700 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-zinc-600 focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2"
+				onclick={continueWithGitHub}
 			>
 				<svg class="mr-2 h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
 					<path

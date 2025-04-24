@@ -7,6 +7,10 @@ import { hash, verify } from "@node-rs/argon2";
 const DAY_IN_MS = 1000 * 60 * 60 * 24;
 
 import DeploymentClient from "../src/DeploymentClient.ts";
+const GITHUB_CLIENT_ID = Deno.env.get("GITHUB_CLIENT_ID")!;
+const GITHUB_CLIENT_SECRET = Deno.env.get("GITHUB_CLIENT_SECRET")!;
+const REDIRECT_URI = Deno.env.get("GITHUB_CALLBACK_URI")!;
+
 
 const deploymentClient = new DeploymentClient();
 
@@ -78,11 +82,13 @@ export const login = async (req: Request) => {
 	const password = formData.get("password") as string;
 
 	const [user] = await db.select().from(table.user).where(eq(table.user.username, username));
-
 	if (!user) {
 		return new Response(JSON.stringify({ message: "Invalid username or password" }), { status: 400 });
 	}
-	const validPassword = await verify(user.passwordHash, password, {
+	const [userAuth] = await db.select().from(table.userAuth).where(eq(table.userAuth.userId, user.id));
+
+
+	const validPassword = await verify(userAuth.passwordHash, password, {
 		memoryCost: 19456,
 		timeCost: 2,
 		outputLen: 32,
@@ -105,6 +111,10 @@ export const signup = async (req: Request) => {
 	const formData = await req.formData();
 	const username = formData.get("username") as string;
 	const password = formData.get("password") as string;
+	const [existingusername] = await db.select().from(table.user).where(eq(table.user.username, username));
+	if (existingusername) {
+		return new Response(JSON.stringify({ message: "Username already exists" }), { status: 400 });
+	}
 
 	if (!validateUsername(username)) {
 		return new Response(JSON.stringify({ message: "Invalid username" }), {
@@ -136,7 +146,10 @@ export const signup = async (req: Request) => {
 			id: userId,
 			projectId,
 			projectName,
-			username,
+			username
+		});
+		await db.insert(table.userAuth).values({
+			userId,
 			passwordHash,
 		});
 
@@ -153,6 +166,101 @@ export const signup = async (req: Request) => {
 		console.error(_e);
 		return new Response(JSON.stringify({ message: "An error has occurred" }), { status: 500 });
 	}
+
+};
+export const githubLogin = async (req: Request) => {
+    const url = new URL("https://github.com/login/oauth/authorize");
+    url.searchParams.set("client_id", GITHUB_CLIENT_ID);
+    url.searchParams.set("redirect_uri", REDIRECT_URI);
+    url.searchParams.set("scope", "read:user user:email");
+
+    return new Response(null, {
+        status: 302,
+        headers: { Location: url.toString() },
+    });
+};
+
+export const githubCallback = async (req: Request) => {
+    const { searchParams } = new URL(req.url);
+    const code = searchParams.get("code");
+
+    if (!code) {
+        return new Response("Missing code", { status: 400 });
+    }
+
+    // Exchange code for access token
+    const tokenResponse = await fetch("https://github.com/login/oauth/access_token", {
+        method: "POST",
+        headers: { Accept: "application/json" },
+        body: new URLSearchParams({
+            client_id: GITHUB_CLIENT_ID,
+            client_secret: GITHUB_CLIENT_SECRET,
+            code,
+            redirect_uri: REDIRECT_URI,
+        }),
+    });
+    const tokenData = await tokenResponse.json();
+    const accessToken = tokenData.access_token;
+
+    if (!accessToken) {
+        return new Response("Failed to get access token", { status: 400 });
+    }
+
+    // Fetch user data from GitHub
+    const userResponse = await fetch("https://api.github.com/user", {
+        headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    const userData = await userResponse.json();
+
+    // Check if the providerUserId already exists in the database
+	const [existingusername] = await db.select().from(table.user).where(eq(table.user.username, userData.login));
+	const [existingUserOAuth] = await db
+	.select()
+	.from(table.userOAuth)
+	.where(eq(table.userOAuth.providerUserId, userData.id.toString()));
+
+	if (existingusername) {
+		if (!(existingUserOAuth)) {
+			return new Response(JSON.stringify({ message: "Username already exists" }), { status: 400 });
+		}
+	}
+
+	if (existingUserOAuth) {
+		// Log in the user
+		const sessionToken = generateRandomId();
+		await createSession(sessionToken, existingUserOAuth.userId);
+		return new Response(null, {
+			status: 302,
+			headers: {
+				"Set-Cookie": `auth-session=${sessionToken}; Path=/; HttpOnly; Max-Age=${DAY_IN_MS * 30};`,
+				Location: "/",
+			},
+		});
+	}
+
+    // If the user does not exist, create a new user
+    const userId = crypto.randomUUID();
+    await db.insert(table.user).values({
+        id: userId,
+        username: userData.login,
+        projectId: userId,
+        projectName: "GitHub",
+    });
+    await db.insert(table.userOAuth).values({
+        userId,
+        provider: "github",
+        providerUserId: userData.id.toString(),
+    });
+
+    const sessionToken = generateRandomId();
+    await createSession(sessionToken, userId);
+    return new Response(null, {
+        status: 302,
+        headers: {
+            "Set-Cookie": `auth-session=${sessionToken}; Path=/; HttpOnly; Max-Age=${DAY_IN_MS * 30};`,
+            Location: req.headers.get("origin") || "/",
+        },
+    });
 };
 
 // export function setSessionTokenCookie(
