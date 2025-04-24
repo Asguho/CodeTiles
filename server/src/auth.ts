@@ -240,11 +240,16 @@ export const githubCallback = async (req: Request) => {
 
     // If the user does not exist, create a new user
     const userId = crypto.randomUUID();
+	const { id: projectId, name: projectName } = await deploymentClient.createProject();
+	if (!projectId) {
+		console.error("Failed to create project");
+		return new Response(JSON.stringify({ message: "Failed to create project" }), { status: 500 });
+	}
     await db.insert(table.user).values({
         id: userId,
         username: userData.login,
-        projectId: userId,
-        projectName: "GitHub",
+        projectId,
+        projectName,
     });
     await db.insert(table.userOAuth).values({
         userId,
