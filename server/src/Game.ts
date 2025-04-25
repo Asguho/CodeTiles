@@ -231,7 +231,6 @@ export class Game {
 
   // Process a single turn for all players by sending requests and processing their responses
   async processTurn() {
-    this.turn++;
     console.log(`Starting turn ${this.turn}`);
 
     const turnStartTime = Date.now();
@@ -278,6 +277,8 @@ export class Game {
     if (elapsed < minTurnDuration) {
       await new Promise((resolve) => setTimeout(resolve, minTurnDuration - elapsed));
     }
+    this.turn++;
+
   }
 
   // Sends a POST request to the player's server with the current game state data
