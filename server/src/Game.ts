@@ -180,20 +180,6 @@ export class Game {
         this.cleanUp([winner!.id, ...this.lossers]);
         break;
       }
-      if (this.isGameOver()) {
-        const winner = this.players.find((player) => player.basePosition);
-        this.players.forEach((player) => {
-          socketHandler.sendMessage(
-            player.id,
-            JSON.stringify({
-              type: "GAME_OVER",
-              winner: winner?.id,
-            }),
-          );
-        });
-        this.cleanUp([winner!.id, ...this.lossers]);
-        break;
-      }
   
       if (this.turn > this.gameSettings.maxTurns) {
         sendMapToPlayers("Game over due to time limit.");
