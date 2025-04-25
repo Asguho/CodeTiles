@@ -180,25 +180,33 @@ const routes: Route[] = [
         );
       }
 
-      // Find enemy player with closest ELO and their latest deployment in one query
-      const response = await db
+      // Find enemy player with closest ELO and their latest deployment in one query      
+      const dbresp = await db
         .select({
           enemyPlayer: table.user,
           latestEnemyDeployment: table.deployment,
         })
         .from(table.user)
-        .where(ne(table.user.id, user.id))
         .innerJoin(
           table.deployment,
           eq(table.deployment.userId, table.user.id),
         )
+        .where(ne(table.user.id, user.id)) // Exclude the current user
         .orderBy(
-          sql`ABS(${table.user.elo} - ${user.elo})`,
-          desc(table.deployment.createdAt),
+          sql`ABS(${table.user.elo} - ${user.elo})`, // Sort by closest ELO difference
+          desc(table.deployment.createdAt), // Then by the most recent deployment
         )
-        .limit(2);
+        .limit(15) // Limit to 15 players
 
-      // console.log("Enemy player:", enemyPlayer, latestEnemyDeployment);
+
+      const uniqueResponse = dbresp.filter((item, index, self) =>
+        index === self.findIndex((t) => (
+          t.enemyPlayer.id === item.enemyPlayer.id
+        ))
+      );
+      const randomizedResponse = [...uniqueResponse].sort(() => Math.random() - 0.5);
+      const response = randomizedResponse.slice(0, 2); // Kun 2 modstandere
+
 
       gameHandler.startGame([
         { id: user.id, url: latestDeployment.url },
@@ -380,19 +388,19 @@ const routes: Route[] = [
         response.headers.set(key, value);
       }
       return response;
-        },
-      },
-      {
-        pattern: new URLPattern({ pathname: "/docs/*" }),
-        method: "GET", 
-        handler: (req: Request) => {
-          console.log("Serving docs", req.url);
-          return serveDir(req, {
-            fsRoot: "./",
-            showIndex: true,
-          });
-        },
-      },
+    },
+  },
+  {
+    pattern: new URLPattern({ pathname: "/docs/*" }),
+    method: "GET",
+    handler: (req: Request) => {
+      console.log("Serving docs", req.url);
+      return serveDir(req, {
+        fsRoot: "./",
+        showIndex: true,
+      });
+    },
+  },
 ];
 
 function defaultHandler(req: Request) {

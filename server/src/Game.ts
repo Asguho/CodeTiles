@@ -14,7 +14,7 @@ interface Player {
   logs: { type: string; values: string[] }[];
 }
 export class Game {
-  
+
   players: Player[];
   map: Tile[][] = [];
   turn: number = 0;
@@ -94,12 +94,12 @@ export class Game {
       .select({ id: table.user.id, username: table.user.username })
       .from(table.user)
       .where(inArray(table.user.id, userIds));
-  
+
     const usernameMap = new Map<string, string>();
     users.forEach((user) => {
       usernameMap.set(user.id, user.username);
     });
-  
+
     return usernameMap;
   }
   async start() {
@@ -129,26 +129,26 @@ export class Game {
     );
 
 
-    
+
 
     this.players.forEach(async (player) => {
       const { p1Username, p2Username } = opponentsMap.get(player.id)!;
       const socket = socketHandler.getSocket(player.id);
       if (socket?.readyState === WebSocket.OPEN) {
-      socketHandler.sendMessage(
-        player.id,
-        JSON.stringify({
-          type: "START",
-          gameId: this.gameId,
-          opponentUsername1: p1Username,
-          opponentUsername2: p2Username,
-          YourUsername: usernameMap.get(player.id) || 'Unknown',
-        }),
-      );}
+        socketHandler.sendMessage(
+          player.id,
+          JSON.stringify({
+            type: "START",
+            gameId: this.gameId,
+            opponentUsername1: p1Username,
+            opponentUsername2: p2Username,
+            YourUsername: usernameMap.get(player.id) || 'Unknown',
+          }),
+        );
+      }
     });
 
     while (true) {
-      console.log(`Main loop: Checking conditions for turn ${this.turn}`);
       if (this.isGameOver()) {
         const winner = this.players.find((player) => player.basePosition);
         sendMapToPlayers(`Game Over. the winner was ${winner?.id}`);
@@ -166,7 +166,7 @@ export class Game {
         this.cleanUp([winner!.id, ...this.lossers]);
         break;
       }
-  
+
       if (this.turn > this.gameSettings.maxTurns) {
         sendMapToPlayers("Game over due to time limit.");
         this.players.forEach((player) => {
@@ -187,7 +187,7 @@ export class Game {
       // this.callback(turnData);
       this.players.forEach(async (player) => {
         const { p1Username, p2Username } = opponentsMap.get(player.id)!;
-      
+
         socketHandler.sendMessage(
           player.id,
           JSON.stringify({
@@ -204,7 +204,6 @@ export class Game {
         this.callback(this);
       }
       await this.processTurn();
-      console.log(`Main loop: Finished processTurn for turn ${this.turn}`);
 
     }
   }
@@ -217,7 +216,7 @@ export class Game {
     }
     return this.players.filter((player) => player.basePosition).length <= 1;
   }
-  
+
   createPayload(player: Player): TurnData {
     return {
       type: "TURN_DATA",
@@ -244,7 +243,6 @@ export class Game {
     this.updatePlayerMapView();
 
     const payloads: TurnData[] = this.players.map((player) => this.createPayload(player));
-    console.log('Sending turn data to players: ' + this.turn);
 
     this.players.forEach((player, index) => {
       socketHandler.sendMessage(
@@ -647,7 +645,7 @@ export class Game {
       .select({ username: table.user.username })
       .from(table.user)
       .where(eq(table.user.id, userId));
-  
+
     return user?.username || null;
   }
 
@@ -724,8 +722,8 @@ export class Game {
         }
       }
     }
-    
+
   }
-  
-  
+
+
 }

@@ -50,6 +50,7 @@ export class GameHandler {
     });
   }
   startGame(players: { id: string; url: string }[]) {
+
     const gameId = crypto.randomUUID();
     const cleanUp = async (outCome: string[] | null) => {
       if (outCome) {
@@ -96,8 +97,7 @@ export class GameHandler {
         await db.update(userTable).set({ elo: newRatingPlayer2 }).where(eq(userTable.id, player2Id));
 
         console.log(
-          `Updated Elo: ${player1.username || player1Id} (${ratingPlayer1} → ${newRatingPlayer1}) ${
-            player1Won ? "won against" : "lost to"
+          `Updated Elo: ${player1.username || player1Id} (${ratingPlayer1} → ${newRatingPlayer1}) ${player1Won ? "won against" : "lost to"
           } ${player2.username || player2Id} (${ratingPlayer2} → ${newRatingPlayer2})`,
         );
       }

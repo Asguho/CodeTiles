@@ -169,55 +169,55 @@ export const signup = async (req: Request) => {
 
 };
 export const githubLogin = async (req: Request) => {
-    const url = new URL("https://github.com/login/oauth/authorize");
-    url.searchParams.set("client_id", GITHUB_CLIENT_ID);
-    url.searchParams.set("redirect_uri", REDIRECT_URI);
-    url.searchParams.set("scope", "read:user user:email");
+	const url = new URL("https://github.com/login/oauth/authorize");
+	url.searchParams.set("client_id", GITHUB_CLIENT_ID);
+	url.searchParams.set("redirect_uri", REDIRECT_URI);
+	url.searchParams.set("scope", "read:user user:email");
 
-    return new Response(null, {
-        status: 302,
-        headers: { Location: url.toString() },
-    });
+	return new Response(null, {
+		status: 302,
+		headers: { Location: url.toString() },
+	});
 };
 
 export const githubCallback = async (req: Request) => {
-    const { searchParams } = new URL(req.url);
-    const code = searchParams.get("code");
+	const { searchParams } = new URL(req.url);
+	const code = searchParams.get("code");
 
-    if (!code) {
-        return new Response("Missing code", { status: 400 });
-    }
+	if (!code) {
+		return new Response("Missing code", { status: 400 });
+	}
 
-    // Exchange code for access token
-    const tokenResponse = await fetch("https://github.com/login/oauth/access_token", {
-        method: "POST",
-        headers: { Accept: "application/json" },
-        body: new URLSearchParams({
-            client_id: GITHUB_CLIENT_ID,
-            client_secret: GITHUB_CLIENT_SECRET,
-            code,
-            redirect_uri: REDIRECT_URI,
-        }),
-    });
-    const tokenData = await tokenResponse.json();
-    const accessToken = tokenData.access_token;
+	// Exchange code for access token
+	const tokenResponse = await fetch("https://github.com/login/oauth/access_token", {
+		method: "POST",
+		headers: { Accept: "application/json" },
+		body: new URLSearchParams({
+			client_id: GITHUB_CLIENT_ID,
+			client_secret: GITHUB_CLIENT_SECRET,
+			code,
+			redirect_uri: REDIRECT_URI,
+		}),
+	});
+	const tokenData = await tokenResponse.json();
+	const accessToken = tokenData.access_token;
 
-    if (!accessToken) {
-        return new Response("Failed to get access token", { status: 400 });
-    }
+	if (!accessToken) {
+		return new Response("Failed to get access token", { status: 400 });
+	}
 
-    // Fetch user data from GitHub
-    const userResponse = await fetch("https://api.github.com/user", {
-        headers: { Authorization: `Bearer ${accessToken}` },
-    });
-    const userData = await userResponse.json();
+	// Fetch user data from GitHub
+	const userResponse = await fetch("https://api.github.com/user", {
+		headers: { Authorization: `Bearer ${accessToken}` },
+	});
+	const userData = await userResponse.json();
 
-    // Check if the providerUserId already exists in the database
+	// Check if the providerUserId already exists in the database
 	const [existingusername] = await db.select().from(table.user).where(eq(table.user.username, userData.login));
 	const [existingUserOAuth] = await db
-	.select()
-	.from(table.userOAuth)
-	.where(eq(table.userOAuth.providerUserId, userData.id.toString()));
+		.select()
+		.from(table.userOAuth)
+		.where(eq(table.userOAuth.providerUserId, userData.id.toString()));
 
 	if (existingusername) {
 		if (!(existingUserOAuth)) {
@@ -238,34 +238,34 @@ export const githubCallback = async (req: Request) => {
 		});
 	}
 
-    // If the user does not exist, create a new user
-    const userId = crypto.randomUUID();
+	// If the user does not exist, create a new user
+	const userId = crypto.randomUUID();
 	const { id: projectId, name: projectName } = await deploymentClient.createProject();
 	if (!projectId) {
 		console.error("Failed to create project");
 		return new Response(JSON.stringify({ message: "Failed to create project" }), { status: 500 });
 	}
-    await db.insert(table.user).values({
-        id: userId,
-        username: userData.login,
-        projectId,
-        projectName,
-    });
-    await db.insert(table.userOAuth).values({
-        userId,
-        provider: "github",
-        providerUserId: userData.id.toString(),
-    });
+	await db.insert(table.user).values({
+		id: userId,
+		username: userData.login,
+		projectId,
+		projectName,
+	});
+	await db.insert(table.userOAuth).values({
+		userId,
+		provider: "github",
+		providerUserId: userData.id.toString(),
+	});
 
-    const sessionToken = generateRandomId();
-    await createSession(sessionToken, userId);
-    return new Response(null, {
-        status: 302,
-        headers: {
-            "Set-Cookie": `auth-session=${sessionToken}; Path=/; HttpOnly; Max-Age=${DAY_IN_MS * 30};`,
-            Location: req.headers.get("origin") || "/",
-        },
-    });
+	const sessionToken = generateRandomId();
+	await createSession(sessionToken, userId);
+	return new Response(null, {
+		status: 302,
+		headers: {
+			"Set-Cookie": `auth-session=${sessionToken}; Path=/; HttpOnly; Max-Age=${DAY_IN_MS * 30};`,
+			Location: req.headers.get("origin") || "/",
+		},
+	});
 };
 
 // export function setSessionTokenCookie(

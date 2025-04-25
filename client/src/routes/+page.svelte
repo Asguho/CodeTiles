@@ -23,13 +23,12 @@
 	let gameCanvas: HTMLCanvasElement;
 	let latestGameData: any = null;
 	let gameOver = $state(false);
-    let lastWinner = $state('');
+	let lastWinner = $state('');
 	let opponentName = $state('');
 
 	let runningGame = $state(false);
 	$inspect(runningGame);
 
-	console.log('Hello, Vite!', document);
 
 	let codeEditor: editor.IStandaloneCodeEditor | null = null;
 	let consoleElement: HTMLDivElement | null = null;
@@ -63,7 +62,6 @@
 	setInterval(updateConsoleLines, 1000);
 
 	onMount(async () => {
-		console.log('Hello, Vite!', document);
 		setupGameCanvas(gameCanvas);
 		setupConsole(consoleElement!);
 		codeEditor = await setupEditor(document.getElementById('editor')!);
@@ -122,13 +120,12 @@
 			const json = JSON.parse(event.data.toString()) as TurnDataWithLogs;
 			if (json?.type === 'TURN_DATA') {
 				drawGame(gameCanvas, json);
-				if (json.turn !== 1 && (json.logs)) {
-					addTurnDivider(consoleElement!, json.turn-1);
+				if (json.turn !== 1 && json.logs) {
+					addTurnDivider(consoleElement!, json.turn - 1);
 				}
 				if (!latestGameData || json.turn > latestGameData.turn) {
 					latestGameData = json;
 				}
-				console.log('Game data received:', json.logs);
 				ingestLogs(consoleElement!, json.logs);
 			} else if (json?.type === 'LOG') {
 				ingestLogs(consoleElement!, json.logs);
@@ -137,28 +134,35 @@
 				tutorialJson = json as any;
 			} else if (json?.type === 'GAME_OVER') {
 				gameOver = true;
-				lastWinner = (json as any).winner || 'No winner'; 
+				lastWinner = (json as any).winner || 'No winner';
 				addConsoleLine(consoleElement!, {
 					type: 'info',
-					values: ['Game over! Winner:', lastWinner,  ' Gameover: ' + gameOver]
+					values: ['Game over! Winner:', lastWinner, ' Gameover: ' + gameOver]
 				});
 				// Handle game over logic here
 				runningGame = false;
-			} else if (json?.type === 'START'){
+			} else if (json?.type === 'START') {
 				runningGame = true;
 				gameOver = false;
 				lastWinner = 'No winner';
-				opponentName = ((json as any).opponentUsername1 || 'Unknown') + " and " + ((json as any).opponentUsername2 || 'Unknown');
+				opponentName =
+					((json as any).opponentUsername1 || 'Unknown') +
+					' and ' +
+					((json as any).opponentUsername2 || 'Unknown');
 				addConsoleLine(consoleElement!, {
 					type: 'info',
 					values: ['Game started! Opponent:', opponentName]
 				});
-			} else if (json?.type === 'GAME_ONGOING'){
+			} else if (json?.type === 'GAME_ONGOING') {
 				runningGame = true;
 				gameOver = false;
-				opponentName = ((json as any).opponentUsername1 || 'Unknown') + " and " + ((json as any).opponentUsername2 || 'Unknown');			} else if (json?.type === 'PING') {
-				console.log("opponents: " + opponentName);
-				console.log("Your user: " + (json as any).YourUsername);
+				opponentName =
+					((json as any).opponentUsername1 || 'Unknown') +
+					' and ' +
+					((json as any).opponentUsername2 || 'Unknown');
+			} else if (json?.type === 'PING') {
+				console.log('opponents: ' + opponentName);
+				console.log('Your user: ' + (json as any).YourUsername);
 			} else {
 				console.log('Unknown message type:', json);
 			}
@@ -166,7 +170,6 @@
 			console.error('WEBSOKET DATA NOT JSON', event.data, error);
 		}
 	};
-	
 
 	ws.onclose = function () {
 		console.log('WebSocket is closed now.');
@@ -229,13 +232,14 @@
 			tutPane?.collapse();
 		}
 	});
-	
 </script>
 
-{#if runningGame && !isTutorial} 
-    <div class="absolute right-1.5 top-2 z-50 flex h-8 items-center rounded-md bg-zinc-800 px-4 text-base text-zinc-200 shadow-md">
-        <span class="text-left whitespace-nowrap">Playing against: {opponentName}</span>
-    </div>
+{#if runningGame && !isTutorial}
+	<div
+		class="absolute right-1.5 top-2 z-50 flex h-8 items-center rounded-md bg-zinc-800 px-4 text-base text-zinc-200 shadow-md"
+	>
+		<span class="whitespace-nowrap text-left">Playing against: {opponentName}</span>
+	</div>
 {/if}
 
 {#if websocketHasClosed}
@@ -254,26 +258,28 @@
 	</div>
 {/if}
 {#if gameOver && !runningGame && !isTutorial}
-    <div class="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
-        <div class="rounded-lg border border-zinc-700 bg-zinc-800 bg-opacity-90 p-6 shadow-xl text-center pointer-events-auto">
-            <h2 class="mb-3 text-2xl font-bold text-zinc-100">Game Over</h2>
-            <p class="mb-4 text-lg text-zinc-300">
-                {#if lastWinner === 'No winner'}
-                    No winner was determined for this game.
-                {:else}
-                    The winner is <span class="font-semibold text-white">{lastWinner}</span>!
-                {/if}
-            </p>
-            <button
-                class="mt-4 w-full rounded-md bg-indigo-600 py-2 font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                onclick={() => {
-                    gameOver = false;
-                }}
-            >
-                Next
-            </button>
-        </div>
-    </div>
+	<div class="pointer-events-none fixed inset-0 z-50 flex items-center justify-center">
+		<div
+			class="pointer-events-auto rounded-lg border border-zinc-700 bg-zinc-800 bg-opacity-90 p-6 text-center shadow-xl"
+		>
+			<h2 class="mb-3 text-2xl font-bold text-zinc-100">Game Over</h2>
+			<p class="mb-4 text-lg text-zinc-300">
+				{#if lastWinner === 'No winner'}
+					No winner was determined for this game.
+				{:else}
+					The winner is <span class="font-semibold text-white">{lastWinner}</span>!
+				{/if}
+			</p>
+			<button
+				class="mt-4 w-full rounded-md bg-indigo-600 py-2 font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+				onclick={() => {
+					gameOver = false;
+				}}
+			>
+				Next
+			</button>
+		</div>
+	</div>
 {/if}
 
 <div class="bg-zinc-900 px-1 pt-1">
@@ -283,44 +289,39 @@
 		<div
 			class="flex flex-row gap-2 *:rounded-md *:border *:border-zinc-700 *:bg-zinc-800 *:p-1 *:px-2 *:text-zinc-200"
 		>
-		<label for="tutorial" class="flex items-center gap-2 text-sm text-zinc-200">
-			<input
-				type="checkbox"
-				bind:checked={isTutorial}
-				id="tutorial"
-				class="hidden"
-			/>
-			<span
-				class="flex items-center justify-center w-5 h-5 rounded border border-zinc-700 bg-zinc-800 text-zinc-200 hover:bg-zinc-700"
-			>
-				{#if isTutorial}
-					<!-- Checkmark icon -->
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						class="w-4 h-4 text-white"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke="currentColor"
-						stroke-width="2"
-					>
-						<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-					</svg>
-				{:else}
-					<!-- Invisible placeholder to maintain size -->
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						class="w-4 h-4 text-transparent"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke="currentColor"
-						stroke-width="2"
-					>
-						<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-					</svg>
-				{/if}
-			</span>
-			<span>Tutorial</span>
-		</label>
+			<label for="tutorial" class="flex items-center gap-2 text-sm text-zinc-200">
+				<input type="checkbox" bind:checked={isTutorial} id="tutorial" class="hidden" />
+				<span
+					class="flex h-5 w-5 items-center justify-center rounded border border-zinc-700 bg-zinc-800 text-zinc-200 hover:bg-zinc-700"
+				>
+					{#if isTutorial}
+						<!-- Checkmark icon -->
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="h-4 w-4 text-white"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+							stroke-width="2"
+						>
+							<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+						</svg>
+					{:else}
+						<!-- Invisible placeholder to maintain size -->
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="h-4 w-4 text-transparent"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+							stroke-width="2"
+						>
+							<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+						</svg>
+					{/if}
+				</span>
+				<span>Tutorial</span>
+			</label>
 			<a href="/docs.html">Documentation</a>
 			<a href="/top.html">Leaderboard</a>
 			<!-- <button
