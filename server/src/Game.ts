@@ -148,21 +148,6 @@ export class Game {
     });
 
     while (true) {
-      this.players.forEach(async (player) => {
-        const { p1Username, p2Username } = opponentsMap.get(player.id)!;
-      
-        socketHandler.sendMessage(
-          player.id,
-          JSON.stringify({
-            type: "GAME_ONGOING",
-            gameId: this.gameId,
-            opponentUsername1: p1Username,
-            opponentUsername2: p2Username,
-            YourUsername: await this.getUsernameFromUserId(player.id),
-          }),
-        );
-      });
-      
       if (this.isGameOver()) {
         const winner = this.players.find((player) => player.basePosition);
         sendMapToPlayers(`Game Over. the winner was ${winner?.id}`);
@@ -202,6 +187,20 @@ export class Game {
       }
       // const turnData = this.createPayload(this.players[0]);
       // this.callback(turnData);
+      this.players.forEach(async (player) => {
+        const { p1Username, p2Username } = opponentsMap.get(player.id)!;
+      
+        socketHandler.sendMessage(
+          player.id,
+          JSON.stringify({
+            type: "GAME_ONGOING",
+            gameId: this.gameId,
+            opponentUsername1: p1Username,
+            opponentUsername2: p2Username,
+            YourUsername: await this.getUsernameFromUserId(player.id),
+          }),
+        );
+      });
       await this.processTurn();
     }
   }
