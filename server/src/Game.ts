@@ -120,10 +120,10 @@ export class Game {
 
     const opponentsMap = new Map<string, { p1Username: string; p2Username: string }>();
     await Promise.all(
-      this.players.map((player) => {
+      this.players.map(async (player) => {
         const opponents = this.players.filter((p) => p.id !== player.id); // Exclude the current player
-        const p1Username = usernameMap.get(opponents[0].id) || 'Unknown';
-        const p2Username = usernameMap.get(opponents[1].id) || 'Unknown';
+        const p1Username = await this.getUsernameFromUserId(opponents[0]?.id || '') || 'Unknown';
+        const p2Username = await this.getUsernameFromUserId(opponents[1]?.id || '') || 'Unknown';
         opponentsMap.set(player.id, { p1Username, p2Username });
       })
     );
@@ -131,7 +131,7 @@ export class Game {
 
     
 
-    this.players.forEach((player) => {
+    this.players.forEach(async (player) => {
       const { p1Username, p2Username } = opponentsMap.get(player.id)!;
       const socket = socketHandler.getSocket(player.id);
       if (socket?.readyState === WebSocket.OPEN) {
@@ -148,7 +148,7 @@ export class Game {
     });
 
     while (true) {
-      this.players.forEach((player) => {
+      this.players.forEach(async (player) => {
         const { p1Username, p2Username } = opponentsMap.get(player.id)!;
       
         socketHandler.sendMessage(
@@ -158,14 +158,13 @@ export class Game {
             gameId: this.gameId,
             opponentUsername1: p1Username,
             opponentUsername2: p2Username,
-            YourUsername: usernameMap.get(player.id),
+            YourUsername: await this.getUsernameFromUserId(player.id),
           }),
         );
       });
       
       if (this.isGameOver()) {
         const winner = this.players.find((player) => player.basePosition);
-        const winnerUsername = usernameMap.get(winner?.id || '') || 'Unknown';
         sendMapToPlayers(`Game Over. the winner was ${winner?.id}`);
 
         this.players.forEach((player) => {
@@ -173,7 +172,7 @@ export class Game {
             player.id,
             JSON.stringify({
               type: "GAME_OVER",
-              winner: winnerUsername,
+              winner: winner?.id,
             }),
           );
         });
@@ -182,7 +181,7 @@ export class Game {
         break;
       }
   
-      if (this.turn > this.gameSettings.maxTurns) {
+      if (this.turn >= this.gameSettings.maxTurns) {
         sendMapToPlayers("Game over due to time limit.");
         this.players.forEach((player) => {
           socketHandler.sendMessage(
