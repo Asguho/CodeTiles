@@ -181,10 +181,7 @@ export class Game {
         console.log("Game over due to time limit.");
         break;
       }
-      this.resetUnitActions();
-      if (this.callback !== undefined) {
-        this.callback(this);
-      }
+
       // const turnData = this.createPayload(this.players[0]);
       // this.callback(turnData);
       this.players.forEach(async (player) => {
@@ -201,6 +198,10 @@ export class Game {
           }),
         );
       });
+      this.resetUnitActions();
+      if (this.callback !== undefined) {
+        this.callback(this);
+      }
       await this.processTurn();
     }
   }
