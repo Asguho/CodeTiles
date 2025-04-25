@@ -152,11 +152,6 @@
 					values: ['Game started! Opponent:', opponentName]
 				});
 			} else if (json?.type === 'GAME_ONGOING'){
-				addConsoleLine(consoleElement!, {
-					type: 'info',
-					values: ['Playing game against: ', opponentName]
-				}
-				)
 				runningGame = true;
 				gameOver = false;
 				opponentName = (json as any).opponentUsername || 'Unknown';

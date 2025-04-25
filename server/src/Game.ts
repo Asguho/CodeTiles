@@ -133,32 +133,32 @@ export class Game {
       );
     }
     while (true) {
+      if (p0Username !== null && p1Username !== null) {
+        socketHandler.sendMessage(
+          this.players[1].id,
+          JSON.stringify({
+            type: "GAME_ONGOING",
+            gameId: this.gameId,
+            opponentId: this.players[0].id,
+            opponentUsername: p0Username,
+            YourUsername: p1Username,
+          }),
+        );
+        socketHandler.sendMessage(
+          this.players[0].id,
+          JSON.stringify({
+            type: "GAME_ONGOING",
+            gameId: this.gameId,
+            opponentId: this.players[1].id,
+            opponentUsername: p1Username,
+            YourUsername: p0Username,
+    
+          }),
+        );
+      }
       if (this.isGameOver()) {
         const winner = this.players.find((player) => player.basePosition);
         sendMapToPlayers(`Game Over. the winner was ${winner?.id}`);
-        if (p0Username !== null && p1Username !== null) {
-          socketHandler.sendMessage(
-            this.players[1].id,
-            JSON.stringify({
-              type: "GAME_ONGOING",
-              gameId: this.gameId,
-              opponentId: this.players[0].id,
-              opponentUsername: p0Username,
-              YourUsername: p1Username,
-            }),
-          );
-          socketHandler.sendMessage(
-            this.players[0].id,
-            JSON.stringify({
-              type: "GAME_ONGOING",
-              gameId: this.gameId,
-              opponentId: this.players[1].id,
-              opponentUsername: p1Username,
-              YourUsername: p0Username,
-      
-            }),
-          );
-        }
 
         this.players.forEach((player) => {
           socketHandler.sendMessage(
