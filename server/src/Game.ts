@@ -133,7 +133,8 @@ export class Game {
 
     this.players.forEach(async (player) => {
       const { p1Username, p2Username } = opponentsMap.get(player.id)!;
-    
+      const socket = socketHandler.getSocket(player.id);
+      if (socket?.readyState === WebSocket.OPEN) {
       socketHandler.sendMessage(
         player.id,
         JSON.stringify({
@@ -143,7 +144,7 @@ export class Game {
           opponentUsername2: p2Username,
           YourUsername: usernameMap.get(player.id) || 'Unknown',
         }),
-      );
+      );}
     });
 
     while (true) {
@@ -194,8 +195,21 @@ export class Game {
         break;
       }
   
-      await this.processTurn()
-
+      if (this.turn > this.gameSettings.maxTurns) {
+        sendMapToPlayers("Game over due to time limit.");
+        this.players.forEach((player) => {
+          socketHandler.sendMessage(
+            player.id,
+            JSON.stringify({
+              type: "GAME_OVER",
+              winner: null,
+            }),
+          );
+        });
+        this.cleanUp(null);
+        console.log("Game over due to time limit.");
+        break;
+      }
       this.resetUnitActions();
       if (this.callback !== undefined) {
         this.callback(this);
