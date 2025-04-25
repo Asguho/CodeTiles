@@ -155,7 +155,8 @@
 				runningGame = true;
 				gameOver = false;
 				opponentName = ((json as any).opponentUsername1 || 'Unknown') + " and " + ((json as any).opponentUsername2 || 'Unknown');			} else if (json?.type === 'PING') {
-				ws.send(JSON.stringify({ type: 'PONG' }));
+				console.log("opponents: " + opponentName);
+				console.log("Your user: " + (json as any).YourUsername);
 			} else {
 				console.log('Unknown message type:', json);
 			}
