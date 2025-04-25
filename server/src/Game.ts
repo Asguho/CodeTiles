@@ -1,5 +1,5 @@
 import { db } from "./db/index.ts";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import * as table from "./db/schema.ts";
 import { socketHandler } from "./SocketHandler.ts";
 import type { GameSettings, Miner, PlayerResponse, Position, Tile, TurnData, Unit } from "./types.ts";
@@ -13,8 +13,8 @@ interface Player {
   mapView?: Tile[][];
   logs: { type: string; values: string[] }[];
 }
-
 export class Game {
+  
   players: Player[];
   map: Tile[][] = [];
   turn: number = 0;
@@ -88,7 +88,20 @@ export class Game {
       });
     });
   }
-
+  async prefetchUsernames(): Promise<Map<string, string>> {
+    const userIds = this.players.map((player) => player.id);
+    const users = await db
+      .select({ id: table.user.id, username: table.user.username })
+      .from(table.user)
+      .where(inArray(table.user.id, userIds));
+  
+    const usernameMap = new Map<string, string>();
+    users.forEach((user) => {
+      usernameMap.set(user.id, user.username);
+    });
+  
+    return usernameMap;
+  }
   async start() {
     this.generateMap();
 
@@ -103,43 +116,51 @@ export class Game {
         player.logs = [];
       });
     };
-    //db. select from players where id in this.players[0].id and this.players[1].id
-    const p0Username = await this.getUsernameFromUserId(this.players[0]?.id);
-    const p1Username = await this.getUsernameFromUserId(this.players[1]?.id);
-    const p2Username = await this.getUsernameFromUserId(this.players[2]?.id);
-    if (!p0Username || !p1Username || !p2Username) {
-      console.error("Error: Missing username(s).");
-      return;
-    }
-    //check if socketHandler is connected to the players
+    const usernameMap = await this.prefetchUsernames();
 
-    const socket = socketHandler.getSocket(this.players[0].id);
-    if (socket?.readyState === WebSocket.OPEN) {
+    const opponentsMap = new Map<string, { p1Username: string; p2Username: string }>();
+    await Promise.all(
+      this.players.map(async (player) => {
+        const opponents = this.players.filter((p) => p.id !== player.id); // Exclude the current player
+        const p1Username = await this.getUsernameFromUserId(opponents[0]?.id || '') || 'Unknown';
+        const p2Username = await this.getUsernameFromUserId(opponents[1]?.id || '') || 'Unknown';
+        opponentsMap.set(player.id, { p1Username, p2Username });
+      })
+    );
+
+
+    
+
+    this.players.forEach(async (player) => {
+      const { p1Username, p2Username } = opponentsMap.get(player.id)!;
+    
       socketHandler.sendMessage(
-        this.players[0].id,
+        player.id,
         JSON.stringify({
           type: "START",
           gameId: this.gameId,
           opponentUsername1: p1Username,
           opponentUsername2: p2Username,
-          YourUsername: p0Username,
-  
+          YourUsername: usernameMap.get(player.id) || 'Unknown',
         }),
       );
-    } 
+    });
 
     while (true) {
-      socketHandler.sendMessage(
-        this.players[0].id,
-        JSON.stringify({
-          type: "GAME_ONGOING",
-          gameId: this.gameId,
-          opponentUsername1: p1Username,
-          opponentUsername2: p2Username,
-          YourUsername: p0Username,
-  
-        }),
-      );
+      this.players.forEach(async (player) => {
+        const { p1Username, p2Username } = opponentsMap.get(player.id)!;
+      
+        socketHandler.sendMessage(
+          player.id,
+          JSON.stringify({
+            type: "GAME_ONGOING",
+            gameId: this.gameId,
+            opponentUsername1: p1Username,
+            opponentUsername2: p2Username,
+            YourUsername: await this.getUsernameFromUserId(player.id),
+          }),
+        );
+      });
       
       if (this.isGameOver()) {
         const winner = this.players.find((player) => player.basePosition);
@@ -158,21 +179,22 @@ export class Game {
         this.cleanUp([winner!.id, ...this.lossers]);
         break;
       }
-      if (this.turn > this.gameSettings.maxTurns) {
-        sendMapToPlayers("Game over due to time limit.");
+      if (this.isGameOver()) {
+        const winner = this.players.find((player) => player.basePosition);
         this.players.forEach((player) => {
           socketHandler.sendMessage(
             player.id,
             JSON.stringify({
               type: "GAME_OVER",
-              winner: null,
+              winner: winner?.id,
             }),
           );
         });
-        this.cleanUp(null);
-        console.log("Game over due to time limit.");
+        this.cleanUp([winner!.id, ...this.lossers]);
         break;
       }
+  
+      await this.processTurn()
 
       this.resetUnitActions();
       if (this.callback !== undefined) {
@@ -192,6 +214,7 @@ export class Game {
     }
     return this.players.filter((player) => player.basePosition).length <= 1;
   }
+  
   createPayload(player: Player): TurnData {
     return {
       type: "TURN_DATA",
