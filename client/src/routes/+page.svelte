@@ -134,13 +134,13 @@
 				console.log('Tutorial complete!');
 				tutorialJson = json as any;
 			} else if (json?.type === 'GAME_OVER') {
+				gameOver = true;
 				lastWinner = (json as any).winner || 'No winner'; 
 				addConsoleLine(consoleElement!, {
 					type: 'info',
 					values: ['Game over! Winner:', lastWinner,  ' Gameover: ' + gameOver]
 				});
 				// Handle game over logic here
-				gameOver = true;
 				runningGame = false;
 			} else if (json?.type === 'START'){
 				runningGame = true;
