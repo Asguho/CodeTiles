@@ -166,7 +166,7 @@ export class Game {
         break;
       }
   
-      if (this.turn > this.gameSettings.maxTurns) {
+      if (this.turn >= this.gameSettings.maxTurns) {
         sendMapToPlayers("Game over due to time limit.");
         this.players.forEach((player) => {
           socketHandler.sendMessage(
@@ -231,7 +231,6 @@ export class Game {
 
   // Process a single turn for all players by sending requests and processing their responses
   async processTurn() {
-    this.turn++;
 
     console.log(`Starting turn ${this.turn}`);
 
@@ -279,6 +278,8 @@ export class Game {
     if (elapsed < minTurnDuration) {
       await new Promise((resolve) => setTimeout(resolve, minTurnDuration - elapsed));
     }
+    this.turn++;
+
 
   }
 
