@@ -146,7 +146,7 @@
 				runningGame = true;
 				gameOver = false;
 				lastWinner = 'No winner';
-				opponentName = (json as any).opponentUsername || 'Unknown';
+				opponentName = ((json as any).opponentUsername1 || 'Unknown') + " and " + ((json as any).opponentUsername2 || 'Unknown');
 				addConsoleLine(consoleElement!, {
 					type: 'info',
 					values: ['Game started! Opponent:', opponentName]
@@ -154,8 +154,7 @@
 			} else if (json?.type === 'GAME_ONGOING'){
 				runningGame = true;
 				gameOver = false;
-				opponentName = (json as any).opponentUsername || 'Unknown';
-			} else if (json?.type === 'PING') {
+				opponentName = ((json as any).opponentUsername1 || 'Unknown') + " and " + ((json as any).opponentUsername2 || 'Unknown');			} else if (json?.type === 'PING') {
 				ws.send(JSON.stringify({ type: 'PONG' }));
 			} else {
 				console.log('Unknown message type:', json);
@@ -230,9 +229,9 @@
 	
 </script>
 
-{#if runningGame} 
-    <div class="absolute right-1.5 top-2 z-50 flex h-8 w-50 items-center rounded-md bg-zinc-800 px-4 text-base text-zinc-200 shadow-md">
-        <span class="w-full text-left">Playing against:   {opponentName}</span>
+{#if runningGame && !isTutorial} 
+    <div class="absolute right-1.5 top-2 z-50 flex h-8 items-center rounded-md bg-zinc-800 px-4 text-base text-zinc-200 shadow-md">
+        <span class="text-left whitespace-nowrap">Playing against: {opponentName}</span>
     </div>
 {/if}
 
@@ -251,7 +250,7 @@
 		</div>
 	</div>
 {/if}
-{#if gameOver && !runningGame}
+{#if gameOver && !runningGame && !isTutorial}
     <div class="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
         <div class="rounded-lg border border-zinc-700 bg-zinc-800 bg-opacity-90 p-6 shadow-xl text-center pointer-events-auto">
             <h2 class="mb-3 text-2xl font-bold text-zinc-100">Game Over</h2>

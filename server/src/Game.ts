@@ -104,58 +104,43 @@ export class Game {
       });
     };
     //db. select from players where id in this.players[0].id and this.players[1].id
-    const p0Username = await this.getUsernameFromUserId(this.players[0].id);
-    const p1Username = await this.getUsernameFromUserId(this.players[1].id);
-    if (p0Username === null || p1Username === null) {
-      console.log("Error: One of the players does not exist in the database.");
+    const p0Username = await this.getUsernameFromUserId(this.players[0]?.id);
+    const p1Username = await this.getUsernameFromUserId(this.players[1]?.id);
+    const p2Username = await this.getUsernameFromUserId(this.players[2]?.id);
+    if (!p0Username || !p1Username || !p2Username) {
+      console.error("Error: Missing username(s).");
+      return;
     }
-    else {
+    //check if socketHandler is connected to the players
+
+    const socket = socketHandler.getSocket(this.players[0].id);
+    if (socket?.readyState === WebSocket.OPEN) {
       socketHandler.sendMessage(
         this.players[0].id,
         JSON.stringify({
           type: "START",
           gameId: this.gameId,
-          opponentId: this.players[1].id,
-          opponentUsername: p1Username,
+          opponentUsername1: p1Username,
+          opponentUsername2: p2Username,
           YourUsername: p0Username,
   
         }),
       );
+    } 
+
+    while (true) {
       socketHandler.sendMessage(
-        this.players[1].id,
+        this.players[0].id,
         JSON.stringify({
-          type: "START",
+          type: "GAME_ONGOING",
           gameId: this.gameId,
-          opponentId: this.players[0].id,
-          opponentUsername: p0Username,
-          YourUsername: p1Username,
+          opponentUsername1: p1Username,
+          opponentUsername2: p2Username,
+          YourUsername: p0Username,
+  
         }),
       );
-    }
-    while (true) {
-      if (p0Username !== null && p1Username !== null) {
-        socketHandler.sendMessage(
-          this.players[1].id,
-          JSON.stringify({
-            type: "GAME_ONGOING",
-            gameId: this.gameId,
-            opponentId: this.players[0].id,
-            opponentUsername: p0Username,
-            YourUsername: p1Username,
-          }),
-        );
-        socketHandler.sendMessage(
-          this.players[0].id,
-          JSON.stringify({
-            type: "GAME_ONGOING",
-            gameId: this.gameId,
-            opponentId: this.players[1].id,
-            opponentUsername: p1Username,
-            YourUsername: p0Username,
-    
-          }),
-        );
-      }
+      
       if (this.isGameOver()) {
         const winner = this.players.find((player) => player.basePosition);
         sendMapToPlayers(`Game Over. the winner was ${winner?.id}`);
