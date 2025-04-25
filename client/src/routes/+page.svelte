@@ -16,6 +16,7 @@
 	import { Tabs } from 'bits-ui';
 
 	import type { TurnData, TurnDataWithLogs } from '../../../server/src/types.js';
+	import TaskRenderer from './task-renderer.svelte';
 
 	let websocketHasClosed = $state(false);
 
@@ -23,6 +24,7 @@
 	let latestGameData: any = null;
 	let gameOver = $state(false);
     let lastWinner = $state('');
+	let opponentName = $state('');
 
 	let runningGame = $state(false);
 	$inspect(runningGame);
@@ -140,11 +142,34 @@
 				});
 				// Handle game over logic here
 				runningGame = false;
+			} else if (json?.type === 'START'){
+				runningGame = true;
+				gameOver = false;
+				lastWinner = 'No winner';
+				opponentName = (json as any).opponentUsername || 'Unknown';
+				addConsoleLine(consoleElement!, {
+					type: 'info',
+					values: ['Game started! Opponent:', opponentName]
+				});
+			} else if (json?.type === 'GAME_ONGOING'){
+				addConsoleLine(consoleElement!, {
+					type: 'info',
+					values: ['Playing game against: ', opponentName]
+				}
+				)
+				runningGame = true;
+				gameOver = false;
+				opponentName = (json as any).opponentUsername || 'Unknown';
+			} else if (json?.type === 'PING') {
+				ws.send(JSON.stringify({ type: 'PONG' }));
+			} else {
+				console.log('Unknown message type:', json);
 			}
 		} catch (error) {
 			console.error('WEBSOKET DATA NOT JSON', event.data, error);
 		}
 	};
+	
 
 	ws.onclose = function () {
 		console.log('WebSocket is closed now.');
@@ -191,16 +216,14 @@
 		}
 	}
 
-	let isTutorial = $state(false);
-	let tutPane: PaneAPI | undefined = $state(undefined);
-
-	import TaskRenderer from './task-renderer.svelte';
 	const tutorial = async () => {
 		const resp = await fetch('/tut.md');
 		const md = await resp.text();
 		return md;
 	};
 
+	let isTutorial = $state(false);
+	let tutPane: PaneAPI | undefined = $state(undefined);
 	$effect(() => {
 		if (!tutPane) return;
 		if (isTutorial) {
@@ -209,7 +232,14 @@
 			tutPane?.collapse();
 		}
 	});
+	
 </script>
+
+{#if runningGame} 
+    <div class="absolute right-1.5 top-2 z-50 flex h-8 w-50 items-center rounded-md bg-zinc-800 px-4 text-base text-zinc-200 shadow-md">
+        <span class="w-full text-left">Playing against:   {opponentName}</span>
+    </div>
+{/if}
 
 {#if websocketHasClosed}
 	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">

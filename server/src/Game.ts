@@ -1,3 +1,6 @@
+import { db } from "./db/index.ts";
+import { eq } from "drizzle-orm";
+import * as table from "./db/schema.ts";
 import { socketHandler } from "./SocketHandler.ts";
 import type { GameSettings, Miner, PlayerResponse, Position, Tile, TurnData, Unit } from "./types.ts";
 
@@ -100,10 +103,62 @@ export class Game {
         player.logs = [];
       });
     };
+    //db. select from players where id in this.players[0].id and this.players[1].id
+    const p0Username = await this.getUsernameFromUserId(this.players[0].id);
+    const p1Username = await this.getUsernameFromUserId(this.players[1].id);
+    if (p0Username === null || p1Username === null) {
+      console.log("Error: One of the players does not exist in the database.");
+    }
+    else {
+      socketHandler.sendMessage(
+        this.players[0].id,
+        JSON.stringify({
+          type: "START",
+          gameId: this.gameId,
+          opponentId: this.players[1].id,
+          opponentUsername: p1Username,
+          YourUsername: p0Username,
+  
+        }),
+      );
+      socketHandler.sendMessage(
+        this.players[1].id,
+        JSON.stringify({
+          type: "START",
+          gameId: this.gameId,
+          opponentId: this.players[0].id,
+          opponentUsername: p0Username,
+          YourUsername: p1Username,
+        }),
+      );
+    }
     while (true) {
       if (this.isGameOver()) {
         const winner = this.players.find((player) => player.basePosition);
         sendMapToPlayers(`Game Over. the winner was ${winner?.id}`);
+        if (p0Username !== null && p1Username !== null) {
+          socketHandler.sendMessage(
+            this.players[1].id,
+            JSON.stringify({
+              type: "GAME_ONGOING",
+              gameId: this.gameId,
+              opponentId: this.players[0].id,
+              opponentUsername: p0Username,
+              YourUsername: p1Username,
+            }),
+          );
+          socketHandler.sendMessage(
+            this.players[0].id,
+            JSON.stringify({
+              type: "GAME_ONGOING",
+              gameId: this.gameId,
+              opponentId: this.players[1].id,
+              opponentUsername: p1Username,
+              YourUsername: p0Username,
+      
+            }),
+          );
+        }
 
         this.players.forEach((player) => {
           socketHandler.sendMessage(
@@ -573,6 +628,14 @@ export class Game {
       player.units.push(newUnit);
     }
   }
+  async getUsernameFromUserId(userId: string): Promise<string | null> {
+    const [user] = await db
+      .select({ username: table.user.username })
+      .from(table.user)
+      .where(eq(table.user.id, userId));
+  
+    return user?.username || null;
+  }
 
   // Updates each player's map view with fog of war
   updatePlayerMapView() {
@@ -647,5 +710,8 @@ export class Game {
         }
       }
     }
+    
   }
+  
+  
 }
