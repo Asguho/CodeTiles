@@ -148,6 +148,7 @@ export class Game {
     });
 
     while (true) {
+      console.log(`Main loop: Checking conditions for turn ${this.turn}`);
       if (this.isGameOver()) {
         const winner = this.players.find((player) => player.basePosition);
         sendMapToPlayers(`Game Over. the winner was ${winner?.id}`);
@@ -166,7 +167,7 @@ export class Game {
         break;
       }
   
-      if (this.turn >= this.gameSettings.maxTurns) {
+      if (this.turn > this.gameSettings.maxTurns) {
         sendMapToPlayers("Game over due to time limit.");
         this.players.forEach((player) => {
           socketHandler.sendMessage(
@@ -203,6 +204,8 @@ export class Game {
         this.callback(this);
       }
       await this.processTurn();
+      console.log(`Main loop: Finished processTurn for turn ${this.turn}`);
+
     }
   }
 
@@ -231,6 +234,7 @@ export class Game {
 
   // Process a single turn for all players by sending requests and processing their responses
   async processTurn() {
+    this.turn++;
 
     console.log(`Starting turn ${this.turn}`);
 
@@ -240,6 +244,7 @@ export class Game {
     this.updatePlayerMapView();
 
     const payloads: TurnData[] = this.players.map((player) => this.createPayload(player));
+    console.log('Sending turn data to players: ' + this.turn);
 
     this.players.forEach((player, index) => {
       socketHandler.sendMessage(
@@ -278,8 +283,6 @@ export class Game {
     if (elapsed < minTurnDuration) {
       await new Promise((resolve) => setTimeout(resolve, minTurnDuration - elapsed));
     }
-    this.turn++;
-
 
   }
 

@@ -122,10 +122,12 @@
 			const json = JSON.parse(event.data.toString()) as TurnDataWithLogs;
 			if (json?.type === 'TURN_DATA') {
 				drawGame(gameCanvas, json);
-				if (json.turn !== 1) {
-					addTurnDivider(consoleElement!, json.turn - 1);
+				if (json.turn !== 1 && (json.logs)) {
+					addTurnDivider(consoleElement!, json.turn-1);
 				}
-				latestGameData = json;
+				if (!latestGameData || json.turn > latestGameData.turn) {
+					latestGameData = json;
+				}
 				console.log('Game data received:', json.logs);
 				ingestLogs(consoleElement!, json.logs);
 			} else if (json?.type === 'LOG') {
