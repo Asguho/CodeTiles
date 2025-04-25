@@ -181,7 +181,7 @@ export class Game {
         break;
       }
   
-      if (this.turn > this.gameSettings.maxTurns) {
+      if (this.turn >= this.gameSettings.maxTurns) {
         sendMapToPlayers("Game over due to time limit.");
         this.players.forEach((player) => {
           socketHandler.sendMessage(
