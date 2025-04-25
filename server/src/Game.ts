@@ -13,6 +13,7 @@ interface Player {
   mapView?: Tile[][];
   logs: { type: string; values: string[] }[];
 }
+
 export class Game {
   
   players: Player[];
@@ -39,7 +40,21 @@ export class Game {
     this.playersInTheStart = this.players.map((player) => player.id);
     this.gameSettings = gameSettings;
   }
-
+  
+  
+  async prefetchUsernames(): Promise<Map<string, string>> {
+    const userIds = this.players.map((player) => player.id);
+    const users = await db
+      .select({ id: table.user.id, username: table.user.username })
+      .from(table.user)
+      .where(inArray(table.user.id, userIds));
+  
+    const usernameMap = new Map<string, string>();
+    users.forEach((user) => {
+      usernameMap.set(user.id, user.username);
+    });
+    return usernameMap;
+  }
   generateMap() {
     for (let y = 0; y < this.gameSettings.map.height; y++) {
       const row: Tile[] = [];
@@ -88,21 +103,10 @@ export class Game {
       });
     });
   }
-  async prefetchUsernames(): Promise<Map<string, string>> {
-    const userIds = this.players.map((player) => player.id);
-    const users = await db
-      .select({ id: table.user.id, username: table.user.username })
-      .from(table.user)
-      .where(inArray(table.user.id, userIds));
+
   
-    const usernameMap = new Map<string, string>();
-    users.forEach((user) => {
-      usernameMap.set(user.id, user.username);
-    });
-  
-    return usernameMap;
-  }
   async start() {
+    const usernameMap = await this.prefetchUsernames();
     this.generateMap();
 
     const sendMapToPlayers = (customLog: string) => {
@@ -116,17 +120,14 @@ export class Game {
         player.logs = [];
       });
     };
-    const usernameMap = await this.prefetchUsernames();
 
     const opponentsMap = new Map<string, { p1Username: string; p2Username: string }>();
-    await Promise.all(
-      this.players.map((player) => {
+    this.players.map((player) => {
         const opponents = this.players.filter((p) => p.id !== player.id); // Exclude the current player
         const p1Username = usernameMap.get(opponents[0].id) || 'Unknown';
         const p2Username = usernameMap.get(opponents[1].id) || 'Unknown';
         opponentsMap.set(player.id, { p1Username, p2Username });
-      })
-    );
+    });
 
 
     
