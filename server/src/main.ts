@@ -214,7 +214,7 @@ const routes: Route[] = [
           sql`ABS(${table.user.elo} - ${user.elo})`
         )
         .limit(5);
-        const randomizedResponse = dbresp.sort(() => Math.random() - 0.5); // Randomize the order of the players
+      const randomizedResponse = dbresp.sort(() => Math.random() - 0.5); // Randomize the order of the players
       const response = randomizedResponse.slice(0, 2); // Kun 2 modstandere
 
 
