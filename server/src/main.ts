@@ -8,7 +8,7 @@ import * as table from "./db/schema.ts";
 import DeploymentClient from "./DeploymentClient.ts";
 import { getCookies } from "jsr:@std/http/cookie";
 import { GameHandler } from "./GameHandler.ts";
-import { desc, eq, ne } from "drizzle-orm/expressions";
+import { desc, eq, ne, and } from "drizzle-orm/expressions";
 import { socketHandler } from "./SocketHandler.ts";
 import { getCloudCode } from "./isolates/isolate.ts";
 import { sql } from "drizzle-orm";
@@ -181,30 +181,40 @@ const routes: Route[] = [
       }
 
       // Find enemy player with closest ELO and their latest deployment in one query      
+      // First, create the subquery with proper typing
+      const latestDeploymentsSubquery = db
+        .select({
+          userId: table.deployment.userId,
+          maxCreatedAt: sql`MAX(${table.deployment.createdAt})`.as("maxCreatedAt")
+        })
+        .from(table.deployment)
+        .groupBy(table.deployment.userId)
+        .as("latest_deployments");
+
+      // Then use the subquery object directly to reference its columns
       const dbresp = await db
         .select({
           enemyPlayer: table.user,
           latestEnemyDeployment: table.deployment,
         })
-        .from(table.user)
+        .from(latestDeploymentsSubquery)
+        .innerJoin(
+          table.user,
+          eq(table.user.id, latestDeploymentsSubquery.userId)
+        )
         .innerJoin(
           table.deployment,
-          eq(table.deployment.userId, table.user.id),
+          and(
+            eq(table.deployment.userId, latestDeploymentsSubquery.userId),
+            eq(table.deployment.createdAt, latestDeploymentsSubquery.maxCreatedAt)
+          )
         )
-        .where(ne(table.user.id, user.id)) // Exclude the current user
+        .where(ne(table.user.id, user.id))
         .orderBy(
-          sql`ABS(${table.user.elo} - ${user.elo})`, // Sort by closest ELO difference
-          desc(table.deployment.createdAt), // Then by the most recent deployment
+          sql`ABS(${table.user.elo} - ${user.elo})`
         )
-        .limit(15) // Limit to 15 players
-
-
-      const uniqueResponse = dbresp.filter((item, index, self) =>
-        index === self.findIndex((t) => (
-          t.enemyPlayer.id === item.enemyPlayer.id
-        ))
-      );
-      const randomizedResponse = [...uniqueResponse].sort(() => Math.random() - 0.5);
+        .limit(5);
+        const randomizedResponse = dbresp.sort(() => Math.random() - 0.5); // Randomize the order of the players
       const response = randomizedResponse.slice(0, 2); // Kun 2 modstandere
 
 
