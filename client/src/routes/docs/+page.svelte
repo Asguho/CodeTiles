@@ -73,8 +73,7 @@
 	}
 
 	const findNear = `const nearestOre = game.map.findNearest(game.base.position, tile => tile.type === TileType.ore);`;
-	const unitMethods = `
-unit.move("south"); // Moves the unit south
+	const unitMethods = `unit.move("south"); // Moves the unit south
 
 const target = { x: 3, y: 3 };
 const withinRange = unit.isWithinRange(target); // Checks if the target is within range
@@ -93,11 +92,9 @@ const isRanged = unit.isRanged(); // Checks if the unit is a ranged unit
 `;
 	const getDistance = `const distance = game.getDistance({ x: 0, y: 0 }, { x: 3, y: 4 });  // Distance will be 7`;
 
-	const buyExample = `
-game.shop.buy("melee", 5); // Buys 5 melee units 
+	const buyExample = `game.shop.buy("melee", 5); // Buys 5 melee units 
 const canBuy = game.shop.canAfford("melee", 5); // Checks if the player can buy 5 melee units
 const cost = game.shop.getPrice("melee", 5); // Gets the cost of 5 melee units
-
 `;
 
 	const attackExample = `const targetPosition = { x: 5, y: 5 };
