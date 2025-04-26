@@ -3,3 +3,7 @@ node_modules
 dist
 code.ts
 /server/docs
+/client/tests
+client/tests/tests.spec.ts
+/client/test-results
+client/test-results/.last-run.json
