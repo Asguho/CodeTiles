@@ -1,0 +1,21 @@
+{
+  "tasks": {
+    "dev": "deno run --watch --env -A ./src/main.ts",
+    "db:push": "deno -A --node-modules-dir --env npm:drizzle-kit push",
+    "db:pull": "deno -A --node-modules-dir --env npm:drizzle-kit pull",
+    "db:studio": "deno -A --node-modules-dir --env npm:drizzle-kit studio",
+		"gen:types": "deno run -A npm:typescript/bin/tsc ./src/isolates/lib/CodeTiles.ts --declaration --allowImportingTsExtensions --emitDeclarationOnly --target ESNEXT --moduleResolution node --skipLibCheck --module none --declarationDir ./src/",
+    "gen:doc": "deno doc --html ./src/CodeTiles.d.ts"
+  },
+    "fmt": {
+      "lineWidth": 140
+    },
+  "imports": {
+    "@node-rs/argon2": "npm:@node-rs/argon2@^2.0.2",
+    "@oslojs/crypto": "npm:@oslojs/crypto@^1.0.1",
+    "@oslojs/encoding": "npm:@oslojs/encoding@^1.1.0",
+    "drizzle-kit": "npm:drizzle-kit@^0.30.4",
+    "drizzle-orm": "npm:drizzle-orm@^0.39.3",
+    "postgres": "npm:postgres@^3.4.5"
+  }
+}

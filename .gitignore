@@ -1,0 +1,8 @@
+*.env
+node_modules
+dist
+code.ts
+/client/tests
+client/tests/tests.spec.ts
+/client/test-results
+client/test-results/.last-run.json
