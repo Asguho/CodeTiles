@@ -4,6 +4,7 @@
 ```bash
 cd client
 deno install
+deno run build
 deno run dev
 ```
 
