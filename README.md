@@ -17,3 +17,4 @@ deno run dev
 
 ## API
 kan læses på https://codetiles.voe.dk/docs.html
+## NB. At der er en række filer der er version af som er omfattet af .gitignore og derfor ikke er tidssvarende
