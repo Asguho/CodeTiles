@@ -33,7 +33,7 @@ for (const unit of game.units) {
 	if (unit.isMiner() && unit.isOwnedBy(game.playerId)) {
 		const ore = game.map.findNearest(unit.position, (tile) => tile.type == "ore");
 
-		unit.moveTowards(ore.position, game.map.tiles);
+		unit.moveTowards(ore.position);
 	}
 }
 ```
