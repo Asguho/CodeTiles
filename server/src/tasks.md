@@ -66,7 +66,7 @@ Når vi i forrige afsnit har mined en `ore`, så skal vi tilbage til vores base 
 for (const unit of game.units) {
 	if (unit.inventory.ore >= 1) {
 		if (!areCordinatesEqual(unit.position, game.base.position)) {
-			unit.moveTowards(game.base.position, game.map.tiles);
+			unit.moveTowards(game.base.position);
 		} else {
 			unit.sell();
 		}
