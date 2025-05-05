@@ -133,7 +133,7 @@ function renderResults(results) {
   }
 
   html += `</ul>`;
-  searchResultsDiv.innerHTML = html;
+  searchResultsDiv.innerHTML = DOMPurify.sanitize(html);
 }
 
 function searchInIndex(val) {
